@@ -6,9 +6,10 @@ const About = () => {
       <div className="about-me">
         <h3 className="title">About Me</h3>
         <p className="para">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Hic quis
-          dolores numquam iusto Ratione earum ducimus autem id iure pariatur
-          dolorum quae maiores.
+          I'm Vivek Biswal. I build digital experiences with a curious mind
+          and an eye for the small details. This portfolio is my playground
+          for exploring how a simple idea can become something you can read,
+          discover, and play.
         </p>
       </div>
     </div>

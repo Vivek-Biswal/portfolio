@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import HoverLinks from "./HoverLinks";
 import { gsap } from "gsap";
-import { ScrollSmoother } from "gsap-trial/ScrollSmoother";
+import { ScrollSmoother } from "gsap/ScrollSmoother";
 import "./styles/Navbar.css";
 
 gsap.registerPlugin(ScrollSmoother, ScrollTrigger);
@@ -23,34 +23,29 @@ const Navbar = () => {
     smoother.scrollTop(0);
     smoother.paused(true);
 
-    let links = document.querySelectorAll(".header ul a");
-    links.forEach((elem) => {
-      let element = elem as HTMLAnchorElement;
-      element.addEventListener("click", (e) => {
+    const links = document.querySelectorAll<HTMLAnchorElement>(".header ul a");
+    const navigate = (e: Event) => {
         if (window.innerWidth > 1024) {
           e.preventDefault();
-          let elem = e.currentTarget as HTMLAnchorElement;
-          let section = elem.getAttribute("data-href");
+          const elem = e.currentTarget as HTMLAnchorElement;
+          const section = elem.getAttribute("data-href");
           smoother.scrollTo(section, true, "top top");
         }
-      });
-    });
-    window.addEventListener("resize", () => {
-      ScrollSmoother.refresh(true);
-    });
+    };
+    const resize = () => ScrollSmoother.refresh(true);
+    links.forEach(element => element.addEventListener("click", navigate));
+    window.addEventListener("resize", resize);
+    return () => {
+      links.forEach(element => element.removeEventListener("click", navigate));
+      window.removeEventListener("resize", resize);
+      smoother.kill();
+    };
   }, []);
   return (
     <>
       <div className="header">
-        <a href="/#" className="navbar-title" data-cursor="disable">
-          Logo
-        </a>
-        <a
-          href="mailto:example@mail.com"
-          className="navbar-connect"
-          data-cursor="disable"
-        >
-          example@mail.com
+        <a href="/3d/" className="navbar-title" data-cursor="disable">
+          Vivek.
         </a>
         <ul>
           <li>

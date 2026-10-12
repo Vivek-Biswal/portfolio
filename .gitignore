@@ -26,3 +26,10 @@ dist-ssr
 
 backup/
 .env
+
+# Offline avatar verification exports
+/tmp/
+# Vercel project links and downloaded environment files
+.vercel/
+.env.*
+!.env.example

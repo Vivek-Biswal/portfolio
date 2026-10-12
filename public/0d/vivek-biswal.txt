@@ -1,0 +1,23 @@
+VIVEK BISWAL
+Personal profile
+
+Email: vivekbiswal.dev@gmail.com
+
+ABOUT
+I'm a curious builder exploring design, technology, and what the web can
+become. I like turning ideas into useful experiences and learning through
+the projects I build.
+
+CURRENT PROJECT
+A portfolio in four dimensions.
+One portfolio with different ways to explore the same person and their work:
+0D (words and photographs), 1D (a guided line), 2D (a pixel world), and 3D
+(an interactive character). The 0D, 1D, and 2D versions are available;
+the 3D version is an ongoing experiment.
+
+TOOLS USED IN THIS PROJECT
+HTML, CSS, JavaScript, TypeScript, React, Three.js, and Vite.
+
+GET IN TOUCH
+For a project, a collaboration, or an interesting idea, email:
+vivekbiswal.dev@gmail.com

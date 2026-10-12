@@ -7,10 +7,11 @@
     "dev": "vite --host",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "verify:dist": "node scripts/verify-dist.mjs"
   },
   "dependencies": {
-    "@gsap/react": "^2.1.1",
+    "@gsap/react": "^2.1.2",
     "@react-three/cannon": "^6.6.0",
     "@react-three/drei": "^9.120.4",
     "@react-three/fiber": "^8.17.10",
@@ -18,8 +19,7 @@
     "@react-three/rapier": "^1.5.0",
     "@types/three": "^0.168.0",
     "@vercel/analytics": "^1.4.1",
-    "gsap": "^3.12.7",
-    "gsap-trial": "^3.12.7",
+    "gsap": "3.13.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-fast-marquee": "^1.6.5",
@@ -39,5 +39,8 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1"
+  },
+  "engines": {
+    "node": "22.x"
   }
 }

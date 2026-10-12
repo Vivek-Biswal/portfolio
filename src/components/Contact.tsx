@@ -1,73 +1,32 @@
 import { MdArrowOutward, MdCopyright } from "react-icons/md";
 import "./styles/Contact.css";
 
-const Contact = () => {
-  return (
-    <div className="contact-section section-container" id="contact">
-      <div className="contact-container">
-        <h3>Contact</h3>
-        <div className="contact-flex">
-          <div className="contact-box">
-            <h4>Email</h4>
-            <p>
-              <a href="mailto:example@mail.com" data-cursor="disable">
-                example@mail.com
-              </a>
-            </p>
-            <h4>Phone</h4>
-            <p>
-              <a href="tel:+9199999999" data-cursor="disable">
-                +91 99999 99999
-              </a>
-            </p>
-          </div>
-          <div className="contact-box">
-            <h4>Social</h4>
-            <a
-              href="https://github.com"
-              target="_blank"
-              data-cursor="disable"
-              className="contact-social"
-            >
-              Github <MdArrowOutward />
-            </a>
-            <a
-              href="https://www.linkedin.com"
-              target="_blank"
-              data-cursor="disable"
-              className="contact-social"
-            >
-              Linkedin <MdArrowOutward />
-            </a>
-            <a
-              href="https://x.com"
-              target="_blank"
-              data-cursor="disable"
-              className="contact-social"
-            >
-              Twitter <MdArrowOutward />
-            </a>
-            <a
-              href="https://www.instagram.com"
-              target="_blank"
-              data-cursor="disable"
-              className="contact-social"
-            >
-              Instagram <MdArrowOutward />
-            </a>
-          </div>
-          <div className="contact-box">
-            <h2>
-              Designed and Developed <br /> by <span>Moncy Yohannan</span>
-            </h2>
-            <h5>
-              <MdCopyright /> 2024
-            </h5>
-          </div>
+const Contact = () => (
+  <div className="contact-section section-container" id="contact">
+    <div className="contact-container">
+      <h3>Let's make something</h3>
+      <div className="contact-flex">
+        <div className="contact-box">
+          <h4>Say hello</h4>
+          <p><a href="mailto:vivekbiswal.dev@gmail.com" data-cursor="disable">vivekbiswal.dev@gmail.com</a></p>
+          <h4>Curiosity is a good starting point.</h4>
+          <p>Have an idea or a project in mind? Send me a note.</p>
+        </div>
+        <div className="contact-box">
+          <h4>Keep exploring</h4>
+          <a href="/" data-cursor="disable" className="contact-social">The essentials <MdArrowOutward /></a>
+          <a href="/1d/" data-cursor="disable" className="contact-social">Along a line <MdArrowOutward /></a>
+          <a href="/2d/" data-cursor="disable" className="contact-social">The pixel world <MdArrowOutward /></a>
+          <a href="/work/notes.html" data-cursor="disable" className="contact-social">Field notes <MdArrowOutward /></a>
+        </div>
+        <div className="contact-box">
+          <h2>Made personal by<br /><span>Vivek Biswal</span></h2>
+          <p>Original 3D design by <a href="https://github.com/MoncyDev/Portfolio-Website" target="_blank" rel="noopener noreferrer" data-cursor="disable">Moncy Yohannan</a>.</p>
+          <h5><MdCopyright /> {new Date().getFullYear()}</h5>
         </div>
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 export default Contact;

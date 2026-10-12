@@ -1,7 +1,7 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ScrollSmoother } from "gsap-trial/ScrollSmoother";
-import { SplitText } from "gsap-trial/SplitText";
+import { ScrollSmoother } from "gsap/ScrollSmoother";
+import { SplitText } from "gsap/SplitText";
 
 interface ParaElement extends HTMLElement {
   anim?: gsap.core.Animation;
@@ -9,6 +9,7 @@ interface ParaElement extends HTMLElement {
 }
 
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText);
+let refreshListenerAdded = false;
 
 export default function setSplitText() {
   ScrollTrigger.config({ ignoreMobileResize: true });
@@ -76,5 +77,8 @@ export default function setSplitText() {
     );
   });
 
-  ScrollTrigger.addEventListener("refresh", () => setSplitText());
+  if (!refreshListenerAdded) {
+    refreshListenerAdded = true;
+    ScrollTrigger.addEventListener("refresh", setSplitText);
+  }
 }

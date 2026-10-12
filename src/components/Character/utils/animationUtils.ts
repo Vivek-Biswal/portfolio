@@ -2,55 +2,94 @@ import * as THREE from "three";
 import { GLTF } from "three-stdlib";
 import { eyebrowBoneNames, typingBoneNames } from "../../../data/boneData";
 
-const setAnimations = (gltf: GLTF) => {
-  let character = gltf.scene;
-  let mixer = new THREE.AnimationMixer(character);
-  if (gltf.animations) {
-    const introClip = gltf.animations.find(
-      (clip) => clip.name === "introAnimation"
-    );
-    const introAction = mixer.clipAction(introClip!);
+const setAnimations = (gltf: GLTF, reducedMotion = false) => {
+  const character = gltf.scene;
+  const mixer = new THREE.AnimationMixer(character);
+  const clips = gltf.animations ?? [];
+  const introClip = THREE.AnimationClip.findByName(clips, "introAnimation");
+  const introAction = introClip ? mixer.clipAction(introClip) : null;
+  const blinkClip = THREE.AnimationClip.findByName(clips, "Blink");
+  const blinkAction = blinkClip ? mixer.clipAction(blinkClip) : null;
+  const loopActions: THREE.AnimationAction[] = [];
+  const hoverCleanups = new Set<() => void>();
+  let blinkTimer: number | undefined;
+  let disposed = false;
+  let motionReduced = reducedMotion;
+
+  if (introAction) {
     introAction.setLoop(THREE.LoopOnce, 1);
     introAction.clampWhenFinished = true;
-    introAction.play();
-    const clipNames = ["key1", "key2", "key5", "key6"];
-    clipNames.forEach((name) => {
-      const clip = THREE.AnimationClip.findByName(gltf.animations, name);
-      if (clip) {
-        const action = mixer?.clipAction(clip);
-        action!.play();
-        action!.timeScale = 1.2;
-      } else {
-        console.error(`Animation "${name}" not found`);
-      }
+  }
+  ["key1", "key2", "key5", "key6"].forEach((name) => {
+    const clip = THREE.AnimationClip.findByName(clips, name);
+    if (clip) loopActions.push(mixer.clipAction(clip));
+  });
+  const typingAction = createBoneAction(gltf, mixer, "typing", typingBoneNames);
+  if (typingAction) loopActions.push(typingAction);
+
+  function playLoops() {
+    loopActions.forEach((action) => {
+      action.enabled = true;
+      action.paused = false;
+      action.timeScale = 1.2;
+      action.play();
     });
-    let typingAction: THREE.AnimationAction | null = null;
-    typingAction = createBoneAction(gltf, mixer, "typing", typingBoneNames);
-    if (typingAction) {
-      typingAction.enabled = true;
-      typingAction.play();
-      typingAction.timeScale = 1.2;
+  }
+
+  function showFinalIntroPose() {
+    if (!introAction || !introClip) return;
+    introAction.reset().play();
+    introAction.time = introClip.duration;
+    introAction.paused = true;
+    mixer.update(0);
+  }
+
+  function playIntro() {
+    if (!introAction) return;
+    introAction.paused = false;
+    introAction.reset().play();
+  }
+
+  if (motionReduced) showFinalIntroPose();
+  else {
+    playLoops();
+    playIntro();
+  }
+
+  function startIntro(skipMotion = motionReduced) {
+    if (disposed) return;
+    window.clearTimeout(blinkTimer);
+    motionReduced = skipMotion;
+    if (motionReduced) {
+      mixer.stopAllAction();
+      showFinalIntroPose();
+      return;
+    }
+    playLoops();
+    playIntro();
+    if (blinkAction) {
+      blinkTimer = window.setTimeout(() => {
+        if (disposed || motionReduced) return;
+        blinkAction.reset().play().fadeIn(0.5);
+      }, 2500);
     }
   }
-  function startIntro() {
-    const introClip = gltf.animations.find(
-      (clip) => clip.name === "introAnimation"
-    );
-    const introAction = mixer.clipAction(introClip!);
-    introAction.clampWhenFinished = true;
-    introAction.reset().play();
-    setTimeout(() => {
-      const blink = gltf.animations.find((clip) => clip.name === "Blink");
-      mixer.clipAction(blink!).play().fadeIn(0.5);
-    }, 2500);
+
+  function setReducedMotion(next: boolean) {
+    if (disposed || next === motionReduced) return;
+    motionReduced = next;
+    window.clearTimeout(blinkTimer);
+    if (motionReduced) {
+      mixer.stopAllAction();
+      showFinalIntroPose();
+    } else {
+      playLoops();
+      blinkAction?.reset().play().fadeIn(0.5);
+    }
   }
-  function hover(gltf: GLTF, hoverDiv: HTMLDivElement) {
-    let eyeBrowUpAction = createBoneAction(
-      gltf,
-      mixer,
-      "browup",
-      eyebrowBoneNames
-    );
+
+  function hover(model: GLTF, hoverDiv: HTMLDivElement) {
+    const eyeBrowUpAction = createBoneAction(model, mixer, "browup", eyebrowBoneNames);
     let isHovering = false;
     if (eyeBrowUpAction) {
       eyeBrowUpAction.setLoop(THREE.LoopOnce, 1);
@@ -58,46 +97,52 @@ const setAnimations = (gltf: GLTF) => {
       eyeBrowUpAction.enabled = true;
     }
     const onHoverFace = () => {
-      if (eyeBrowUpAction && !isHovering) {
-        isHovering = true;
-        eyeBrowUpAction.reset();
-        eyeBrowUpAction.enabled = true;
-        eyeBrowUpAction.setEffectiveWeight(4);
-        eyeBrowUpAction.fadeIn(0.5).play();
-      }
+      if (disposed || motionReduced || !eyeBrowUpAction || isHovering) return;
+      isHovering = true;
+      eyeBrowUpAction.reset();
+      eyeBrowUpAction.enabled = true;
+      eyeBrowUpAction.setEffectiveWeight(4);
+      eyeBrowUpAction.fadeIn(0.5).play();
     };
     const onLeaveFace = () => {
-      if (eyeBrowUpAction && isHovering) {
-        isHovering = false;
-        eyeBrowUpAction.fadeOut(0.6);
-      }
+      if (disposed || !eyeBrowUpAction || !isHovering) return;
+      isHovering = false;
+      eyeBrowUpAction.fadeOut(0.6);
     };
-    if (!hoverDiv) return;
     hoverDiv.addEventListener("mouseenter", onHoverFace);
     hoverDiv.addEventListener("mouseleave", onLeaveFace);
-    return () => {
+    const cleanup = () => {
       hoverDiv.removeEventListener("mouseenter", onHoverFace);
       hoverDiv.removeEventListener("mouseleave", onLeaveFace);
+      hoverCleanups.delete(cleanup);
     };
+    hoverCleanups.add(cleanup);
+    return cleanup;
   }
-  return { mixer, startIntro, hover };
+
+  function dispose() {
+    if (disposed) return;
+    disposed = true;
+    window.clearTimeout(blinkTimer);
+    hoverCleanups.forEach((cleanup) => cleanup());
+    hoverCleanups.clear();
+    mixer.stopAllAction();
+    mixer.uncacheRoot(character);
+  }
+
+  return { mixer, startIntro, hover, setReducedMotion, dispose };
 };
 
 const createBoneAction = (
   gltf: GLTF,
   mixer: THREE.AnimationMixer,
-  clip: string,
+  name: string,
   boneNames: string[]
 ): THREE.AnimationAction | null => {
-  const AnimationClip = THREE.AnimationClip.findByName(gltf.animations, clip);
-  if (!AnimationClip) {
-    console.error(`Animation "${clip}" not found in GLTF file.`);
-    return null;
-  }
-
-  const filteredClip = filterAnimationTracks(AnimationClip, boneNames);
-
-  return mixer.clipAction(filteredClip);
+  const clip = THREE.AnimationClip.findByName(gltf.animations ?? [], name);
+  if (!clip) return null;
+  const filteredClip = filterAnimationTracks(clip, boneNames);
+  return filteredClip.tracks.length ? mixer.clipAction(filteredClip) : null;
 };
 
 const filterAnimationTracks = (
@@ -107,7 +152,6 @@ const filterAnimationTracks = (
   const filteredTracks = clip.tracks.filter((track) =>
     boneNames.some((boneName) => track.name.includes(boneName))
   );
-
   return new THREE.AnimationClip(
     clip.name + "_filtered",
     clip.duration,

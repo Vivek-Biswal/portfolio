@@ -10,28 +10,43 @@ const Loading = ({ percent }: { percent: number }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [clicked, setClicked] = useState(false);
 
-  if (percent >= 100) {
-    setTimeout(() => {
-      setLoaded(true);
-      setTimeout(() => {
-        setIsLoaded(true);
-      }, 1000);
-    }, 600);
-  }
+  const complete = percent >= 100;
 
   useEffect(() => {
-    import("./utils/initialFX").then((module) => {
-      if (isLoaded) {
-        setClicked(true);
-        setTimeout(() => {
-          if (module.initialFX) {
-            module.initialFX();
-          }
+    if (!complete) return;
+    const loadedTimer = window.setTimeout(() => setLoaded(true), 600);
+    const revealTimer = window.setTimeout(() => setIsLoaded(true), 1600);
+    return () => {
+      window.clearTimeout(loadedTimer);
+      window.clearTimeout(revealTimer);
+    };
+  }, [complete]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    let cancelled = false;
+    setClicked(true);
+    const exitTimer = window.setTimeout(() => {
+      void import("./utils/initialFX").then((module) => {
+        if (cancelled) return;
+        try {
+          module.initialFX();
+        } finally {
           setIsLoading(false);
-        }, 900);
-      }
-    });
-  }, [isLoaded]);
+        }
+      }).catch((error: unknown) => {
+        if (cancelled) return;
+        console.warn("Portfolio entrance effects were unavailable:", error);
+        document.body.style.overflowY = "auto";
+        document.querySelector("main")?.classList.add("main-active");
+        setIsLoading(false);
+      });
+    }, 900);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(exitTimer);
+    };
+  }, [isLoaded, setIsLoading]);
 
   function handleMouseMove(e: React.MouseEvent<HTMLElement>) {
     const { currentTarget: target } = e;
@@ -45,8 +60,8 @@ const Loading = ({ percent }: { percent: number }) => {
   return (
     <>
       <div className="loading-header">
-        <a href="/#" className="loader-title" data-cursor="disable">
-          Logo
+        <a href="/3d/" className="loader-title" data-cursor="disable">
+          Vivek.
         </a>
         <div className={`loaderGame ${clicked && "loader-out"}`}>
           <div className="loaderGame-container">
@@ -93,43 +108,75 @@ const Loading = ({ percent }: { percent: number }) => {
 export default Loading;
 
 export const setProgress = (setLoading: (value: number) => void) => {
-  let percent: number = 0;
+  let percent = 0;
+  let timer: number | undefined;
+  let stopped = false;
+  let completion: Promise<number> | undefined;
+  let resolveCompletion: ((value: number) => void) | undefined;
 
-  let interval = setInterval(() => {
-    if (percent <= 50) {
-      let rand = Math.round(Math.random() * 5);
-      percent = percent + rand;
-      setLoading(percent);
-    } else {
-      clearInterval(interval);
-      interval = setInterval(() => {
-        percent = percent + Math.round(Math.random());
-        setLoading(percent);
-        if (percent > 91) {
-          clearInterval(interval);
-        }
-      }, 2000);
+  function stopTimer() {
+    window.clearTimeout(timer);
+    timer = undefined;
+  }
+
+  function settleCompletion() {
+    resolveCompletion?.(percent);
+    resolveCompletion = undefined;
+  }
+
+  function advance() {
+    if (stopped || completion) return;
+    const step = percent <= 50
+      ? Math.round(Math.random() * 5)
+      : Math.round(Math.random());
+    percent = Math.min(percent + step, 91);
+    setLoading(percent);
+    if (percent < 91) {
+      timer = window.setTimeout(advance, percent <= 50 ? 100 : 2000);
     }
-  }, 100);
+  }
 
   function clear() {
-    clearInterval(interval);
-    setLoading(100);
+    if (stopped) return;
+    stopped = true;
+    stopTimer();
+    percent = 100;
+    setLoading(percent);
+    settleCompletion();
   }
 
-  function loaded() {
-    return new Promise<number>((resolve) => {
-      clearInterval(interval);
-      interval = setInterval(() => {
-        if (percent < 100) {
-          percent++;
-          setLoading(percent);
-        } else {
-          resolve(percent);
-          clearInterval(interval);
-        }
-      }, 2);
-    });
+  // Cancelling an unmounted scene must not complete another scene's loader.
+  function dispose() {
+    if (stopped) return;
+    stopped = true;
+    stopTimer();
+    settleCompletion();
   }
-  return { loaded, percent, clear };
+
+  function loaded(): Promise<number> {
+    if (stopped) return Promise.resolve(percent);
+    if (completion) return completion;
+    stopTimer();
+    completion = new Promise<number>((resolve) => {
+      resolveCompletion = resolve;
+    });
+    const finish = () => {
+      if (stopped) return;
+      percent = Math.min(percent + 1, 100);
+      setLoading(percent);
+      if (percent === 100) {
+        stopped = true;
+        stopTimer();
+        settleCompletion();
+      } else {
+        timer = window.setTimeout(finish, 2);
+      }
+    };
+    timer = window.setTimeout(finish, 2);
+    return completion;
+  }
+
+  setLoading(percent);
+  timer = window.setTimeout(advance, 100);
+  return { loaded, get percent() { return percent; }, clear, dispose };
 };

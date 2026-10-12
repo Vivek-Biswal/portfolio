@@ -1,13 +1,77 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- <link rel="icon" type="image/svg+xml" href="/" /> -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Moncy Yohannan - Creative Developer | Designer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Vivek Biswal's personal portfolio. Work, ideas, and experiments, in a simple space made for reading." />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Vivek Biswal — Portfolio</title>
+    <link rel="icon" href="/0d/mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/src/zero/zero.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="wordmark" href="/" aria-label="Vivek Biswal, homepage">Vivek Biswal</a>
+      <nav aria-label="Main navigation">
+        <a href="#about">About</a><a href="#work">Work</a><a href="/work/notes.html">Notes</a><a href="#contact">Contact</a>
+      </nav>
+    </header>
+    <main class="page" id="main" tabindex="-1">
+      <nav class="world-links" aria-label="Portfolio version">
+        <span aria-current="page">0D / The essentials</span><div><a href="/1d/">Follow 1D →</a><a href="/2d/">Open 2D ↗</a><a href="/3d/">Enter 3D ↗</a></div>
+      </nav>
+      <section class="intro" aria-labelledby="intro-title">
+        <div>
+          <p class="eyebrow">A personal corner of the internet.</p>
+          <h1 id="intro-title">Hello, I’m Vivek.</h1>
+          <p class="lead">I’m a curious builder exploring design, technology, and what the web can become.</p>
+          <p>I like turning an idea into something you can use, explore, or play with. This is where I collect that work.</p>
+          <p class="intro-links"><a href="#work">Explore my work</a> <span aria-hidden="true">·</span> <a href="mailto:vivekbiswal.dev@gmail.com">Say hello</a></p>
+        </div>
+        <figure class="portrait">
+          <img src="/0d/portrait-dots.png" width="1254" height="1254" alt="Vivek Biswal smiling, drawn in thousands of fine ink dots." fetchpriority="high" />
+          <figcaption>Vivek, point by point.</figcaption>
+        </figure>
+      </section>
+      <section id="about" aria-labelledby="about-title">
+        <h2 id="about-title">01. About</h2>
+        <p>I’m Vivek Biswal. I enjoy the whole journey from “what if?” to a working experience: shaping an idea, finding a clear way to present it, and refining the details.</p>
+        <p>My current experiment is this portfolio. It explores how the same person and their work can be presented through different worlds, from a quiet page of words and photographs to an interactive 3D space.</p>
+        <p>I’m drawn to useful interfaces, small thoughtful interactions, and projects that give me something new to learn.</p>
+        <h3>Tools in this project</h3>
+        <ul class="inline-list" aria-label="Project technologies"><li>HTML</li><li>CSS</li><li>JavaScript</li><li>TypeScript</li><li>React</li><li>Three.js</li><li>Vite</li></ul>
+      </section>
+      <section id="work" aria-labelledby="work-title">
+        <h2 id="work-title">02. Selected work</h2>
+        <article class="project" aria-labelledby="portfolio-title">
+          <div class="project-heading"><h3 id="portfolio-title"><a href="/work/dimensional-portfolio.html">A portfolio in four dimensions</a></h3><span class="small">Personal project · 2026</span></div>
+          <p>One portfolio, different ways to explore it. This version brings together the essentials. The 3D experiment uses an animated character, pointer interactions, and a moving camera.</p>
+          <p class="small">0D, 1D, and 2D are ready to explore. 3D is an ongoing experiment.</p>
+          <p><a href="/work/dimensional-portfolio.html">Read the project</a> <span aria-hidden="true">·</span> <a href="/3d/">Explore the 3D experiment ↗</a></p>
+          <details><summary>A quick look at the idea</summary><p>A visitor chooses how they want to experience the same portfolio. 0D focuses on words, photographs, and links. The next worlds add a timeline, a pixel environment, and a character you can interact with.</p></details>
+        </article>
+      </section>
+      <section id="notes" aria-labelledby="notes-title">
+        <h2 id="notes-title">03. Notes &amp; ideas</h2>
+        <p>Thoughts from building this little corner of the web.</p>
+        <ul class="reading-list">
+          <li><a href="/work/notes.html#dimensions">Why give a portfolio different dimensions?</a> <span class="small">— the idea behind the worlds</span></li>
+          <li><a href="/work/notes.html#interfaces">Keeping the work easy to find</a> <span class="small">— a little restraint</span></li>
+          <li><a href="/work/notes.html#avatar">A character that feels personal</a> <span class="small">— the 3D experiment</span></li>
+        </ul>
+        <p><a href="/work/now.html">What I’m working on now →</a></p>
+      </section>
+      <section id="contact" aria-labelledby="contact-title">
+        <h2 id="contact-title">04. Let’s talk</h2>
+        <p>A project, a collaboration, or an interesting idea? I’d love to hear about it.</p>
+        <p class="contact-email"><a href="mailto:vivekbiswal.dev@gmail.com">vivekbiswal.dev@gmail.com</a></p>
+        <p><a href="mailto:vivekbiswal.dev@gmail.com?subject=Hello%20Vivek">Write me an email ↗</a> <span aria-hidden="true">·</span> <a href="/0d/vivek-biswal.vcf" download="vivek-biswal.vcf">Save my contact</a> <span aria-hidden="true">·</span> <a href="/0d/vivek-biswal.txt" download="vivek-biswal-profile.txt">Download my profile</a></p>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <p>© 2026 Vivek Biswal. A work in progress, with room to grow.</p>
+      <p><a href="#main">Back to top ↑</a> <span aria-hidden="true">·</span> <a href="/work/now.html">Now</a> <span aria-hidden="true">·</span> <a href="/3d/">3D version</a></p>
+    </footer>
   </body>
 </html>

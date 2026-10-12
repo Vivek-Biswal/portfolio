@@ -1,0 +1,78 @@
+/* A framed portrait keeps the approved art whole, with a quiet, playful hello. */
+.avatar-button.pixel-companion-ready {
+  position: relative;
+  width: 160px;
+  min-height: 236px;
+  display: grid;
+  place-items: end center;
+  padding: 12px 8px 14px;
+  border: 1px solid rgb(55 67 68 / 12%);
+  border-radius: 22px;
+  isolation: isolate;
+  background: radial-gradient(ellipse at 50% 45%, #fbf2dd 0%, #eee9db 68%, #e5e7dd 100%);
+  box-shadow: inset 0 1px 0 #fff9, 0 8px 24px rgb(41 48 43 / 5%);
+}
+.avatar-button.pixel-companion-ready::before {
+  content: '';
+  position: absolute;
+  left: 34px;
+  right: 28px;
+  bottom: 13px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3a403517;
+  z-index: -1;
+}
+.avatar-button.pixel-companion-ready > img {
+  display: block;
+  width: 140px;
+  height: 210px;
+  object-fit: contain;
+  image-rendering: auto;
+  transform-origin: 50% 100%;
+  animation: companion-breathe 4.8s ease-in-out infinite;
+  transition: filter .2s ease;
+}
+.avatar-button.pixel-companion-ready:hover > img,
+.avatar-button.pixel-companion-ready:focus-visible > img {
+  filter: drop-shadow(0 5px 6px #564b291c);
+}
+.companion-greeting {
+  position: absolute;
+  left: 50%;
+  top: 5px;
+  z-index: 1;
+  padding: 6px 11px;
+  border-radius: 10px 10px 10px 2px;
+  border: 1px solid #ded8c6;
+  background: #fffdf5;
+  box-shadow: 0 4px 12px #343b3610;
+  color: #354b44;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-40%, 4px);
+  transition: opacity .2s ease, transform .2s ease;
+  pointer-events: none;
+}
+.avatar-button.is-greeting .companion-greeting {
+  opacity: 1;
+  transform: translate(-40%, 0);
+}
+.avatar-button.is-suspended > img { animation-play-state: paused; }
+.avatar-caption { font-size: 12px; line-height: 1.5; margin-top: 12px; }
+@keyframes companion-breathe { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@media (max-width: 760px) {
+  .avatar-button.pixel-companion-ready { width: 116px; min-height: 178px; border-radius: 16px; padding: 8px 4px 10px; }
+  .avatar-button.pixel-companion-ready > img { width: 104px; height: 156px; }
+  .avatar-button.pixel-companion-ready::before { left: 26px; right: 18px; bottom: 9px; }
+  .avatar-caption { font-size: 11px; }
+  .companion-greeting { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .avatar-button.pixel-companion-ready > img { animation: none; }
+  .companion-greeting { transition: none; }
+}

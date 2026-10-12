@@ -1,0 +1,115 @@
+/* Smoked glass shell with a lavender optical lens. Kept outside the model loader. */
+.dimension-switcher {
+  position: fixed;
+  left: 50%;
+  top: calc(22px + env(safe-area-inset-top, 0px));
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  isolation: isolate;
+  padding: 5px;
+  border: 1px solid rgb(235 222 255 / 23%);
+  border-radius: 100px;
+  background: linear-gradient(165deg, rgb(99 87 114 / 55%), rgb(23 20 31 / 85%) 55%, rgb(43 33 58 / 83%));
+  color: #f3f0f7;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%), inset 0 -1px 0 rgb(210 182 255 / 10%), 0 8px 24px rgb(0 0 0 / 25%);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  font-family: "Geist", "Segoe UI", sans-serif;
+  line-height: 1;
+  pointer-events: auto;
+}
+.dimension-switcher::before {
+  content: "";
+  position: absolute;
+  inset: 0 20% auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 65%), transparent);
+  pointer-events: none;
+}
+.dimension-switcher-links {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 62px);
+}
+.dimension-switcher-lens {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 25%;
+  transform: translateX(300%);
+  border-radius: 100px;
+  border: 1px solid rgb(236 218 255 / 48%);
+  box-sizing: border-box;
+  background: linear-gradient(170deg, rgb(240 224 255 / 45%), rgb(184 146 234 / 24%) 48%, rgb(130 92 185 / 30%) 52%, rgb(199 163 247 / 30%));
+  box-shadow: inset 0 1px 2px rgb(255 255 255 / 50%), inset 0 -1px 2px rgb(231 205 255 / 28%), 0 2px 7px rgb(0 0 0 / 24%), 0 0 18px rgb(164 110 246 / 12%);
+  transition: transform 420ms cubic-bezier(.22, 1, .36, 1);
+  pointer-events: none;
+}
+.dimension-switcher-links:has(a:nth-of-type(1):is(:hover, :focus-visible)) .dimension-switcher-lens { transform: translateX(0); }
+.dimension-switcher-links:has(a:nth-of-type(2):is(:hover, :focus-visible)) .dimension-switcher-lens { transform: translateX(100%); }
+.dimension-switcher-links:has(a:nth-of-type(3):is(:hover, :focus-visible)) .dimension-switcher-lens { transform: translateX(200%); }
+.dimension-switcher a {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  border-radius: 100px;
+  color: #c6bed1;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 180ms ease, transform 200ms ease;
+}
+.dimension-switcher a:is(:hover, :focus-visible), .dimension-switcher a[aria-current="page"] { color: #fff5ff; }
+.dimension-switcher a:active { transform: scale(.94); }
+.dimension-switcher a[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  left: calc(50% - 1.5px);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #eddcff;
+  box-shadow: 0 0 6px #c498ff;
+}
+.dimension-switcher-number { font-size: 13px; font-weight: 600; letter-spacing: .025em; }
+.dimension-switcher-name {
+  position: absolute;
+  top: calc(100% + 16px);
+  left: 50%;
+  transform: translate(-50%, -4px);
+  padding: 9px 12px;
+  border: 1px solid rgb(223 205 245 / 18%);
+  border-radius: 10px;
+  background: #282230;
+  box-shadow: 0 5px 16px rgb(0 0 0 / 20%);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.dimension-switcher a:is(:hover, :focus-visible) .dimension-switcher-name { opacity: 1; transform: translate(-50%, 0); }
+.dimension-switcher a:focus-visible { outline: 2px solid #e6ceff; outline-offset: 3px; }
+@media (min-width: 1100px) and (max-width: 1199px) {
+  .dimension-switcher { top: 7px; }
+}
+@media (max-width: 1099px) {
+  /* A dedicated header row keeps links clear at tablet and phone widths. */
+  .dimension-switcher { top: calc(72px + env(safe-area-inset-top, 0px)); }
+  .dimension-switcher-links { grid-template-columns: repeat(4, 60px); }
+  .dimension-switcher a { min-height: 44px; }
+}
+@media (max-width: 899px) {
+  .dimension-switcher { top: calc(54px + env(safe-area-inset-top, 0px)); }
+  .landing-section .landing-intro { top: max(132px, 12%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dimension-switcher *, .dimension-switcher *::after { transition: none; }
+  .dimension-switcher a:active { transform: none; }
+}
+@media (forced-colors: active) {
+  .dimension-switcher a[aria-current="page"] { outline: 2px solid Highlight; }
+}
