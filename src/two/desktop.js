@@ -146,7 +146,7 @@ function openApp(id, opener = null) {
   const element = document.createElement('section');
   element.className = 'app-window'; element.dataset.app = id; element.tabIndex = -1;
   element.setAttribute('role','dialog'); element.setAttribute('aria-labelledby',`title-${id}`);
-  element.innerHTML = `<header class="window-titlebar" tabindex="0" aria-label="${app.title} title bar. Use arrow keys to move the window.">${icon(app.icon)}<h2 id="title-${id}"></h2><div class="window-controls"><button data-action="minimize" aria-label="Minimize ${app.title} window">_</button><button data-action="maximize" aria-label="Maximize ${app.title} window" aria-pressed="false">□</button><button data-action="close" aria-label="Close ${app.title} window">×</button></div></header><div class="window-body">${app.html}</div><footer class="window-footer"><span>VivekOS / ${id}</span><span>2D · A personal experiment</span></footer>`;
+  element.innerHTML = `<header class="window-titlebar" tabindex="0" aria-label="${app.title} title bar. Use arrow keys to move the window.">${icon(app.icon)}<h2 id="title-${id}"></h2><div class="window-controls"><button data-action="minimize" aria-label="Minimize ${app.title} window">_</button><button data-action="maximize" aria-label="Maximize ${app.title} window" aria-pressed="false">□</button><button data-action="close" aria-label="Close ${app.title} window">×</button></div></header><div class="window-body">${app.html}</div><footer class="window-footer"><span>VivekOS / ${id}</span><span>3D · A personal experiment</span></footer>`;
   element.querySelector('h2').textContent = app.title;
   const task = document.createElement('button');
   task.className = 'task-button'; task.innerHTML = `${icon(app.icon)}<span></span>`;

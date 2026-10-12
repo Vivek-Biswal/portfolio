@@ -14,16 +14,26 @@ for (const route of routes) {
   const html = readFileSync(join('dist', route), 'utf8');
   for (const [, url] of html.matchAll(/(?:src|href)="([^"\s]+)"/g)) verifyUrl(url, route);
 }
-assert.ok(!/<script\b/i.test(readFileSync('dist/index.html', 'utf8')), '0D must stay script-free');
+for (const route of ['index.html', '1d/index.html']) {
+  assert.ok(!/<script\b/i.test(readFileSync(`dist/${route}`, 'utf8')), '1D essentials must stay script-free');
+}
+assert.ok(readFileSync('dist/2d/index.html', 'utf8').includes('class="journey"'), '2D must serve the guided line');
+assert.ok(readFileSync('dist/3d/index.html', 'utf8').includes('class="workspace"'), '3D must serve the pixel desktop');
+assert.ok(!existsSync('dist/archive/character-world/index.html'), 'Archived character entry must not be published');
+for (const route of routes) {
+  const html = readFileSync(`dist/${route}`, 'utf8');
+  assert.ok(!/\b0D\b|character-led|3D experiment|3D prototype/.test(html), `${route} promotes a retired world`);
+}
 for (const file of readdirSync('dist/assets')) {
   if (!/\.(js|css)$/.test(file)) continue;
   const source = readFileSync(join('dist/assets', file), 'utf8');
   for (const [url] of source.matchAll(/\/(?:images|models|draco|0d|2d)\/[a-zA-Z0-9_./-]+\.(?:png|jpe?g|webp|svg|hdr|glb|enc|wasm|vcf|txt|ttf|woff2?)/g)) verifyUrl(url, file);
   assert.ok(!source.includes('gsap-trial'), `${file} contains a trial plugin`);
+  assert.ok(!source.includes('character.glb'), `${file} bundles the retired character scene`);
 }
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const lock = JSON.parse(readFileSync('package-lock.json', 'utf8'));
 assert.deepEqual(pkg.dependencies, lock.packages[''].dependencies, 'Lockfile dependencies differ');
 assert.deepEqual(pkg.devDependencies, lock.packages[''].devDependencies, 'Lockfile devDependencies differ');
 assert.ok(!pkg.dependencies['gsap-trial'], 'Remove trial animation plugins before deployment');
-console.log('Verified seven production pages, local asset references, script-free 0D and dependency lockfile.');
+console.log('Verified three public worlds, seven pages, preserved script-free 1D, local assets, excluded character scene and dependency lockfile.');

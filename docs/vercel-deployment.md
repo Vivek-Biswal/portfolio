@@ -8,10 +8,9 @@ required by the portfolio or browser-local arcade.
 
 ## Routes
 
-- `/`: script-free 0D portfolio.
-- `/1d/`: guided line.
-- `/2d/`: pixel desktop and seven-game arcade.
-- `/3d/`: inherited Three.js character experiment.
+- `/` and `/1d/`: script-free 1D essentials.
+- `/2d/`: 2D guided line.
+- `/3d/`: 3D pixel desktop and seven-game arcade.
 - `/work/dimensional-portfolio.html`, `/work/now.html`, `/work/notes.html`.
 
 Keep directory trailing slashes and the `.html` project-page URLs. There is no
@@ -29,12 +28,12 @@ npm run preview -- --host 127.0.0.1
 ```
 
 The verifier checks the seven pages, local assets, dependency/lockfile agreement,
-absence of trial plugins, and the no-JavaScript contract for 0D. The arcade tests
+absence of trial plugins, and the no-JavaScript contract for 1D. The arcade tests
 cover gameplay, pause/replay, boundary wrapping, room paths and responsive room
 sizes. The public GSAP 3.13.0 distribution replaces `gsap-trial`.
 
 After importing, inspect Vercel's Preview deployment at each route, reload a
-nested route directly, check 3D model loading, and play a game on a phone. Best
+nested route directly, check the three-world navigation, and play a game on a phone. Best
 scores are per-browser/per-origin; localhost scores do not transfer to Vercel.
 
 ## Public release constraint

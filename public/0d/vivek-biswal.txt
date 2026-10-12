@@ -9,14 +9,13 @@ become. I like turning ideas into useful experiences and learning through
 the projects I build.
 
 CURRENT PROJECT
-A portfolio in four dimensions.
+A portfolio in three dimensions.
 One portfolio with different ways to explore the same person and their work:
-0D (words and photographs), 1D (a guided line), 2D (a pixel world), and 3D
-(an interactive character). The 0D, 1D, and 2D versions are available;
-the 3D version is an ongoing experiment.
+1D (words and photographs), 2D (a guided line), and 3D (a pixel desktop
+and seven-game arcade). All three versions are available.
 
 TOOLS USED IN THIS PROJECT
-HTML, CSS, JavaScript, TypeScript, React, Three.js, and Vite.
+HTML, CSS, JavaScript, TypeScript, Canvas, pixel art, and Vite.
 
 GET IN TOUCH
 For a project, a collaboration, or an interesting idea, email:

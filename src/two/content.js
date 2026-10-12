@@ -22,7 +22,7 @@ export const apps = Object.freeze({
         <h2>From “what if?” to something real.</h2>
         <p>I enjoy shaping an idea, finding a clear way to present it, and refining the details. Useful interfaces and small, thoughtful interactions keep me curious.</p>
       </div>
-      <p class="app-links"><a href="/1d/">Follow the 1D line →</a><a href="/">Read the 0D essentials →</a></p>
+      <p class="app-links"><a href="/2d/">Follow the 2D line →</a><a href="/">Read the 1D essentials →</a></p>
     `,
   },
   projects: {
@@ -30,19 +30,18 @@ export const apps = Object.freeze({
     icon: "folder",
     html: `
       <p class="app-eyebrow">Selected work / 001</p>
-      <h1 class="app-heading">One portfolio. Four ways in.</h1>
+      <h1 class="app-heading">One portfolio. Three ways in.</h1>
       <p class="app-copy">The same person, work, and ideas, presented through different worlds.</p>
       <article class="app-card">
-        <h2>A portfolio in four dimensions</h2>
-        <p>My current personal project starts with a plain page, follows a guided line, opens this pixel desktop, and explores a character-led 3D scene.</p>
+        <h2>A portfolio in three dimensions</h2>
+        <p>My current personal project starts with a plain page, follows a guided line, opens this pixel desktop.</p>
         <ul class="tag-list" aria-label="Portfolio modes">
-          <li>0D · Essentials</li><li>1D · A guided line</li><li>2D · You are here</li><li>3D · Experiment</li>
+          <li>1D · Essentials</li><li>2D · A guided line</li><li>3D · You are here</li>
         </ul>
-        <p class="app-links"><a href="/work/dimensional-portfolio.html">Read the project →</a><a href="/">0D</a><a href="/1d/">1D</a><a href="/3d/">3D ↗</a></p>
+        <p class="app-links"><a href="/work/dimensional-portfolio.html">Read the project →</a><a href="/">1D</a><a href="/2d/">2D</a></p>
         <details>
           <summary>Inside the project</summary>
-          <p>The 0D pages use HTML and CSS. The guided line and pixel desktop add small JavaScript interactions. The 3D experiment uses React, TypeScript, Three.js, and GSAP. Vite builds the different entry points.</p>
-          <p>The 3D foundation comes from <a href="https://github.com/MoncyDev/Portfolio-Website" target="_blank" rel="noopener noreferrer">MoncyDev’s portfolio</a>; its attribution is retained.</p>
+          <p>The 1D pages use HTML and CSS. The guided line and pixel desktop add small JavaScript interactions. Vite builds the different entry points.</p>
         </details>
       </article>
       <p>More work will find a home here as I build it. For now, explore the experiment that started this desktop.</p>
@@ -118,7 +117,7 @@ export const apps = Object.freeze({
           <li>Pause a game with Escape or P. Return to the arcade to choose another cabinet, or to Desktop to pick up your portfolio windows.</li>
         </ul>
       </div>
-      <p class="app-links"><a href="/">Prefer a plain page? Open 0D →</a></p>
+      <p class="app-links"><a href="/">Prefer a plain page? Open 1D →</a></p>
     `,
   },
 });

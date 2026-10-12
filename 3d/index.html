@@ -2,12 +2,86 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Vivek Biswal's experimental 3D portfolio." />
-    <title>Vivek Biswal — 3D experiment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Vivek Biswal's pixel desktop. Open a window into my work, ideas, and experiments." />
+    <meta name="theme-color" content="#c7bdd9" />
+    <title>VivekOS — The 3D world</title>
+    <link rel="icon" href="/0d/mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/src/two/desktop.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <a class="skip-link" href="#desktop">Skip to desktop</a>
+    <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <symbol id="icon-person" viewBox="0 0 32 32"><path fill="#f8edcf" stroke="#302736" stroke-width="2" d="M6 4h20v24H6z"/><path fill="#302736" d="M12 8h8v2h2v6h-2v2h-8v-2h-2v-6h2z"/><path fill="#c18458" d="M12 11h8v5h-8z"/><path fill="#9083b1" d="M10 20h12v6H10z"/><path fill="#302736" d="M13 12h2v2h-2zm5 0h2v2h-2z"/></symbol>
+      <symbol id="icon-folder" viewBox="0 0 32 32"><path fill="#d89d58" stroke="#302736" stroke-width="2" d="M3 7h11l3 4h12v17H3z"/><path fill="#f6d186" stroke="#302736" stroke-width="2" d="M2 14h28l-3 14H5z"/><path fill="#fff1bd" d="M6 17h20v2H6z"/></symbol>
+      <symbol id="icon-note" viewBox="0 0 32 32"><path fill="#fbf4de" stroke="#302736" stroke-width="2" d="M7 3h14l5 5v21H7z"/><path fill="#bb9ad0" d="M21 3v6h5"/><path fill="#766185" d="M11 12h11v2H11zm0 5h11v2H11zm0 5h8v2h-8z"/></symbol>
+      <symbol id="icon-mail" viewBox="0 0 32 32"><path fill="#e8c0bc" stroke="#302736" stroke-width="2" d="M3 8h26v19H3z"/><path fill="none" stroke="#302736" stroke-width="2" d="m3 9 13 10L29 9M3 26l9-10m17 10-9-10"/></symbol>
+      <symbol id="icon-gear" viewBox="0 0 32 32"><path fill="#98a7a8" stroke="#302736" stroke-width="2" d="M12 3h8v5h5v4h4v8h-5v5h-4v4h-8v-5H7v-4H3v-8h5V7h4z"/><path fill="#f8edcf" stroke="#302736" stroke-width="2" d="M11 11h10v10H11z"/></symbol>
+      <symbol id="icon-grid" viewBox="0 0 32 32"><path fill="#302736" d="M3 3h11v11H3zm15 0h11v11H18zM3 18h11v11H3zm15 0h11v11H18z"/></symbol>
+      <symbol id="icon-game" viewBox="0 0 32 32"><path fill="#c7bdd9" stroke="#302736" stroke-width="2" d="M5 9h22l3 17h-7l-4-5h-6l-4 5H2z"/><path fill="#302736" d="M8 12h3v3h3v3h-3v3H8v-3H5v-3h3zm14 1h3v3h-3zm-4 4h3v3h-3z"/></symbol>
+    </svg>
+    <header class="menubar">
+      <a class="os-logo" href="/3d/">Vivek<span>OS</span><small>v.03</small></a>
+      <span class="menubar-caption">A little world. A lot of curiosity.</span>
+      <nav class="dimension-links" aria-label="Portfolio dimension"><a href="/">1D</a><a href="/2d/">2D</a><a href="/3d/" aria-current="page">3D</a></nav>
+    </header>
+    <main class="workspace" id="desktop" tabindex="-1" aria-label="Vivek's desktop">
+      <div class="pixel-playground"><canvas class="world-canvas" aria-hidden="true"></canvas></div>
+      <button class="arcade-building" type="button" data-arcade-enter aria-controls="arcade-world" aria-label="Enter Vivek Arcade. Vivek will run to the entrance."><img src="/2d/arcade-building.svg" width="384" height="384" alt="Vivek Arcade, a neighbourhood game house with a green tiled roof, glowing lamps and cabinets in its windows." /><span>Vivek Arcade · Come on in ↗</span></button>
+      <nav class="desktop-icons" aria-label="Desktop apps">
+        <button class="desktop-icon" data-open="about"><svg aria-hidden="true"><use href="#icon-person"/></svg><span>About me</span></button>
+        <button class="desktop-icon" data-open="projects"><svg aria-hidden="true"><use href="#icon-folder"/></svg><span>Projects</span></button>
+        <button class="desktop-icon" data-open="notes"><svg aria-hidden="true"><use href="#icon-note"/></svg><span>Notes</span></button>
+        <button class="desktop-icon" data-open="contact"><svg aria-hidden="true"><use href="#icon-mail"/></svg><span>Contact</span></button>
+        <button class="desktop-icon" data-open="settings"><svg aria-hidden="true"><use href="#icon-gear"/></svg><span>Settings</span></button>
+      </nav>
+      <div class="desktop-intro"><p class="intro-kicker">VIVEK BISWAL · WORLD 03</p><h1>A small world.<br />A curious mind.</h1><p>Part portfolio, part playground.<br />Stay a while. Find something interesting.</p><button type="button" class="pixel-button" data-open="about">Meet the person behind the pixels <span aria-hidden="true">↗</span></button></div>
+      <div class="window-layer" aria-label="Open apps"></div>
+      <p class="desktop-hint">Click an icon. Open a little window into my world.</p>
+      <section class="arcade-world" id="arcade-world" aria-labelledby="arcade-heading" aria-describedby="arcade-room-hint" tabindex="-1" hidden>
+        <header class="arcade-room-header">
+          <div><p class="arcade-kicker">THE PLAY ROOM / 07 GAMES</p><h2 id="arcade-heading">One more round.</h2><p data-arcade-subtitle>Pick a cabinet. Make yourself at home.</p></div>
+          <button class="pixel-button" type="button" data-arcade-exit>Desktop ↗</button>
+        </header>
+        <nav class="arcade-cabinets" aria-label="Game cabinets" hidden></nav>
+        <p class="arcade-room-hint" id="arcade-room-hint">Walk with arrows / WASD, or click the floor. Enter / E at a cabinet to play.</p>
+        <section class="arcade-screen" aria-labelledby="arcade-screen-title" hidden>
+          <header class="arcade-screen-header">
+            <h3 class="arcade-screen-title" id="arcade-screen-title">Game</h3>
+            <div class="arcade-scores"><div><small>SCORE</small><strong data-arcade-score>0</strong></div><div><small>BEST</small><strong data-arcade-best>0</strong></div></div>
+            <div class="arcade-screen-actions"><button class="pixel-button" type="button" data-arcade-pause>Pause</button><button class="pixel-button" type="button" data-arcade-restart>Restart</button><button class="pixel-button" type="button" data-arcade-room>Arcade ↗</button></div>
+          </header>
+          <div class="arcade-game-stage">
+            <canvas class="arcade-game-canvas" width="360" height="260" tabindex="0" role="img" aria-label="Arcade game" aria-describedby="arcade-game-instructions"></canvas>
+            <div class="arcade-result" role="dialog" aria-modal="true" aria-labelledby="arcade-result-title" hidden><p class="arcade-result-kicker">VIVEK ARCADE</p><h3 id="arcade-result-title" data-arcade-result-title>One more round?</h3><p data-arcade-result-message></p><div class="arcade-result-actions"><button class="pixel-button" type="button" data-arcade-continue>Play again</button><button class="pixel-button" type="button" data-arcade-room>Back to arcade</button></div></div>
+          </div>
+          <p class="arcade-game-instructions" id="arcade-game-instructions"></p>
+        </section>
+        <div class="arcade-input" role="group" aria-label="Movement and game controls" hidden>
+          <div class="arcade-dpad"><button type="button" data-input="up" aria-label="Move up">↑</button><button type="button" data-input="left" aria-label="Move left">←</button><button type="button" data-input="down" aria-label="Move down">↓</button><button type="button" data-input="right" aria-label="Move right">→</button></div>
+          <button class="pixel-button arcade-action" type="button" data-input="action">Choose game</button>
+        </div>
+      </section>
+    </main>
+    <div class="scanlines" aria-hidden="true"></div>
+    <nav class="start-menu" id="start-menu" aria-label="Start menu" hidden>
+      <div class="start-heading"><strong>VivekOS</strong><span>Your next click could be an idea.</span></div>
+      <button data-open="about"><svg aria-hidden="true"><use href="#icon-person"/></svg>About me</button>
+      <button data-open="projects"><svg aria-hidden="true"><use href="#icon-folder"/></svg>Projects</button>
+      <button data-open="notes"><svg aria-hidden="true"><use href="#icon-note"/></svg>Notes</button>
+      <button data-open="contact"><svg aria-hidden="true"><use href="#icon-mail"/></svg>Contact</button>
+      <button data-open="settings"><svg aria-hidden="true"><use href="#icon-gear"/></svg>Settings</button>
+      <button data-arcade-enter aria-controls="arcade-world" aria-pressed="false"><svg aria-hidden="true"><use href="#icon-game"/></svg>Visit the arcade</button>
+      <a href="/">← Return to the essentials</a>
+    </nav>
+    <footer class="taskbar">
+      <button class="start-button" type="button" aria-controls="start-menu" aria-expanded="false"><svg aria-hidden="true"><use href="#icon-grid"/></svg><span>Start</span></button>
+      <button class="game-toggle" type="button" data-arcade-enter aria-controls="arcade-world" aria-label="Visit Vivek Arcade" aria-pressed="false"><svg aria-hidden="true"><use href="#icon-game"/></svg><span>Arcade</span></button>
+      <div class="tasks" aria-label="Open windows"></div>
+      <div class="tray"><span class="tray-dot" aria-hidden="true"></span><time class="clock" title="India Standard Time">--:--</time><span class="timezone">IST</span></div>
+    </footer>
+    <p class="sr-only" id="desktop-status" role="status" aria-live="polite"></p>
+    <noscript><style>.menubar,.workspace,.taskbar,.skip-link{display:none}</style><div class="fallback"><h1>Vivek’s 3D desktop</h1><p>The desktop uses JavaScript to open and move windows. You can read all the portfolio content in <a href="/">1D</a> or follow the <a href="/2d/">2D line</a>.</p><a href="mailto:vivekbiswal.dev@gmail.com">vivekbiswal.dev@gmail.com</a></div></noscript>
+    <script type="module" src="/src/two/desktop.js"></script>
   </body>
 </html>
