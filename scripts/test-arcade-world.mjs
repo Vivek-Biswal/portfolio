@@ -105,6 +105,7 @@ test('nearby interaction obeys its radius and does not select a distant cabinet'
 });
 
 test('expanded desktop, portrait and landscape rooms keep every cabinet reachable', () => {
+  const originalRoom = { ...ROOM };
   const original = CABINETS.map(cab => ({ ...cab }));
   try {
     for (const [width, height] of [[768, 390], [640, 300], [375, 692], [812, 256], [738, 221], [320, 256]]) {
@@ -117,7 +118,50 @@ test('expanded desktop, portrait and landscape rooms keep every cabinet reachabl
       assert.equal(canWalk(width - 12, height / 2), false);
     }
   } finally {
-    ROOM.width = 320; ROOM.height = 256;
+    Object.assign(ROOM, originalRoom);
     CABINETS.forEach((cab, index) => Object.assign(cab, original[index]));
+  }
+});
+
+test('responsive cabinet layouts reserve the header and controls without blocking routes', () => {
+  const originalRoom = { ...ROOM };
+  const original = CABINETS.map(cab => ({ ...cab }));
+  try {
+    for (const [width, height, top, bottom] of [[760, 356, 70, 48], [450, 256, 50, 32], [640, 300, 100, 64], [375, 692, 140, 130], [600, 450, 100, 64]]) {
+      configureRoom(width, height, { top, bottom });
+      const entrance = { x: width / 2, y: height - 26 };
+      for (const cabinet of CABINETS) {
+        assert.ok(cabinet.y - 92 >= top, `${cabinet.id} overlaps the header or instruction band`);
+        assert.ok(cabinet.y <= height - bottom, `${cabinet.id} overlaps the controls`);
+        assertSafePath(entrance, { x: cabinet.x, y: cabinet.y });
+      }
+      if (width === 450 || width === 640) assert.equal(new Set(CABINETS.map(cab => cab.y)).size, 1, 'Compact rooms use one accessible row');
+    }
+  } finally {
+    Object.assign(ROOM, originalRoom);
+    CABINETS.forEach((cab, index) => Object.assign(cab, original[index]));
+  }
+});
+
+test('detailed character bounds protect the full sprite while preserving every cabinet route', () => {
+  const originalRoom = { ...ROOM }, originalCabinets = CABINETS.map(cab => ({ ...cab }));
+  try {
+    for (const [width, height, top, bottom, characterHeight] of [[760, 356, 70, 48, 52], [320, 456, 96, 130, 64], [375, 692, 140, 130, 64], [812, 256, 100, 64, 64], [450, 256, 50, 48, 52], [320, 220, 96, 64, 64]]) {
+      configureRoom(width, height, { top, bottom, characterHeight });
+      const halfWidth = characterHeight * 0.3;
+      assert.equal(canWalk(ROOM.footBounds.left - 0.1, height - 26), false, 'Left edge cannot clip the sprite');
+      assert.equal(canWalk(ROOM.footBounds.right + 0.1, height - 26), false, 'Right edge cannot clip the sprite');
+      assert.equal(canWalk(width / 2, ROOM.footBounds.top - 0.1), false, 'The head cannot enter the header band');
+      for (const cabinet of CABINETS) {
+        const path = assertSafePath({ x: width / 2, y: height - 26 }, { x: cabinet.x, y: cabinet.y });
+        for (const point of path) {
+          assert.ok(point.x - halfWidth >= 2 && point.x + halfWidth <= width - 2);
+          assert.ok(point.y - characterHeight >= top + 2);
+        }
+      }
+    }
+  } finally {
+    Object.assign(ROOM, originalRoom);
+    CABINETS.forEach((cab, index) => Object.assign(cab, originalCabinets[index]));
   }
 });

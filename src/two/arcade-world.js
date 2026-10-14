@@ -1,4 +1,4 @@
-export const ROOM = { width: 320, height: 256 };
+export const ROOM = { width: 320, height: 256, footBounds: { left: 13, right: 307, top: 43, bottom: 238 } };
 export const CABINETS = [
   { id: 'snake', title: 'Snake', x: 44, y: 106, color: '#8daa8b', symbol: 'S' },
   { id: 'bricks', title: 'Brick Breaker', x: 120, y: 106, color: '#c99274', symbol: 'B' },
@@ -11,18 +11,34 @@ export const CABINETS = [
 
 // Keep the same scene units while expanding the walkable room to the viewport.
 // Cabinets stay on the pixel grid instead of stretching a small picture.
-export function configureRoom(width, height) {
+export function configureRoom(width, height, { top = 43, bottom = 18, characterHeight = 0 } = {}) {
   ROOM.width = Math.max(320, Math.floor(width));
   ROOM.height = Math.max(220, Math.floor(height));
-  if (ROOM.height < 300 && ROOM.width >= 600) {
+  const header = Math.max(43, Number.isFinite(top) ? top : 43);
+  const controls = Math.max(18, Number.isFinite(bottom) ? bottom : 18);
+  const actorHeight = Number.isFinite(characterHeight) ? Math.max(0, characterHeight) : 0;
+  const sideMargin = Math.max(13, Math.ceil(actorHeight * 0.3 + 2));
+  // Movement coordinates are feet anchors. A taller sprite therefore needs
+  // head clearance and half its natural body width at each outside boundary.
+  const actorTop = actorHeight ? header + actorHeight + 2 : 43;
+  ROOM.footBounds = { left: sideMargin, right: ROOM.width - sideMargin, top: actorTop, bottom: ROOM.height - 18 };
+  const frontMin = header + 92;
+  const frontMax = ROOM.height - controls;
+  // Use one row when two full cabinet bodies cannot fit above the controls.
+  // Seven cabinets need 54 scene units each; the old 600px threshold left
+  // compact desktop and tablet scenes squeezed into overlapping rows.
+  if ((ROOM.height < 300 || frontMin + 76 > frontMax) && ROOM.width >= 430) {
+    const front = Math.min(ROOM.height - 18, Math.max(actorTop, 111, Math.min(frontMax, Math.max(frontMin, Math.round(ROOM.height * 0.64)))));
     CABINETS.forEach((cab, index) => {
-      cab.x = Math.round(44 + index * (ROOM.width - 88) / 6);
-      cab.y = Math.round(ROOM.height * 0.64);
+      cab.x = Math.round(58 + index * (ROOM.width - 116) / 6);
+      cab.y = front;
     });
     return;
   }
-  const firstY = Math.max(ROOM.width >= 450 && ROOM.height >= 300 ? 162 : 142, Math.round(ROOM.height * 0.44));
-  const secondY = Math.min(ROOM.height - 30, Math.max(firstY + 76, Math.round(ROOM.height * 0.73)));
+  const roomForBands = frontMin + 76 <= frontMax;
+  const maxFront = roomForBands ? frontMax : ROOM.height - 18;
+  const firstY = Math.max(actorTop, 111, Math.min(maxFront - 76, Math.max(frontMin, Math.round(ROOM.height * 0.44))));
+  const secondY = Math.min(maxFront, Math.max(firstY + 76, Math.round(ROOM.height * 0.73)));
   CABINETS.forEach((cab, index) => {
     cab.x = index < 4 ? Math.round(44 + index * (ROOM.width - 88) / 3) : Math.round(ROOM.width * (index - 3) / 4);
     cab.y = index < 4 ? firstY : secondY;
@@ -31,7 +47,8 @@ export function configureRoom(width, height) {
 
 export function canWalk(x, y) {
   if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
-  if (x < 13 || x > ROOM.width - 13 || y < 43 || y > ROOM.height - 18) return false;
+  const bounds = ROOM.footBounds;
+  if (x < bounds.left || x > bounds.right || y < bounds.top || y > bounds.bottom) return false;
   return !CABINETS.some(cab => x > cab.x - 27 && x < cab.x + 27 && y > cab.y - 68 && y < cab.y - 10);
 }
 

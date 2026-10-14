@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "verify:dist": "node scripts/verify-dist.mjs",
     "test:cms": "node --test scripts/test-cms.mjs scripts/test-admin-api.mjs",
+    "test:arcade": "node --test scripts/test-arcade-controller.mjs scripts/test-arcade-world.mjs scripts/test-arcade-games.mjs scripts/test-glitch-run.mjs",
     "bootstrap:admin": "node --env-file=.env.local scripts/bootstrap-admin.mjs",
     "test:runtime": "node --no-experimental-require-module --test scripts/test-jwks-compat.mjs"
   },

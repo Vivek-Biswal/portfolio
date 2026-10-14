@@ -80,13 +80,15 @@ export function drawRoomBackdrop(ctx, { width, height, cabinets }) {
   box(ctx, '#d1dac6', 4, 5, width - 8, 1); box(ctx, '#4c6657', 0, 31, width, 8); box(ctx, '#e1dac3', 0, 39, width, 3);
   box(ctx, '#879480', 0, 0, 5, height); box(ctx, '#879480', width - 5, 0, 5, height);
   box(ctx, '#c4bca3', 5, 43, 5, height - 43); box(ctx, '#c4bca3', width - 10, 43, 5, height - 43);
-  const upper = cabinets[0].y, lower = cabinets[4].y;
-  for (const [row, y] of [[0,upper],[1,lower]]) {
-    const selected = cabinets.slice(row === 0 ? 0 : 4, row === 0 ? 4 : 7);
-    const left = selected[0].x - 34, right = selected.at(-1).x + 34;
-    box(ctx, '#b9bda330', left - 8, y - 79, right - left + 16, 92);
-    box(ctx, '#c5b596', left - 4, y - 75, right - left + 8, 3);
-    box(ctx, '#f9f1dc', left - 4, y - 74, right - left + 8, 1);
+  const rows = [...new Set(cabinets.map(cab => cab.y))].sort((a, b) => a - b);
+  const upper = rows[0] ?? 106, lower = rows.at(-1) ?? upper;
+  // Derive rails from the actual layout: short screens use one cabinet row.
+  for (const y of rows) {
+    const selected = cabinets.filter(cab => cab.y === y).sort((a, b) => a.x - b.x);
+    const left = Math.max(10, selected[0].x - 38), right = Math.min(width - 10, selected.at(-1).x + 38);
+    box(ctx, '#b9bda330', left - 4, y - 79, right - left + 8, 92);
+    box(ctx, '#c5b596', left, y - 75, right - left, 3);
+    box(ctx, '#f9f1dc', left, y - 74, right - left, 1);
   }
   // Inlaid runner leads visitors naturally from the entrance to the cabinets.
   const rugW = Math.min(150, width * .26), rugX = Math.round((width - rugW) / 2), rugY = Math.max(lower + 8, height - 65);
