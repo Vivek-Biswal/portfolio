@@ -1,0 +1,11 @@
+// All direct browser access is denied, including published content, drafts,
+// administrator roles, revisions, audit records and uploads metadata.
+// Public published content is served through the read-only server API.
+// The server Admin SDK bypasses these rules, so its API must enforce identity,
+// active administrator role, verified email, MFA, origin, CSRF and schema checks.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} { allow read, write: if false; }
+  }
+}

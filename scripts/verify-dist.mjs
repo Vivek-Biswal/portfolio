@@ -32,6 +32,17 @@ for (const file of readdirSync('dist/assets')) {
   assert.ok(!source.includes('character.glb'), `${file} bundles the retired character scene`);
 }
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+assert.ok(existsSync('dist/admin/login/index.html'), 'Hidden login page must be built');
+assert.ok(!existsSync('dist/admin/dashboard/index.html'), 'Dashboard HTML must never be published as a static file');
+assert.ok(existsSync('server/generated/admin.html'), 'Protected dashboard template must be packaged for the server');
+for(const route of routes) {
+  const html=readFileSync(join('dist',route),'utf8');
+  assert.ok(!/href="\/admin/.test(html), 'Public pages must not link to admin');
+  assert.ok(!html.includes('BEGIN PRIVATE KEY'), 'Private credentials must never appear in public HTML');
+}
+for(const file of readdirSync('dist/assets')) {
+  if(file.endsWith('.js'))assert.ok(!readFileSync(join('dist/assets',file),'utf8').includes('BEGIN PRIVATE KEY'), 'Private credentials must never appear in browser bundles');
+}
 const lock = JSON.parse(readFileSync('package-lock.json', 'utf8'));
 assert.deepEqual(pkg.dependencies, lock.packages[''].dependencies, 'Lockfile dependencies differ');
 assert.deepEqual(pkg.devDependencies, lock.packages[''].devDependencies, 'Lockfile devDependencies differ');

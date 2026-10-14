@@ -1,4 +1,6 @@
-import { apps } from './content.js';
+import {escapeHtml} from '../shared/content.js';
+import { apps, updateApps, getContent } from './content.js';
+import { subscribeContent } from '../shared/public-client.js';
 import { mountCompanion } from './companion.js';
 import { mountArcade } from './arcade.js';
 import './companion.css';
@@ -146,7 +148,7 @@ function openApp(id, opener = null) {
   const element = document.createElement('section');
   element.className = 'app-window'; element.dataset.app = id; element.tabIndex = -1;
   element.setAttribute('role','dialog'); element.setAttribute('aria-labelledby',`title-${id}`);
-  element.innerHTML = `<header class="window-titlebar" tabindex="0" aria-label="${app.title} title bar. Use arrow keys to move the window.">${icon(app.icon)}<h2 id="title-${id}"></h2><div class="window-controls"><button data-action="minimize" aria-label="Minimize ${app.title} window">_</button><button data-action="maximize" aria-label="Maximize ${app.title} window" aria-pressed="false">□</button><button data-action="close" aria-label="Close ${app.title} window">×</button></div></header><div class="window-body">${app.html}</div><footer class="window-footer"><span>VivekOS / ${id}</span><span>3D · A personal experiment</span></footer>`;
+  element.innerHTML = `<header class="window-titlebar" tabindex="0" aria-label="${escapeHtml(app.title)} title bar. Use arrow keys to move the window.">${icon(app.icon)}<h2 id="title-${id}"></h2><div class="window-controls"><button data-action="minimize" aria-label="Minimize ${escapeHtml(app.title)} window">_</button><button data-action="maximize" aria-label="Maximize ${escapeHtml(app.title)} window" aria-pressed="false">□</button><button data-action="close" aria-label="Close ${escapeHtml(app.title)} window">×</button></div></header><div class="window-body">${app.html}</div><footer class="window-footer"><span>VivekOS / ${id}</span><span>3D · A personal experiment</span></footer>`;
   element.querySelector('h2').textContent = app.title;
   const task = document.createElement('button');
   task.className = 'task-button'; task.innerHTML = `${icon(app.icon)}<span></span>`;
@@ -195,7 +197,7 @@ document.addEventListener('click', async event => {
   const copy = event.target.closest('[data-copy-email]');
   if (copy) {
     const message = copy.closest('.window-body').querySelector('[data-copy-status]');
-    try { await navigator.clipboard.writeText('vivekbiswal.dev@gmail.com'); message.textContent = 'Email copied. Say hello when you’re ready.'; }
+    try { await navigator.clipboard.writeText(getContent().contact.email); message.textContent = 'Email copied. Say hello when you’re ready.'; }
     catch { message.textContent = 'Please copy the address above, or click it to open your email app.'; }
   }
 });
@@ -228,4 +230,32 @@ game = mountArcade(document.querySelector('.workspace'), {
     windows.forEach(state => state.cleanupCompanion?.setPaused?.(active));
   },
   announce,
+});
+
+subscribeContent(content=>{
+  updateApps(content);
+  document.title=content.settings.siteTitle+' — 3D';
+  const logo=document.querySelector('.os-logo');
+  logo.firstChild.textContent=content.profile.name.split(' ')[0];
+  const intro=document.querySelector('.desktop-intro');
+  intro.querySelector('.intro-kicker').textContent=content.profile.name.toUpperCase()+' · WORLD 03';
+  intro.querySelector('h1').textContent=content.settings.pixelTitle;
+  intro.querySelector('p:not(.intro-kicker)').textContent=content.settings.pixelSubtitle;
+  let savedDisplay=false;
+  try {savedDisplay=Boolean(localStorage.getItem('vivek-2d-display'));}catch{/* Apply the published default when storage is blocked. */}
+  if(!savedDisplay) {preference.wallpaper=content.settings.defaultWallpaper;syncSettings();}
+  document.querySelectorAll('[data-arcade-enter]').forEach(button=>{button.hidden=!content.settings.arcadeEnabled;});
+  if(!content.settings.arcadeEnabled && game?.active)game.exit({restoreFocus:false});
+  windows.forEach(state=>{
+    const scroll=state.element.querySelector('.window-body').scrollTop;
+    state.cleanupCompanion?.();state.cleanupCompanion=undefined;
+    state.element.querySelector('.window-body').innerHTML=apps[state.id].html;
+    state.element.querySelector('h2').textContent=apps[state.id].title;
+    state.element.querySelector('.window-titlebar').setAttribute('aria-label',apps[state.id].title+' title bar. Use arrow keys to move the window.');
+    state.element.querySelectorAll('[data-action]').forEach(button=>button.setAttribute('aria-label',button.dataset.action+' '+apps[state.id].title+' window'));
+    state.element.querySelector('.window-footer span').textContent=content.profile.name.split(' ')[0]+'OS / '+state.id;
+    state.task.querySelector('span').textContent=apps[state.id].title;
+    if(state.id==='about'){state.cleanupCompanion=mountCompanion(state.element);state.cleanupCompanion.setPaused?.(game?.active);}
+    state.element.querySelector('.window-body').scrollTop=scroll;
+  });syncSettings();
 });

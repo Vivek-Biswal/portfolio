@@ -33,3 +33,9 @@ backup/
 .vercel/
 .env.*
 !.env.example
+
+server/generated/
+.firebase/
+firestore-debug.log
+ui-debug.log
+*-private-key.json

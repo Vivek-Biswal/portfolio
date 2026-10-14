@@ -1,3 +1,4 @@
+import './content-sync.js';
 // Native links and details remain usable if this small enhancement cannot run.
 const root = document.documentElement;
 const themeButton = document.querySelector('.theme-toggle');

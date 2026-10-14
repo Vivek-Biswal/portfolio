@@ -1,0 +1,15 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "portfolioContent",
+      "fieldPath": "content",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "portfolioRevisions",
+      "fieldPath": "content",
+      "indexes": []
+    }
+  ]
+}

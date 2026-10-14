@@ -1,10 +1,17 @@
 # Vercel release setup
 
-This is a Vite multipage static site. Import this repository into Vercel with the
+This is a Vite multipage portfolio with a Firebase-backed CMS and a Vercel Node API. Import this repository into Vercel with the
 repository root as Root Directory. The checked-in `vercel.json` selects Vite,
 uses `npm ci`, builds with `npm run build && npm run verify:dist`, and serves
-`dist/`. Select Node.js 22.x. No environment variables or backend services are
-required by the portfolio or browser-local arcade.
+`dist/`. Select Node.js 22.x. The CMS requires the server environment variables below.
+
+## Firebase server environment
+
+Set `FIREBASE_PROJECT_ID=vivek-biswal`, `FIREBASE_STORAGE_BUCKET=vivek-biswal.firebasestorage.app`, and private `FIREBASE_SERVICE_ACCOUNT_JSON` in Vercel server environment settings. Use the JSON value from the ignored local setup, without the surrounding dotenv quotes. Never put it in a `VITE_*` variable, repository, screenshot or chat. Set `SITE_ORIGIN` to the exact HTTPS origin used to access the site; production and preview origins must be configured independently. Keep `FIREBASE_MEDIA_ENABLED=false` until Storage is provisioned.
+
+Add the deployed hostname to Firebase Authentication authorized domains. Do not include a protocol or port there. Redeploy after setting environment variables. Open `/admin/login/` directly and follow [the admin guide](admin-guide.md).
+
+The live project already has shared content, its owner account and authenticator MFA configured. Email verification and first authenticator enrollment must be completed by the owner. Verify draft save, authenticated previews, publication across all three worlds, revision restore and sign-out on a Vercel Preview before production.
 
 ## Routes
 
@@ -13,8 +20,8 @@ required by the portfolio or browser-local arcade.
 - `/3d/`: 3D pixel desktop and seven-game arcade.
 - `/work/dimensional-portfolio.html`, `/work/now.html`, `/work/notes.html`.
 
-Keep directory trailing slashes and the `.html` project-page URLs. There is no
-SPA catch-all rewrite: every world has its own generated HTML entry. Hashed
+Keep directory trailing slashes and the `.html` project-page URLs. Public page rewrites render shared published content through `/api/portfolio`.
+The admin dashboard template is packaged privately with that function; it is removed from static output. Hashed
 `/assets/` files get immutable caching; other files use Vercel defaults.
 
 ## Local release checks
@@ -24,7 +31,7 @@ npm ci
 npm run build
 npm run verify:dist
 node --test scripts/test-arcade-games.mjs scripts/test-arcade-world.mjs scripts/test-glitch-run.mjs
-npm run preview -- --host 127.0.0.1
+npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
 The verifier checks the seven pages, local assets, dependency/lockfile agreement,

@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "profile": {
+    "name": "Vivek Biswal",
+    "headline": "A curious builder exploring design, technology, and what the web can become.",
+    "introduction": "I like turning an idea into something you can use, explore, or play with. This is where I collect that work.",
+    "status": "Building & exploring",
+    "portrait": "/0d/portrait.jpg",
+    "dottedPortrait": "/0d/portrait-dots.png",
+    "pixelPortrait": "/2d/vivek-pixel.png",
+    "portraitCaption": "Vivek, point by point."
+  },
+  "about": {
+    "paragraphs": [
+      "I’m Vivek Biswal. I enjoy the whole journey from “what if?” to a working experience: shaping an idea, finding a clear way to present it, and refining the details.",
+      "My current experiment is this portfolio. It explores how the same person and their work can be presented through different worlds, from a quiet page of words and photographs to a playful pixel desktop.",
+      "I’m drawn to useful interfaces, small thoughtful interactions, and projects that give me something new to learn."
+    ]
+  },
+  "contact": {
+    "email": "vivekbiswal.dev@gmail.com",
+    "phone": "",
+    "location": "",
+    "heading": "Let’s make something interesting.",
+    "message": "A project, a collaboration, or an interesting idea? I’d love to hear about it.",
+    "socialLinks": [],
+    "resumeUrl": "/0d/vivek-biswal.txt",
+    "contactCardUrl": "/0d/vivek-biswal.vcf"
+  },
+  "skills": [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "TypeScript",
+    "Canvas",
+    "Pixel art",
+    "Vite"
+  ],
+  "projects": [
+    {
+      "id": "dimensional-portfolio",
+      "title": "A portfolio in three dimensions",
+      "summary": "One portfolio, different ways to explore it. The worlds bring together the essentials, a guided line, and movable pixel windows with a seven-game arcade.",
+      "details": "1D brings the essentials together. 2D follows a guided line. 3D opens the pixel desktop and arcade.",
+      "url": "/work/dimensional-portfolio.html",
+      "image": "/images/world-pixel.svg",
+      "category": "Personal project",
+      "year": "2026",
+      "tags": [
+        "HTML & CSS",
+        "JavaScript",
+        "Canvas",
+        "Pixel art"
+      ]
+    }
+  ],
+  "notes": [
+    {
+      "id": "dimensions",
+      "title": "One portfolio. A few ways in.",
+      "summary": "Why let visitors choose their world?",
+      "paragraphs": [
+        "Some visitors want the essentials. Others want to explore. Each mode is another way into the same portfolio, and you can choose one directly.",
+        "1D is a direct page of text and images. 2D follows a guided line. 3D opens a pixel desktop and a little room to play."
+      ]
+    },
+    {
+      "id": "interfaces",
+      "title": "Keep the work easy to find.",
+      "summary": "A little restraint makes room for the story.",
+      "paragraphs": [
+        "A playful interface still needs clear answers: what is the work, what was the idea, and how can someone get in touch?",
+        "The simple version gives that content a home. The other worlds add movement and exploration while keeping the important information easy to find."
+      ]
+    },
+    {
+      "id": "avatar",
+      "title": "A character that feels personal.",
+      "summary": "Exploring personality, movement, and small reactions.",
+      "paragraphs": [
+        "My photographs are the reference for the pixel companion. A smile, a wave, or a small reaction can add personality while leaving the work readable.",
+        "Click the arcade building, walk between cabinets, and choose a game. The projects and contact details stay easy to reach through the app windows."
+      ]
+    }
+  ],
+  "now": {
+    "title": "What I’m working on.",
+    "introduction": "I’m shaping a personal portfolio that can be explored in different ways, starting with the simplest version.",
+    "sections": [
+      {
+        "heading": "Making the basics feel complete",
+        "paragraphs": [
+          "The current focus is the portfolio’s foundation: text, photographs, useful links, and a comfortable reading experience.",
+          "Whichever world someone chooses, it should lead to the same work and the same way to reach me."
+        ]
+      },
+      {
+        "heading": "A little room to play",
+        "paragraphs": [
+          "The pixel world brings together movable portfolio windows, a personal companion, and seven games in Vivek Arcade.",
+          "The next step is to add more projects and refine the experience as the portfolio grows."
+        ]
+      }
+    ]
+  },
+  "settings": {
+    "siteTitle": "Vivek Biswal — Portfolio",
+    "description": "Vivek Biswal’s work, ideas, and experiments. One portfolio, three ways to explore.",
+    "copyright": "© 2026 Vivek Biswal.",
+    "pixelTitle": "A small world.\nA curious mind.",
+    "pixelSubtitle": "Part portfolio, part playground.\nStay a while. Find something interesting.",
+    "defaultWallpaper": "lavender",
+    "arcadeEnabled": true
+  }
+}
