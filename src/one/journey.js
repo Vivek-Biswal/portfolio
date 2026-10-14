@@ -15,7 +15,7 @@ function setTheme(theme) {
   themeButton.setAttribute('aria-pressed', String(dark));
   themeButton.setAttribute('aria-label', `Switch to ${dark ? 'light' : 'dark'} theme`);
   themeLabel.textContent = dark ? 'Light' : 'Dark';
-  themeMeta.setAttribute('content', dark ? '#191a18' : '#f8f7f4');
+  themeMeta.setAttribute('content', dark ? '#1d1b22' : '#f7f5f0');
 }
 setTheme(explicitTheme ? savedTheme : systemTheme.matches ? 'dark' : 'light');
 themeButton.hidden = false;

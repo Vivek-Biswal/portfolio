@@ -27,7 +27,7 @@ for (const route of routes) {
 for (const file of readdirSync('dist/assets')) {
   if (!/\.(js|css)$/.test(file)) continue;
   const source = readFileSync(join('dist/assets', file), 'utf8');
-  for (const [url] of source.matchAll(/\/(?:images|models|draco|0d|2d)\/[a-zA-Z0-9_./-]+\.(?:png|jpe?g|webp|svg|hdr|glb|enc|wasm|vcf|txt|ttf|woff2?)/g)) verifyUrl(url, file);
+  for (const [url] of source.matchAll(/\/(?:images|models|draco|0d|2d|fonts)\/[a-zA-Z0-9_./-]+\.(?:png|jpe?g|webp|svg|hdr|glb|enc|wasm|vcf|txt|ttf|woff2?)/g)) verifyUrl(url, file);
   assert.ok(!source.includes('gsap-trial'), `${file} contains a trial plugin`);
   assert.ok(!source.includes('character.glb'), `${file} bundles the retired character scene`);
 }
