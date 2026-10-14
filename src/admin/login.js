@@ -5,7 +5,7 @@ const status=document.getElementById('login-status'),form=document.getElementByI
 const email=document.getElementById('email'),password=document.getElementById('password');
 let auth,resolver,secret;
 function message(text,error=false){status.textContent=text;status.classList.toggle('error',error);}
-function busy(value){document.querySelectorAll('button').forEach(button=>button.disabled=value);}
+function busy(value){document.querySelectorAll('form button,#reset-password').forEach(button=>button.disabled=value);}
 async function finish(user) {
   const result=await user.getIdTokenResult(true);
   if(result.claims.admin!==true) {await signOut(auth);throw new Error('This account does not have administrator access.');}

@@ -1,0 +1,16 @@
+.login-header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:36px}.login-theme-toggle{display:flex;align-items:center;gap:8px;padding:9px 13px;background:#ffffff80;font-size:12px;border-radius:999px;white-space:nowrap}.login-theme-toggle>span:first-child{font-size:18px;line-height:1}.login-page,.login-card,.login-page input,.login-theme-toggle{transition:background-color .2s,border-color .2s,color .2s}
+:root[data-admin-theme="light"]{color-scheme:light}
+:root[data-admin-theme="dark"]{color-scheme:dark;color:#f1edf5;background:#15141a;--accent:#c3a9dd;--border:#49414f;--muted:#b0a8bb}
+[data-admin-theme="dark"] .login-page{background:radial-gradient(ellipse at 70% 0,#36283d80,transparent 55%),#15141a}
+[data-admin-theme="dark"] .login-card{background:#201d27;border-color:#423a4c;box-shadow:0 18px 55px #0003}
+[data-admin-theme="dark"] .login-page input{background:#18151e;color:#f1edf5;border-color:var(--border)}
+[data-admin-theme="dark"] .login-page input[readonly]{background:#2a2434}
+[data-admin-theme="dark"] .login-page input::placeholder{color:#a99fb4}
+[data-admin-theme="dark"] .login-page input:-webkit-autofill{box-shadow:0 0 0 1000px #18151e inset;-webkit-text-fill-color:#f1edf5}
+[data-admin-theme="dark"] .login-page button.primary{background:#c8afe1;border-color:#c8afe1;color:#251930;box-shadow:0 3px 8px #0002}
+[data-admin-theme="dark"] .login-page button.primary:hover{background:#d7c1e9;border-color:#d7c1e9}
+[data-admin-theme="dark"] .login-theme-toggle{background:#2a2434;border-color:#49414f}
+[data-admin-theme="dark"] .login-theme-toggle:hover{background:#372e43}
+[data-admin-theme="dark"] .login-footnote{color:var(--muted)}
+[data-admin-theme="dark"] .status.error{color:#ffa1a7}
+@media(prefers-reduced-motion:reduce){.login-page,.login-card,.login-page input,.login-theme-toggle{transition:none}}
