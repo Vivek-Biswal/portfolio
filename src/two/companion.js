@@ -1,6 +1,7 @@
 const PORTRAIT_URL = '/2d/vivek-pixel.png';
-const WALK_WIDTH = 48;
-const WALK_HEIGHT = 80;
+const WALK_SHEET_URL = '/2d/vivek-walk-sheet.png';
+const WALK_COLUMNS = 3;
+const WALK_ROWS = 2;
 const palette = {
   outline: '#17191f', hair: '#17191d', hairShadow: '#101215', hairMid: '#2c3037', hairLight: '#444851',
   skin: '#d78c55', skinLight: '#eca66a', skinBright: '#f7b97d', skinShade: '#ad623a', skinDeep: '#79412d',
@@ -37,117 +38,95 @@ function pixelArt(context) {
   return { rect, poly };
 }
 
-function paintHead(art, bob = 0) {
-  const { rect, poly } = art;
-  const p = (color, points) => poly(color, points.map(([x, y]) => [x, y + bob]));
-  const r = (color, x, y, w, h) => rect(color, x, y + bob, w, h);
-  p('outline', [[16,8],[31,6],[36,11],[36,21],[31,26],[24,27],[17,23],[15,17]]);
-  p('skinShade', [[18,9],[31,8],[35,11],[35,21],[30,25],[24,25],[19,22],[17,17]]);
-  p('skin', [[20,8],[31,9],[34,12],[34,20],[30,24],[25,24],[20,20],[19,13]]);
-  p('skinLight', [[22,10],[30,10],[33,13],[32,16],[30,15],[26,16],[21,14]]);
-  p('skinBright', [[23,11],[29,11],[31,13],[28,14],[23,13]]);
-  r('skinLight',21,18,3,3); r('skinLight',31,18,2,2);
-  p('skin', [[15,14],[18,14],[20,18],[18,21],[15,20],[14,16]]);
-  r('skinShade',16,16,2,3); r('skinLight',15,15,1,3);
-  p('outline', [[20,13],[23,12],[26,13],[26,14],[22,14],[20,14]]);
-  p('outline', [[29,13],[33,13],[34,14],[29,14]]);
-  r('white',21,15,4,2); r('white',29,15,4,2);
-  r('outline',23,15,1,2); r('outline',31,15,1,2);
-  r('skinShade',21,17,4,1); r('skinShade',29,17,4,1);
-  r('skinShade',27,16,1,3); r('skinDeep',27,19,3,1); r('skinLight',28,17,1,2);
-  p('skinDeep', [[22,20],[25,21],[30,21],[33,20],[32,23],[29,24],[25,23]]);
-  p('white', [[23,20],[26,21],[30,21],[32,20],[31,23],[27,23],[24,22]]);
-  r('skinLight',26,24,4,1);
-  p('hairShadow', [[14,15],[12,11],[13,6],[16,3],[20,3],[24,1],[31,2],[35,5],[37,10],[35,15],[33,11],[29,9],[25,6],[21,11],[17,14],[17,18],[15,18]]);
-  p('hair', [[14,10],[15,6],[20,4],[24,2],[30,3],[35,6],[35,10],[30,8],[26,5],[24,6],[20,10],[16,13],[15,16]]);
-  p('hairMid', [[15,8],[17,5],[21,4],[22,5],[19,7],[16,11],[15,12]]);
-  p('hairMid', [[23,3],[28,3],[33,6],[35,7],[35,9],[31,8],[27,5],[24,4]]);
-  r('hairLight',24,3,4,1); r('hairLight',29,5,3,1); r('hairLight',17,6,3,1);
-  r('hairMid',14,10,1,4); r('hairShadow',17,12,1,5);
-}
-
-function paintWalker(context, step, pose) {
-  const art = pixelArt(context);
-  const { rect, poly } = art;
-  const stride = pose === 'run' ? [-1, 0, 1, 0][step] : 0;
-  const bob = pose === 'run' && step % 2 === 1 ? -1 : 0;
-  const jump = pose === 'jump';
-  const frontFoot = jump ? 4 : stride * 5;
-  const rearFoot = jump ? -5 : -stride * 5;
-  const hem = 49 + bob;
-
-  function leg(hip, foot, rear) {
-    const toe = hip + foot + (rear ? 0 : 1);
-    const kneeX = hip + Math.round(foot * 0.45);
-    const ankleY = jump ? (rear ? 69 : 66) : 74;
-    const shade = rear ? 'pantsShade' : 'pants';
-    poly('outline', [[hip-5,hem-3],[hip+5,hem-3],[kneeX+4,61],[toe+4,ankleY],[toe-5,ankleY],[kneeX-5,63]]);
-    poly(shade, [[hip-4,hem-1],[hip+3,hem-1],[kneeX+3,62],[toe+3,ankleY-1],[toe-4,ankleY-1],[kneeX-4,63]]);
-    poly(rear ? 'pants' : 'pantsLight', [[hip-3,hem+1],[hip,hem],[kneeX,61],[kneeX-2,64],[toe-2,ankleY-2],[toe-4,ankleY-2],[kneeX-3,61]]);
-    rect('pantsShade',kneeX-2,63,4,1); rect('pantsShade',toe-3,ankleY-3,6,2);
-    poly('outline', [[toe-5,ankleY-2],[toe+3,ankleY-2],[toe+5,ankleY+1],[toe+9,ankleY+2],[toe+9,ankleY+5],[toe-5,ankleY+5],[toe-6,ankleY+3]]);
-    poly('shoeShade', [[toe-4,ankleY-1],[toe+2,ankleY-1],[toe+4,ankleY+2],[toe+7,ankleY+2],[toe+8,ankleY+4],[toe-4,ankleY+4]]);
-    poly('shoe', [[toe-3,ankleY-1],[toe+1,ankleY-1],[toe+3,ankleY+2],[toe+6,ankleY+2],[toe+7,ankleY+3],[toe-3,ankleY+3]]);
-    rect('white',toe-2,ankleY,4,1); rect('shoeShade',toe,ankleY+1,3,1);
-    rect('sole',toe-4,ankleY+4,12,1);
-  }
-  leg(27, rearFoot, true);
-  leg(20, frontFoot, false);
-
-  // Sleeves are complete contours from shoulder to cuff; the hands overlap.
-  function arm(side, swing, behind) {
-    const shoulder = side === 'left' ? 15 : 33;
-    const elbow = shoulder + (side === 'left' ? -4 : 3) + swing;
-    const hand = elbow + (jump ? -2 : -swing);
-    const handY = jump ? 42 : 52 + (behind ? -1 : 0);
-    poly('outline', [[shoulder-3,28+bob],[shoulder+3,28+bob],[elbow+3,39+bob],[hand+3,handY-3+bob],[hand-3,handY-3+bob],[elbow-3,41+bob]]);
-    poly(behind ? 'shirtShade' : 'shirt', [[shoulder-2,29+bob],[shoulder+2,29+bob],[elbow+2,40+bob],[hand+2,handY-4+bob],[hand-2,handY-4+bob],[elbow-2,41+bob]]);
-    poly('shirtLight', [[shoulder-2,30+bob],[shoulder,30+bob],[elbow,39+bob],[elbow-2,41+bob],[hand-1,handY-5+bob],[hand-2,handY-5+bob],[elbow-2,39+bob]]);
-    rect('seam',hand-2,handY-5+bob,4,1);
-    poly('outline', [[hand-3,handY-4+bob],[hand+3,handY-4+bob],[hand+4,handY+3+bob],[hand+2,handY+5+bob],[hand-1,handY+5+bob],[hand-3,handY+2+bob]]);
-    poly('skin', [[hand-2,handY-4+bob],[hand+2,handY-4+bob],[hand+3,handY+2+bob],[hand+1,handY+4+bob],[hand-1,handY+3+bob],[hand-2,handY+1+bob]]);
-    rect('skinLight',hand-1,handY-3+bob,2,4); rect('skinShade',hand+1,handY+1+bob,1,3);
-  }
-  arm('right', stride * 3, true);
-  poly('outline', [[19,24+bob],[29,24+bob],[29,27+bob],[34,28+bob],[36,35+bob],[33,43+bob],[34,50+bob],[31,52+bob],[17,52+bob],[14,50+bob],[15,43+bob],[12,34+bob],[14,28+bob],[20,26+bob]]);
-  poly('shirt', [[18,28+bob],[22,29+bob],[29,28+bob],[33,30+bob],[33,42+bob],[32,48+bob],[30,50+bob],[18,50+bob],[16,48+bob],[17,40+bob],[15,32+bob]]);
-  poly('shirtLight', [[17,30+bob],[20,31+bob],[31,30+bob],[32,32+bob],[23,33+bob],[18,32+bob],[18,41+bob],[16,44+bob]]);
-  poly('shirtShade', [[30,35+bob],[32,35+bob],[31,43+bob],[33,48+bob],[30,49+bob],[22,48+bob],[20,46+bob],[29,47+bob]]);
-  rect('shirtShade',17,49+bob,14,2); rect('seam',18,48+bob,5,1);
-  rect('skinShade',21,22+bob,8,6); rect('skin',23,23+bob,5,5);
-  poly('outline', [[19,26+bob],[23,28+bob],[29,27+bob],[31,29+bob],[29,30+bob],[23,31+bob],[19,29+bob]]);
-  rect('shirtLight',23,29+bob,5,1);
-  arm('left', -stride * 3, false);
-  paintHead(art, bob);
-}
-
 const walkerFrames = new Map();
-function walkerFrame(pose, step) {
-  const key = `${pose}-${step}`;
-  if (walkerFrames.has(key)) return walkerFrames.get(key);
-  const canvas = document.createElement('canvas');
-  canvas.width = WALK_WIDTH; canvas.height = WALK_HEIGHT;
-  const context = canvas.getContext('2d');
-  if (!context) return null;
-  paintWalker(context, step, pose);
-  walkerFrames.set(key, canvas);
-  return canvas;
+let spriteSheetPromise;
+
+/** Decode and measure once. Complete poses share one scale; align the head
+ * within each cell so asymmetric arm swings cannot shift the whole person. */
+function loadWalkerSheet() {
+  if (spriteSheetPromise) return spriteSheetPromise;
+  spriteSheetPromise = (async () => {
+    const image = new Image();
+    image.decoding = 'async';
+    const loaded = new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = () => reject(new Error('Could not load the walking character.'));
+    });
+    image.src = WALK_SHEET_URL;
+    await loaded;
+    if (typeof image.decode === 'function') await image.decode();
+    const cellWidth = image.naturalWidth / WALK_COLUMNS;
+    const cellHeight = image.naturalHeight / WALK_ROWS;
+    if (!Number.isInteger(cellWidth) || !Number.isInteger(cellHeight) || cellWidth <= 0 || cellHeight <= 0) {
+      throw new Error('Walking character sheet must contain six equal cells.');
+    }
+    const measuringCanvas = document.createElement('canvas');
+    measuringCanvas.width = image.naturalWidth;
+    measuringCanvas.height = image.naturalHeight;
+    const measuringContext = measuringCanvas.getContext('2d', { willReadFrequently: true });
+    if (!measuringContext) throw new Error('Walking character canvas is unavailable.');
+    measuringContext.drawImage(image, 0, 0);
+    const frames = [];
+    for (let index = 0; index < WALK_COLUMNS * WALK_ROWS; index++) {
+      const cellX = (index % WALK_COLUMNS) * cellWidth;
+      const cellY = Math.floor(index / WALK_COLUMNS) * cellHeight;
+      const { data } = measuringContext.getImageData(cellX, cellY, cellWidth, cellHeight);
+      let left = cellWidth, top = cellHeight, right = -1, bottom = -1;
+      for (let y = 0; y < cellHeight; y++) {
+        for (let x = 0; x < cellWidth; x++) {
+          if (data[(y * cellWidth + x) * 4 + 3] < 16) continue;
+          left = Math.min(left, x); right = Math.max(right, x);
+          top = Math.min(top, y); bottom = Math.max(bottom, y);
+        }
+      }
+      if (right < left || bottom < top) throw new Error('Walking character sheet has an empty pose.');
+      const height = bottom - top + 1;
+      const headCenters = [];
+      for (let y = top + Math.floor(height * 0.03); y < top + Math.ceil(height * 0.27); y++) {
+        let headLeft = cellWidth, headRight = -1;
+        for (let x = left; x <= right; x++) {
+          if (data[(y * cellWidth + x) * 4 + 3] < 128) continue;
+          headLeft = Math.min(headLeft, x); headRight = Math.max(headRight, x);
+        }
+        if (headRight >= headLeft) headCenters.push((headLeft + headRight) / 2);
+      }
+      headCenters.sort((a, b) => a - b);
+      const anchorX = headCenters.length ? headCenters[Math.floor(headCenters.length / 2)] : (left + right) / 2;
+      frames.push({ cellX, cellY, left, top, right, bottom, anchorX, width: right - left + 1, height });
+    }
+    // A jump may be crouched. Size it like the standing poses rather than
+    // enlarging it to occupy the idle character's full height.
+    const standingHeight = Math.max(...frames.slice(0, 5).map(frame => frame.height));
+    const minLeft = Math.min(...frames.map(frame => frame.left - frame.anchorX));
+    const maxRight = Math.max(...frames.map(frame => frame.right - frame.anchorX));
+    measuringCanvas.width = measuringCanvas.height = 0;
+    return { image, frames, standingHeight, aspectRatio: (maxRight - minLeft + 1) / standingHeight };
+  })().catch(error => {
+    spriteSheetPromise = undefined;
+    throw error;
+  });
+  return spriteSheetPromise;
 }
 
-/** Whole, cached pixel frames; x/y is the feet center and time is seconds. */
+/** Complete reference-quality poses; x/y is the feet center, time is seconds. */
 export async function createPixelPainter() {
+  const sheet = await loadWalkerSheet();
   return {
-    aspectRatio: 0.6,
+    aspectRatio: sheet.aspectRatio,
     draw(context, { x, y, height, time = 0, pose = 'idle', facing = 1 }) {
-      const framePose = pose === 'run' ? 'run' : pose === 'jump' ? 'jump' : 'idle';
-      const step = framePose === 'run' ? Math.floor(time * 9) % 4 : 0;
-      const frame = walkerFrame(framePose, step);
-      if (!frame || height <= 0) return;
-      const width = Math.round(height * WALK_WIDTH / WALK_HEIGHT);
-      context.save(); context.imageSmoothingEnabled = false;
+      if (!Number.isFinite(height) || height <= 0 || !Number.isFinite(x) || !Number.isFinite(y)) return;
+      const tick = Number.isFinite(time) ? Math.floor(Math.max(0, time) * 9) : 0;
+      const index = pose === 'run' ? 1 + tick % 4 : pose === 'jump' ? 5 : 0;
+      const frame = sheet.frames[index];
+      const scale = height / sheet.standingHeight;
+      context.save();
+      context.imageSmoothingEnabled = false;
       context.translate(Math.round(x), Math.round(y));
       context.scale(facing < 0 ? -1 : 1, 1);
-      context.drawImage(frame, -Math.round(width / 2), -Math.round(height), width, Math.round(height));
+      context.drawImage(sheet.image,
+        frame.cellX + frame.left, frame.cellY + frame.top, frame.width, frame.height,
+        (frame.left - frame.anchorX) * scale, -frame.height * scale,
+        frame.width * scale, frame.height * scale);
       context.restore();
     },
   };

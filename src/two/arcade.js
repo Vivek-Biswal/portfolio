@@ -43,6 +43,8 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   let outer = { x: 80, y: 80, facing: 1 }, approachTarget;
   let player = { x: 160, y: 226, direction: 'up', moving: false }, path = [], pendingCabinet;
   let game, currentCabinet, round = 'running', score = 0, best = 0, near;
+  const outdoorHeight = () => Math.min(204, Math.max(144, workspace.clientHeight * 0.28)) / pixelScale;
+  const outdoorMargin = () => Math.ceil(outdoorHeight() * (painter?.aspectRatio || 0.57) / 2) + 8;
   const listen = (target, event, handler, options) => {
     target.addEventListener(event, handler, options);
     cleanups.push(() => target.removeEventListener(event, handler, options));
@@ -265,7 +267,8 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     player.x = Math.round(fraction.x * ROOM.width); player.y = Math.round(fraction.y * ROOM.height);
     if (!canWalk(player.x, player.y)) { player.x = ROOM.width / 2; player.y = ROOM.height - 26; }
     path = []; pendingCabinet = undefined;
-    outer.x = Math.min(ROOM.width - 30, Math.max(30, outer.x)); outer.y = ROOM.height - 32;
+    const margin = outdoorMargin();
+    outer.x = Math.min(ROOM.width - margin, Math.max(margin, outer.x)); outer.y = ROOM.height - 32;
     ctx.imageSmoothingEnabled = false; fitRoom(); fitGame(); refresh();
     if (mode === 'room') updateHint();
   }
@@ -282,8 +285,9 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     drawOutside(ctx, { width: ROOM.width, height: ROOM.height, palette, time });
     ctx.restore();
     characterCtx.save(); characterCtx.scale(pixelScale, pixelScale);
-    painter?.draw(characterCtx, { x: Math.round(outer.x), y: Math.round(outer.y), height: 80,
-      time: motion.matches ? 0 : time, pose: mode === 'approaching' || !motion.matches ? 'run' : 'idle', facing: outer.facing });
+    painter?.draw(characterCtx, { x: Math.round(outer.x), y: Math.round(outer.y), height: outdoorHeight(),
+      time: motion.matches ? 0 : mode === 'approaching' ? time : time * 0.4,
+      pose: mode === 'approaching' || !motion.matches ? 'run' : 'idle', facing: outer.facing });
     characterCtx.restore();
   }
   function draw() {
@@ -297,8 +301,9 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     if (disposed || document.hidden || !windowFocused) { last = 0; return; }
     const dt = last ? Math.min(0.04, (now - last) / 1000) : 0; last = now; time += dt;
     if (mode === 'desktop' && !motion.matches) {
-      const max = Math.max(60, ROOM.width * .64);
-      outer.x += dt * 15 * outer.facing; if (outer.x < 38) outer.facing = 1; if (outer.x > max) outer.facing = -1;
+      const min = outdoorMargin(), max = Math.max(min, Math.min(ROOM.width - min, ROOM.width * .64));
+      outer.x = Math.max(min, Math.min(max, outer.x + dt * 15 * outer.facing));
+      if (outer.x <= min) outer.facing = 1; if (outer.x >= max) outer.facing = -1;
     } else if (mode === 'approaching') {
       const dx = approachTarget.x - outer.x, dy = approachTarget.y - outer.y, distance = Math.hypot(dx, dy);
       if (distance < 2) enterRoom();
