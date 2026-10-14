@@ -9,8 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "verify:dist": "node scripts/verify-dist.mjs",
-    "test:cms": "node --test scripts/test-cms.mjs",
-    "bootstrap:admin": "node --env-file=.env.local scripts/bootstrap-admin.mjs"
+    "test:cms": "node --test scripts/test-cms.mjs scripts/test-admin-api.mjs",
+    "bootstrap:admin": "node --env-file=.env.local scripts/bootstrap-admin.mjs",
+    "test:runtime": "node --no-experimental-require-module --test scripts/test-jwks-compat.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -51,6 +52,9 @@
   "overrides": {
     "@firebase/app": "0.16.2",
     "@firebase/app-compat": "0.5.18",
-    "@grpc/grpc-js": "1.14.6"
+    "@grpc/grpc-js": "1.14.6",
+    "jwks-rsa": {
+      "jose": "5.10.0"
+    }
   }
 }

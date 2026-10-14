@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+tmp/
+.firebase/
+*-private-key.json
+artifacts/
+backup/

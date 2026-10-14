@@ -7,6 +7,13 @@ uses `npm ci`, builds with `npm run build && npm run verify:dist`, and serves
 
 ## Firebase server environment
 
+The Firebase Admin dependency currently needs a scoped `jwks-rsa > jose@5.10.0` override.
+Without it, Vercel's loader can throw `ERR_REQUIRE_ESM` before the API handler starts.
+This is the upstream [Firebase/JWKS compatibility issue](https://github.com/firebase/firebase-admin-node/issues/3181).
+`npm run test:runtime` reproduces that loader constraint and verifies RSA/EC public-key conversion and signature rejection.
+The Vercel build command runs this regression and the CMS tests before packaging the site.
+Revisit the override when the upstream dependency fixes its CommonJS/ESM loading behavior.
+
 Set `FIREBASE_PROJECT_ID=vivek-biswal`, `FIREBASE_STORAGE_BUCKET=vivek-biswal.firebasestorage.app`, and private `FIREBASE_SERVICE_ACCOUNT_JSON` in Vercel server environment settings. Use the JSON value from the ignored local setup, without the surrounding dotenv quotes. Never put it in a `VITE_*` variable, repository, screenshot or chat. Set `SITE_ORIGIN` to the exact HTTPS origin used to access the site; production and preview origins must be configured independently. Keep `FIREBASE_MEDIA_ENABLED=false` until Storage is provisioned.
 
 Add the deployed hostname to Firebase Authentication authorized domains. Do not include a protocol or port there. Redeploy after setting environment variables. Open `/admin/login/` directly and follow [the admin guide](admin-guide.md).

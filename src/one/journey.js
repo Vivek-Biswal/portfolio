@@ -15,7 +15,7 @@ function setTheme(theme) {
   themeButton.setAttribute('aria-pressed', String(dark));
   themeButton.setAttribute('aria-label', `Switch to ${dark ? 'light' : 'dark'} theme`);
   themeLabel.textContent = dark ? 'Light' : 'Dark';
-  themeMeta.setAttribute('content', dark ? '#191c19' : '#faf9f6');
+  themeMeta.setAttribute('content', dark ? '#191a18' : '#f8f7f4');
 }
 setTheme(explicitTheme ? savedTheme : systemTheme.matches ? 'dark' : 'light');
 themeButton.hidden = false;
@@ -61,6 +61,10 @@ document.body.classList.add('is-tracking');
 window.addEventListener('scroll', scheduleUpdate, { passive: true });
 window.addEventListener('resize', scheduleUpdate);
 window.addEventListener('hashchange', scheduleUpdate);
-document.querySelectorAll('details').forEach(detail => detail.addEventListener('toggle', scheduleUpdate));
+// Toggle does not bubble. Capture it so details inserted by CMS updates are tracked too.
+document.addEventListener('toggle', event => {
+  if (event.target instanceof HTMLDetailsElement) scheduleUpdate();
+}, true);
+document.addEventListener('portfolio:content-updated', scheduleUpdate);
 window.addEventListener('load', scheduleUpdate, { once: true });
 updateJourney();

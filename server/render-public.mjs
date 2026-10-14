@@ -1,4 +1,5 @@
 import { escapeHtml as e, paragraphs, emailHref, socialHtml, noteHref } from '../src/shared/content.js';
+import {lineSections} from './render-line.mjs';
 const section=(html,id,body)=>html.replace(new RegExp(`(<section[^>]*\\bid="${id}"[^>]*>)[\\s\\S]*?</section>`),(_,start)=>start+body+'</section>');
 const heading=(tag,id,value)=>`<${tag} id="${id}">${e(value)}</${tag}>`;
 const contactBody=c=>`${heading('h2','contact-title','04. '+c.contact.heading)}<p>${e(c.contact.message)}</p><p class="contact-email"><a href="${emailHref(c.contact.email)}">${e(c.contact.email)}</a></p>${c.contact.phone?`<p>${e(c.contact.phone)}</p>`:''}${c.contact.location?`<p>${e(c.contact.location)}</p>`:''}<p class="intro-links"><a href="${emailHref(c.contact.email)}">Write me an email ↗</a>${c.contact.contactCardUrl?` <span aria-hidden="true">·</span> <a href="${e(c.contact.contactCardUrl)}">Save my contact</a>`:''}${c.contact.resumeUrl?` <span aria-hidden="true">·</span> <a href="${e(c.contact.resumeUrl)}">Download my profile</a>`:''}</p><p>${socialHtml(c.contact.socialLinks)}</p>`;
@@ -21,10 +22,7 @@ export function renderPublic(template,page,c) {
     html=section(html,'contact',contactBody(c));
   }
   if(page==='2d') {
-    html=section(html,'hello',`<span class="node" aria-hidden="true"></span><p class="small-label">01 / A little introduction</p><div class="identity"><img src="${e(c.profile.portrait)}" width="76" height="76" alt="${e(c.profile.name)}" fetchpriority="high" /><span class="status"><span aria-hidden="true"></span>${e(c.profile.status)}</span></div>${heading('h1','hello-title',c.profile.name)}<p class="hero-copy">${e(c.profile.headline)}</p><p>${e(c.profile.introduction)}</p>${paragraphs(c.about.paragraphs)}<a class="next" href="#work">Start with the work <span aria-hidden="true">↓</span></a>`);
-    html=section(html,'work',`<span class="node" aria-hidden="true"></span><p class="small-label">02 / From idea to experiment</p>${heading('h2','work-title','Things I’m building.')}${projectBody(c)}<ul class="tags">${c.skills.map(s=>`<li>${e(s)}</li>`).join('')}</ul><a class="next" href="#ideas">A few thoughts along the way ↓</a>`);
-    html=section(html,'ideas',`<span class="node" aria-hidden="true"></span><p class="small-label">03 / Notes along the way</p>${heading('h2','ideas-title','Thinking out loud.')}<div class="note-list">${c.notes.map((n,i)=>`<a href="${noteHref(n)}"><span class="note-number">${String(i+1).padStart(2,'0')}</span><span><strong>${e(n.title)}</strong><small>${e(n.summary)}</small></span><span class="note-arrow" aria-hidden="true">↗</span></a>`).join('')}</div><a class="next" href="#contact">Keep the conversation going ↓</a>`);
-    html=section(html,'contact',`<span class="node" aria-hidden="true"></span><p class="small-label">04 / The line doesn’t end here</p>${contactBody(c)}<div class="endnote"><span aria-hidden="true">↳</span><p>Same person. Another perspective.<br /><a href="/1d/">Read the essentials in 1D</a> or <a href="/3d/">step into the pixel world</a>.</p></div>`);
+    for(const [id,body] of Object.entries(lineSections(c)))html=section(html,id,body);
   }
   if(page==='3d') {
     html=html.replace(/(<a class="os-logo"[^>]*>)[\s\S]*?<\/a>/,(_,start)=>start+e(first)+'<span>OS</span><small>v.03</small></a>');
