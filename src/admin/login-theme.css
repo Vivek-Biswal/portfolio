@@ -13,4 +13,7 @@
 [data-admin-theme="dark"] .login-theme-toggle:hover{background:#372e43}
 [data-admin-theme="dark"] .login-footnote{color:var(--muted)}
 [data-admin-theme="dark"] .status.error{color:#ffa1a7}
+@media(pointer:coarse),(max-width:650px){.login-page input{font-size:16px;scroll-margin-block:24px}.login-page input[readonly]{font-size:16px}.login-theme-toggle,.login-page .text-button{min-height:44px}}
+@media(max-width:650px){.login-page{padding:24px max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}.login-header{gap:12px;margin-bottom:28px}.login-card{padding:24px}.login-footnote{padding-inline:8px}}
+@media(max-height:600px){.login-page{align-items:start;padding-top:max(20px,env(safe-area-inset-top))}}
 @media(prefers-reduced-motion:reduce){.login-page,.login-card,.login-page input,.login-theme-toggle{transition:none}}

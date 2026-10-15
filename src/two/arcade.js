@@ -4,6 +4,7 @@ import { CABINETS, ROOM, canWalk, configureRoom, findWalkPath, nearestCabinet } 
 import { createSnake, createBrickBreaker, createPong } from './arcade-games-a.js';
 import { createMemoryMatch, createBlockDrop, createCoinMaze } from './arcade-games-b.js';
 import { createGlitchRun } from './arcade-runner.js';
+import { advanceGait, stepPatrol } from './locomotion.js';
 
 const factories = { snake: createSnake, bricks: createBrickBreaker, memory: createMemoryMatch,
   runner: createGlitchRun, pong: createPong, blocks: createBlockDrop, maze: createCoinMaze };
@@ -40,10 +41,12 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   let windowFocused = true;
   let pixelScale = 2;
   let palette, view = { x: 0, y: 0, scale: 1 }, previousFocus;
-  let outer = { x: 80, y: 80, facing: 1 }, approachTarget;
-  let player = { x: 160, y: 226, direction: 'down', moving: false }, path = [], pendingCabinet;
+  let outer = { x: 80, y: 80, facing: 1, phase: 0, speed: 0, rest: 0 }, approachTarget;
+  let player = { x: 160, y: 226, direction: 'down', moving: false, phase: 0 }, path = [], pendingCabinet;
   let game, currentCabinet, round = 'running', score = 0, best = 0, near;
-  const outdoorHeight = () => Math.min(204, Math.max(144, workspace.clientHeight * 0.28)) / pixelScale;
+  const outdoorHeight = () => (workspace.clientWidth <= 760
+    ? workspace.clientHeight <= 300 ? Math.min(108, Math.max(80, workspace.clientHeight * 0.5 - 4)) : Math.min(152, Math.max(108, workspace.clientHeight * 0.27))
+    : Math.min(204, Math.max(144, workspace.clientHeight * 0.28))) / pixelScale;
   const roomCharacterHeight = () => Math.max(52, 64 / pixelScale);
   const outdoorMargin = () => Math.ceil(outdoorHeight() * (painter?.aspectRatio || 0.57) / 2) + 8;
   const listen = (target, event, handler, options) => {
@@ -102,7 +105,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     if (mode === 'desktop') return;
     stopGame(); mode = 'desktop'; path = []; pendingCabinet = undefined; near = undefined;
     sync(); onActiveChange(false);
-    outer.y = ROOM.height - 32;
+    outer.y = ROOM.height - 32; outer.speed = 0; outer.rest = 0.6;
     if (restoreFocus) {
       const target = previousFocus?.isConnected && previousFocus.getClientRects().length ? previousFocus : building;
       target.focus({ preventScroll: true });
@@ -114,7 +117,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     if (fromGame) stopGame();
     inputPanel.inert = false;
     mode = 'room'; pendingCabinet = undefined; path = []; near = undefined;
-    if (!fromGame) player = { x: ROOM.width / 2, y: ROOM.height - 26, direction: 'down', moving: false };
+    if (!fromGame) player = { x: ROOM.width / 2, y: ROOM.height - 26, direction: 'down', moving: false, phase: 0 };
     clearInput(); sync(); fitRoom(); world.focus({ preventScroll: true });
     announce('Welcome to Vivek Arcade. Walk with arrows or WASD, or click a cabinet to walk there and play.');
     last = 0; wake();
@@ -224,6 +227,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
       : 'Walk with arrows / WASD, or click the floor. Enter / E at a cabinet to play.';
   }
   function movePlayer(dt) {
+    const startX = player.x, startY = player.y;
     let dx = 0, dy = 0;
     if (path.length) {
       const target = path[0], distance = Math.hypot(target.x - player.x, target.y - player.y);
@@ -235,12 +239,18 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
       dy = Number(held.has('down')) - Number(held.has('up'));
       const length = Math.hypot(dx, dy); if (length) { dx /= length; dy /= length; }
     }
-    player.moving = Boolean(dx || dy || path.length);
     if (dx || dy) {
-      player.direction = Math.abs(dx) > Math.abs(dy) ? dx > 0 ? 'right' : 'left' : dy > 0 ? 'down' : 'up';
       const step = dt * 74;
       if (canWalk(player.x + dx * step, player.y)) player.x += dx * step;
       if (canWalk(player.x, player.y + dy * step)) player.y += dy * step;
+    }
+    const movedX = player.x - startX, movedY = player.y - startY, distance = Math.hypot(movedX, movedY);
+    player.moving = distance > 0.001;
+    if (player.moving) {
+      const horizontal = ['left', 'right'].includes(player.direction);
+      if (Math.abs(movedX) > Math.abs(movedY) * 1.15 || (horizontal && Math.abs(movedX) >= Math.abs(movedY) * 0.87)) player.direction = movedX >= 0 ? 'right' : 'left';
+      else player.direction = movedY >= 0 ? 'down' : 'up';
+      player.phase = advanceGait(player.phase, distance, roomCharacterHeight());
     }
     updateHint();
     // A cabinet route can cross the entrance on a compact viewport. Finish the
@@ -275,13 +285,16 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     pixelScale = workspace.clientWidth >= 900 && workspace.clientHeight >= 512 ? 2 : 1;
     const compact = workspace.clientHeight <= 520;
     const short = workspace.clientHeight <= 400;
+    const smallLandscape = workspace.clientWidth > 430 && workspace.clientWidth <= 700 && workspace.clientHeight <= 240;
     configureRoom(workspace.clientWidth / pixelScale, workspace.clientHeight / pixelScale, {
-      top: (compact ? workspace.clientWidth < 600 ? 96 : 100 : 140) / pixelScale,
-      bottom: (short ? 64 : workspace.clientWidth <= 760 ? 130 : 96) / pixelScale,
+      top: (smallLandscape ? 56 : compact ? workspace.clientWidth < 600 ? 96 : 100 : 140) / pixelScale,
+      bottom: (smallLandscape ? 56 : short ? 64 : workspace.clientWidth <= 760 ? 130 : 96) / pixelScale,
       characterHeight: roomCharacterHeight(),
     });
-    worldCanvas.width = workspace.clientWidth; worldCanvas.height = workspace.clientHeight;
+    const resolution = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+    worldCanvas.width = Math.round(workspace.clientWidth * resolution); worldCanvas.height = Math.round(workspace.clientHeight * resolution);
     characterCanvas.width = worldCanvas.width; characterCanvas.height = worldCanvas.height;
+    ctx.setTransform(resolution, 0, 0, resolution, 0, 0); characterCtx.setTransform(resolution, 0, 0, resolution, 0, 0);
     player.x = Math.round(fraction.x * ROOM.width); player.y = Math.round(fraction.y * ROOM.height);
     if (!canWalk(player.x, player.y)) { player.x = ROOM.width / 2; player.y = ROOM.height - 26; }
     if (pendingCabinet) path = findWalkPath(player, pendingCabinet);
@@ -297,7 +310,9 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     ctx.save(); ctx.translate(view.x, view.y); ctx.scale(view.scale, view.scale);
     drawRoomBackdrop(ctx, { width: ROOM.width, height: ROOM.height, cabinets: CABINETS });
     const entities = CABINETS.map(cab => ({ y: cab.y - 5, paint: () => drawCabinet(ctx, cab, time, cab.id === near?.id) }));
-    entities.push({ y: player.y, paint: () => painter?.drawRoom(ctx, { ...player, time: motion.matches ? 0 : time, height: roomCharacterHeight() }) });
+    entities.push({ y: player.y, paint: () => painter?.drawRoom(ctx, { ...player,
+      moving: player.moving && !motion.matches, phase: motion.matches ? 0 : player.phase,
+      time: motion.matches ? 0 : time, height: roomCharacterHeight() }) });
     entities.sort((a,b) => a.y - b.y).forEach(entity => entity.paint());
     ctx.restore();
   }
@@ -306,9 +321,8 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     drawOutside(ctx, { width: ROOM.width, height: ROOM.height, palette, time });
     ctx.restore();
     characterCtx.save(); characterCtx.scale(pixelScale, pixelScale);
-    painter?.draw(characterCtx, { x: Math.round(outer.x), y: Math.round(outer.y), height: outdoorHeight(),
-      time: motion.matches ? 0 : mode === 'approaching' ? time : time * 0.4,
-      pose: mode === 'approaching' || !motion.matches ? 'run' : 'idle', facing: outer.facing });
+    painter?.draw(characterCtx, { x: outer.x, y: outer.y, height: outdoorHeight(), phase: outer.phase,
+      pose: !motion.matches && (mode === 'approaching' || outer.speed > 0.2) ? 'run' : 'idle', facing: outer.facing });
     characterCtx.restore();
   }
   function draw() {
@@ -322,13 +336,12 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     if (disposed || document.hidden || !windowFocused) { last = 0; return; }
     const dt = last ? Math.min(0.04, (now - last) / 1000) : 0; last = now; time += dt;
     if (mode === 'desktop' && !motion.matches) {
-      const min = outdoorMargin(), max = Math.max(min, Math.min(ROOM.width - min, ROOM.width * .64));
-      outer.x = Math.max(min, Math.min(max, outer.x + dt * 15 * outer.facing));
-      if (outer.x <= min) outer.facing = 1; if (outer.x >= max) outer.facing = -1;
+      const min = outdoorMargin(), max = Math.max(min, Math.min(ROOM.width - min, ROOM.width * (workspace.clientWidth <= 760 ? 0.52 : 0.64)));
+      stepPatrol(outer, dt, { min, max, height: outdoorHeight() });
     } else if (mode === 'approaching') {
       const dx = approachTarget.x - outer.x, dy = approachTarget.y - outer.y, distance = Math.hypot(dx, dy);
       if (distance < 2) enterRoom();
-      else { const step = Math.min(distance, dt * 125); outer.x += dx / distance * step; outer.y += dy / distance * step; outer.facing = dx >= 0 ? 1 : -1; }
+      else { const step = Math.min(distance, dt * 125); outer.x += dx / distance * step; outer.y += dy / distance * step; outer.phase = advanceGait(outer.phase, step, outdoorHeight()); outer.facing = dx >= 0 ? 1 : -1; }
     } else if (mode === 'room') movePlayer(dt);
     draw();
     // A transition inside this tick may already have scheduled the next frame.

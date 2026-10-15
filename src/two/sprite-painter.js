@@ -69,7 +69,7 @@ function drawPose(context, sheet, index, { x, y, height, facing = 1 }) {
   if (![x, y, height].every(Number.isFinite) || height <= 0) return;
   const f = sheet.frames[index], scale = height / sheet.standingHeight;
   context.save(); context.imageSmoothingEnabled = false;
-  context.translate(Math.round(x), Math.round(y)); context.scale(facing < 0 ? -1 : 1, 1);
+  context.translate(x, y); context.scale(facing < 0 ? -1 : 1, 1);
   context.drawImage(sheet.image, f.x, f.y, f.width, f.height,
     (f.left - f.anchorX) * scale, -f.height * scale, f.width * scale, f.height * scale);
   context.restore();
@@ -79,18 +79,21 @@ function drawPose(context, sheet, index, { x, y, height, facing = 1 }) {
 export async function createPixelPainter() {
   const [walk, room] = await Promise.all([loadSheet(WALK_URL, 5, 2, 9), loadSheet(ROOM_URL, 4, 3, 12)]);
   const tick = time => Math.floor(Math.max(0, Number.isFinite(time) ? time : 0) * 16);
+  const cycle = (phase, count) => Math.floor(((phase % 1 + 1) % 1) * count) % count;
   return {
     aspectRatio: walk.aspectRatio,
     draw(context, options) {
-      const index = options.pose === 'run' ? 1 + tick(options.time) % 8 : options.pose === 'jump' ? 9 : 0;
+      const step = Number.isFinite(options.phase) ? cycle(options.phase, 8) : tick(options.time) % 8;
+      const index = options.pose === 'run' ? 1 + step : options.pose === 'jump' ? 9 : 0;
       drawPose(context, walk, index, options);
     },
-    drawRoom(context, { direction = 'down', moving = false, time = 0, ...options }) {
+    drawRoom(context, { direction = 'down', moving = false, time = 0, phase, ...options }) {
       if (![options.x, options.y, options.height].every(Number.isFinite) || options.height <= 0) return;
       const row = direction === 'up' ? 2 : direction === 'left' || direction === 'right' ? 1 : 0;
-      const sequence = [1, 2, 3, 2], step = moving ? sequence[Math.floor(tick(time) / 2) % sequence.length] : 0;
+      const sequence = [1, 2, 3, 2], position = Number.isFinite(phase) ? cycle(phase, sequence.length) : Math.floor(tick(time) / 2) % sequence.length;
+      const step = moving ? sequence[position] : 0;
       context.save(); context.fillStyle = 'rgba(12,19,25,.14)';
-      context.beginPath(); context.ellipse(Math.round(options.x), Math.round(options.y) - 1, options.height * 0.18, 2, 0, 0, Math.PI * 2); context.fill(); context.restore();
+      context.beginPath(); context.ellipse(options.x, options.y - 1, options.height * 0.18, 2, 0, 0, Math.PI * 2); context.fill(); context.restore();
       drawPose(context, room, row * 4 + step, { ...options, facing: direction === 'left' ? -1 : 1 });
     },
   };

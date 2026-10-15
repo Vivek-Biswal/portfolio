@@ -78,6 +78,17 @@ dd { margin: 0 0 16px; }
   .page > section:not(.intro) { padding: 30px 0; }
   .contact-email { font-size: 18px; }
 }
+@media (pointer: coarse), (max-width: 560px) {
+  .site-header nav { column-gap: 12px; row-gap: 0; }
+  .site-header nav a, .world-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .world-links { align-items: center; padding-block: 12px; }
+  summary { min-height: 44px; padding-block: 8px; }
+}
 @media print {
   :root { color: #000; font-size: 11pt; }
   .page, .site-header, .site-footer { width: 100%; }
