@@ -6,6 +6,9 @@ export function lineSections(c) {
   const nameParts=c.profile.name.trim().split(/\s+/);
   const nameFirst=nameParts.shift() || '';
   const nameLast=nameParts.join(' ');
+  // The glasses are a presentation variant of the bundled photo. Custom CMS
+  // portraits still render directly instead of being replaced by a fixed image.
+  const portrait=c.profile.portrait==='/0d/portrait.jpg'?'/0d/portrait-pixel-shades.png':c.profile.portrait;
   return {
     hello:`${node}${label('Introduction')}
       <div class="intro-grid"><div class="intro-copy">
@@ -13,7 +16,7 @@ export function lineSections(c) {
         <p class="hero-copy">${e(c.profile.headline)}</p>
         <p class="intro-description">${e(c.profile.introduction)}</p>
         <div class="hero-actions"><a class="next" href="#work">View selected work <span aria-hidden="true">↘</span></a><span class="status"><span aria-hidden="true"></span>${e(c.profile.status)}</span></div>
-      </div>${c.profile.portrait?`<figure class="hero-portrait"><div class="portrait-frame"><img src="${e(c.profile.portrait)}" width="400" height="480" alt="${e(c.profile.name)}" fetchpriority="high" /></div><figcaption class="portrait-note">02 / A personal perspective</figcaption></figure>`:''}</div>
+      </div>${portrait?`<figure class="hero-portrait"><div class="portrait-frame"><img src="${e(portrait)}" width="400" height="480" alt="${e(c.profile.name)}${portrait!==c.profile.portrait?', wearing pixel sunglasses':''}" fetchpriority="high" /></div><figcaption class="portrait-note">02 / A personal perspective</figcaption></figure>`:''}</div>
       <details class="about-details" id="about-details"><summary>More about me <span aria-hidden="true">+</span></summary><div class="detail-content">${paragraphs(c.about.paragraphs)}${c.skills.length?`<p class="tools-label">A few tools I work with</p><ul class="tags" aria-label="Skills">${c.skills.map(s=>`<li>${e(s)}</li>`).join('')}</ul>`:''}</div></details>`,
     work:`${node}${label('Selected work')}<h2 id="work-title">Ideas, made real.</h2><div class="projects-list">${c.projects.map((p,i)=>`<article class="project" aria-labelledby="project-title-${e(p.id)}">
       ${p.image?`<figure class="project-preview"><img class="project-image" src="${e(p.image)}" alt="${e(p.title)} preview" loading="lazy" />${p.url?`<a class="preview-link" href="${e(p.url)}" aria-label="Explore ${e(p.title)}"><span aria-hidden="true">↗</span></a>`:''}</figure>`:''}

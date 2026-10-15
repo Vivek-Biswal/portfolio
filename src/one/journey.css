@@ -19,4 +19,5 @@ h2{font-family:Instrument,Georgia,serif;font-size:clamp(42px,5vw,64px);letter-sp
 @media(max-width:800px){.header{height:79px;padding-block:12px}.dimensions{gap:0;padding:3px}.waypoints{top:79px;gap:4px;padding-block:6px}.waypoints>a{justify-content:center;flex:1}.contact-links{row-gap:0}.endnote{row-gap:0}.endnote p{min-height:0}html{scroll-padding-top:158px}}
 @media(max-width:370px){.header{gap:8px}.dimensions a{padding-inline:5px}.waypoints>a{font-size:10px;gap:5px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+.portrait-frame img[src="/0d/portrait-pixel-shades.png"]{object-position:center 12%}
 @media print{.header,.waypoints,.next,.theme-toggle,.footer{display:none!important}.layout{display:block;margin:0}.journey{border:0}.stop{padding:0 0 24px;break-inside:avoid}.node,.hero-portrait{display:none}.intro-grid,.project-grid{display:block}.contact-panel{background:none;border:0;padding:0}:root,:root[data-theme="dark"]{--paper:white;--ink:black;--muted:#555;--rule:#ccc;--accent:black;--lavender:#eee;--wash:#eee}h1{font-size:48px}h2{font-size:32px}h3{font-size:25px}}

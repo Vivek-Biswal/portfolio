@@ -1,0 +1,25 @@
+@import './login-theme.css';
+
+.admin-sidebar>.login-theme-toggle{margin-top:18px;align-self:flex-start}
+.admin-sidebar nav{margin-top:26px}
+.admin-sidebar{overflow-y:auto}
+[data-admin-theme="dark"] .editor-page{background:#15141a}
+[data-admin-theme="dark"] .admin-sidebar{background:#1b171f;border-color:#42374a}
+[data-admin-theme="dark"] .admin-sidebar nav button{color:#c2b8cd;background:transparent}
+[data-admin-theme="dark"] .admin-sidebar nav button:hover{background:#2b2334}
+[data-admin-theme="dark"] .admin-sidebar nav button[aria-current="page"]{background:#372c45;color:#eedffe;box-shadow:none}
+[data-admin-theme="dark"] .editor-page button{background:#2c2635;border-color:var(--border)}
+[data-admin-theme="dark"] .editor-page button:hover{background:#3b3148}
+[data-admin-theme="dark"] .editor-page button.primary{background:#c8afe1;border-color:#c8afe1;color:#251930}
+[data-admin-theme="dark"] .editor-page button.primary:hover{background:#d7c1e9;border-color:#d7c1e9}
+[data-admin-theme="dark"] .editor-page button.text-button{background:transparent}
+[data-admin-theme="dark"] .editor-page .danger-button{color:#ffacb4}
+[data-admin-theme="dark"] .editor-page input,[data-admin-theme="dark"] .editor-page textarea,[data-admin-theme="dark"] .editor-page select{background:#19161f;color:#f1edf5;border-color:var(--border)}
+[data-admin-theme="dark"] .editor-page input[readonly]{background:#2e2639}
+[data-admin-theme="dark"] .editor-page input::placeholder,[data-admin-theme="dark"] .editor-page textarea::placeholder{color:#afa3bd}
+[data-admin-theme="dark"] .editor-page input:-webkit-autofill{box-shadow:0 0 0 1000px #19161f inset;-webkit-text-fill-color:#f1edf5}
+[data-admin-theme="dark"] .editor-card,[data-admin-theme="dark"] .media-card,[data-admin-theme="dark"] .revision-card,[data-admin-theme="dark"] .preview-links a,[data-admin-theme="dark"] .editor-page dialog{background:#231e2c;color:#f1edf5;border-color:var(--border)}
+[data-admin-theme="dark"] .draft-badge{background:#372a45;color:#d4bfec;border-color:#5b4770}
+[data-admin-theme="dark"] .media-card img{background:#18141e}
+[data-admin-theme="dark"] .editor-page dialog::backdrop{background:#0009}
+@media(max-width:650px){.admin-sidebar>.login-theme-toggle{margin-top:14px;min-height:44px}.admin-sidebar nav{margin-top:16px}.editor-page input,.editor-page textarea,.editor-page select{font-size:16px}}
