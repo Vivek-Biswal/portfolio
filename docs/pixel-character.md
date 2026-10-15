@@ -1,6 +1,6 @@
 # Pixel character animation
 
-The exterior, Glitch Run, and arcade left/right movement use `public/2d/vivek-walk-v3.png`: eight sequential walk poses in four columns and two rows. The second row is the opposite step: the camera-near leg moves behind while the far leg leads, with the arm swing reversed. The old v2 sheet repeated the same leading leg in both halves; increasing its playback smoothness could not correct that artwork defect.
+The exterior, Glitch Run, and arcade left/right movement use `public/2d/vivek-walk-v4.png`: eight sequential walk poses in four columns and two rows. V4 refines the arm swing while retaining v3's alternating legs. See [arm-edit prompts](pixel-character-arms.md). The second row is the opposite step: the camera-near leg moves behind while the far leg leads, with the arm swing reversed. The old v2 sheet repeated the same leading leg in both halves; increasing its playback smoothness could not correct that artwork defect.
 
 The arcade front/back movement uses `public/2d/vivek-room-v3.png`: eight poses in four columns and two rows. Each row contains idle, one foot contact, passing, and the opposite foot contact. Front and back walking use the sequence `1, 2, 3, 2` within their row. Sideways walking uses the same eight-frame gait as outside; on stopping, the explorer turns toward the viewer in the new neutral pose. `public/2d/vivek-walk-v2.png` supplies only the existing outdoor idle and jump. Earlier assets remain preserved.
 
@@ -8,7 +8,9 @@ Both v3 assets were created in built-in image-generation mode. The outdoor sheet
 
 The browser decodes each of the three referenced images once, measures the main silhouette, normalizes scale, and aligns the head and feet. Whole poses keep hands and limbs intact. Room movement, collision bounds, reduced-motion preferences, and cabinet depth ordering use the same character across the scene.
 
-Gait follows actual distance travelled rather than a global animation clock. The patrol eases to a stop and idles before turning; blocked room movement holds a standing pose. Fractional positions and canvas backing resolution up to 2× remove visible coordinate snapping while keeping the artwork crisp. Reduced-motion preferences keep the standing pose during necessary navigation.
+Gait follows actual distance travelled rather than a global animation clock. Walking is entirely manual: the exterior stays idle until an arrow, WASD key, or on-screen direction is held, and releasing the last direction stops it immediately. Outdoor speed is 0.48 body heights per second; room speed is 44 world units per second. There is no automatic patrol, approach, cabinet route, or floor-click destination. Building and cabinet activation open their destinations directly. Blocked movement holds a standing pose. Fractional positions and canvas backing resolution up to 2× remove visible coordinate snapping while keeping the artwork crisp. Reduced-motion preferences keep the standing pose during necessary navigation.
+
+The outdoor controls are an independent workspace element, outside the CMS introduction replacement. The compact foreground strip leaves room for 44-pixel touch buttons, shoes, and the arcade steps in portrait and landscape layouts. Typing, app-window controls, browser shortcuts, and desktop Escape behavior are excluded from walking input.
 
 Visual verification must compare actual limb overlap and shoe positions, not just count frame indices. In the v3 side cycle, frame 0 has the near leg forward and near arm back; frame 4 has the near leg back and near arm forward. Frames 2 and 6 are opposite passing steps. Check both directions at the rendered 152-pixel outdoor and 64-pixel room sizes, plus movement release and blocked movement.
 

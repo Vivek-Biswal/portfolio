@@ -16,8 +16,8 @@ function tree(ctx, x, y, size) {
   box(ctx, '#b4bc98', -10, -72, 14, 7); box(ctx, '#b4bc98', -19, -57, 12, 5); box(ctx, '#65816d', 6, -41, 14, 6);
   ctx.restore();
 }
-export function drawOutside(ctx, { width, height, palette, time }) {
-  const ground = height - 32;
+export function drawOutside(ctx, { width, height, palette, time, groundOffset = 32 }) {
+  const ground = height - groundOffset;
   box(ctx, palette.wall, 0, 0, width, height);
   // A quiet layered garden, with space above it for the portfolio introduction.
   box(ctx, '#ffffff22', 0, 0, width, height * .55);
@@ -37,7 +37,7 @@ export function drawOutside(ctx, { width, height, palette, time }) {
   }
   tree(ctx, 28, ground - 5, 1.1); if (width > 400) tree(ctx, width * .52, ground - 23, .65);
   tree(ctx, width - 20, ground - 12, .95);
-  box(ctx, '#82937e', 0, ground, width, 2); box(ctx, '#f4eedb', 0, ground + 2, width, 30);
+  box(ctx, '#82937e', 0, ground, width, 2); box(ctx, '#f4eedb', 0, ground + 2, width, height - ground - 2);
   box(ctx, '#fff9e8', 0, ground + 4, width, 2);
   for (let x = -24; x < width; x += 30) { box(ctx, '#d8cfb8', x, ground + 18, 29, 1); box(ctx, '#d8cfb8', x + 18, ground + 3, 1, 15); }
 }

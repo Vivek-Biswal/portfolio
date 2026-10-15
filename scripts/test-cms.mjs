@@ -49,6 +49,17 @@ test('re-rendering content produces exactly one bootstrap payload and updates th
  assert.equal((twice.match(/id="portfolio-content"/g)||[]).length,1);
  assert.match(twice,/class="signature"[^>]*>changed/);assert.match(twice,/New copyright/);
 });
+
+test('editing the pixel introduction preserves its independent walking controls',()=>{
+ const c=copy();c.settings.pixelTitle='An edited little world';
+ const template=readFileSync('3d/index.html','utf8');
+ const once=renderPublic(template,'3d',c),twice=renderPublic(once,'3d',c);
+ for(const html of [once,twice]){
+  assert.match(html,/<h1>An edited little world<\/h1>/);
+  assert.equal((html.match(/class="outdoor-controls"/g)||[]).length,1);
+  for(const direction of ['left','up','down','right'])assert.ok(html.includes(`data-walk="${direction}"`));
+ }
+});
 test('downloads follow the current shared profile and contact content',()=>{
  const c=copy();c.profile.name='Changed; Owner';c.contact.email='updated@example.com';
  assert.match(profileText(c),/updated@example.com/);assert.match(contactCard(c),/FN:Changed\\; Owner/);assert.match(contactCard(c),/EMAIL:updated@example.com/);

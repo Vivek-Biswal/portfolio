@@ -1,5 +1,5 @@
 const sheets = new Map();
-const WALK_URL = '/2d/vivek-walk-v3.png';
+const WALK_URL = '/2d/vivek-walk-v4.png';
 const POSE_URL = '/2d/vivek-walk-v2.png';
 const ROOM_URL = '/2d/vivek-room-v3.png';
 

@@ -8,7 +8,8 @@
     <title>VivekOS — The 3D world</title>
     <link rel="icon" href="/0d/mark.svg" type="image/svg+xml" />
     <link rel="preload" as="image" href="/2d/vivek-walk-v2.png" />
-    <link rel="prefetch" as="image" href="/2d/vivek-room-v2.png" />
+    <link rel="prefetch" as="image" href="/2d/vivek-walk-v4.png" />
+    <link rel="prefetch" as="image" href="/2d/vivek-room-v3.png" />
     <link rel="stylesheet" href="/src/two/desktop.css" />
   </head>
   <body>
@@ -29,7 +30,7 @@
     </header>
     <main class="workspace" id="desktop" tabindex="-1" aria-label="Vivek's desktop">
       <div class="pixel-playground"><canvas class="world-canvas" aria-hidden="true"></canvas></div>
-      <button class="arcade-building" type="button" data-arcade-enter aria-controls="arcade-world" aria-label="Enter Vivek Arcade. Vivek will run to the entrance."><img src="/2d/arcade-building.svg" width="384" height="384" alt="Vivek Arcade, a neighbourhood game house with a green tiled roof, glowing lamps and cabinets in its windows." /><span>Vivek Arcade · Come on in ↗</span></button>
+      <button class="arcade-building" type="button" data-arcade-enter aria-controls="arcade-world" aria-label="Enter Vivek Arcade"><img src="/2d/arcade-building.svg" width="384" height="384" alt="Vivek Arcade, a cream brick game house with a green canopy, warm windows and a glowing doorway." /><span>Enter the arcade ↗</span></button>
       <nav class="desktop-icons" aria-label="Desktop apps">
         <button class="desktop-icon" data-open="about"><svg aria-hidden="true"><use href="#icon-person"/></svg><span>About me</span></button>
         <button class="desktop-icon" data-open="projects"><svg aria-hidden="true"><use href="#icon-folder"/></svg><span>Projects</span></button>
@@ -38,15 +39,16 @@
         <button class="desktop-icon" data-open="settings"><svg aria-hidden="true"><use href="#icon-gear"/></svg><span>Settings</span></button>
       </nav>
       <div class="desktop-intro"><p class="intro-kicker">VIVEK BISWAL · WORLD 03</p><h1>A small world.<br />A curious mind.</h1><p>Part portfolio, part playground.<br />Stay a while. Find something interesting.</p><button type="button" class="pixel-button" data-open="about">Meet the person behind the pixels <span aria-hidden="true">↗</span></button></div>
+      <div class="outdoor-controls" role="group" aria-label="Walk around the scene"><p>Take a little walk<small>Hold arrows or WASD</small></p><div><button type="button" data-walk="left" aria-label="Walk left">←</button><button type="button" data-walk="up" aria-label="Walk up">↑</button><button type="button" data-walk="down" aria-label="Walk down">↓</button><button type="button" data-walk="right" aria-label="Walk right">→</button></div></div>
       <div class="window-layer" aria-label="Open apps"></div>
-      <p class="desktop-hint">Click an icon. Open a little window into my world.</p>
+      <p class="desktop-hint">Your pace. Your little world.</p>
       <section class="arcade-world" id="arcade-world" aria-labelledby="arcade-heading" aria-describedby="arcade-room-hint" tabindex="-1" hidden>
         <header class="arcade-room-header">
           <div><p class="arcade-kicker">THE PLAY ROOM / 07 GAMES</p><h2 id="arcade-heading">One more round.</h2><p data-arcade-subtitle>Pick a cabinet. Make yourself at home.</p></div>
           <button class="pixel-button" type="button" data-arcade-exit>Desktop ↗</button>
         </header>
         <nav class="arcade-cabinets" aria-label="Game cabinets" hidden></nav>
-        <p class="arcade-room-hint" id="arcade-room-hint">Walk with arrows / WASD, or click the floor. Enter / E at a cabinet to play.</p>
+        <p class="arcade-room-hint" id="arcade-room-hint">Hold arrows / WASD to walk. Release to stop. Click a cabinet to play.</p>
         <section class="arcade-screen" aria-labelledby="arcade-screen-title" hidden>
           <header class="arcade-screen-header">
             <h3 class="arcade-screen-title" id="arcade-screen-title">Game</h3>

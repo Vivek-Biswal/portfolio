@@ -1,10 +1,10 @@
 import { drawOutside, drawRoomBackdrop, drawCabinet } from './arcade-art.js';
 import { createPixelPainter } from './companion.js';
-import { CABINETS, ROOM, canWalk, configureRoom, findWalkPath, nearestCabinet } from './arcade-world.js';
+import { CABINETS, ROOM, canWalk, configureRoom, nearestCabinet } from './arcade-world.js';
 import { createSnake, createBrickBreaker, createPong } from './arcade-games-a.js';
 import { createMemoryMatch, createBlockDrop, createCoinMaze } from './arcade-games-b.js';
 import { createGlitchRun } from './arcade-runner.js';
-import { advanceGait, stepPatrol } from './locomotion.js';
+import { advanceGait } from './locomotion.js';
 
 const factories = { snake: createSnake, bricks: createBrickBreaker, memory: createMemoryMatch,
   runner: createGlitchRun, pong: createPong, blocks: createBlockDrop, maze: createCoinMaze };
@@ -22,6 +22,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   const characterCtx = characterCanvas.getContext('2d');
   const world = workspace.querySelector('.arcade-world');
   const building = workspace.querySelector('.arcade-building');
+  const outdoorControls = workspace.querySelector('.outdoor-controls');
   const cabinets = world.querySelector('.arcade-cabinets');
   const inputPanel = world.querySelector('.arcade-input');
   const actionButton = world.querySelector('.arcade-action');
@@ -41,13 +42,14 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   let windowFocused = true;
   let pixelScale = 2;
   let palette, view = { x: 0, y: 0, scale: 1 }, previousFocus;
-  let outer = { x: 80, y: 80, facing: 1, phase: 0, speed: 0, rest: 0 }, approachTarget;
-  let player = { x: 160, y: 226, direction: 'down', moving: false, phase: 0 }, path = [], pendingCabinet;
+  let outer = { x: 80, y: 80, facing: 1, phase: 0, moving: false, direction: 'right' };
+  let player = { x: 160, y: 226, direction: 'down', moving: false, phase: 0 };
   let game, currentCabinet, round = 'running', score = 0, best = 0, near;
   const outdoorHeight = () => (workspace.clientWidth <= 760
     ? workspace.clientHeight <= 300 ? Math.min(108, Math.max(80, workspace.clientHeight * 0.5 - 4)) : Math.min(152, Math.max(108, workspace.clientHeight * 0.27))
     : Math.min(204, Math.max(144, workspace.clientHeight * 0.28))) / pixelScale;
   const roomCharacterHeight = () => Math.max(52, 64 / pixelScale);
+  const outdoorGround = () => workspace.clientWidth <= 760 || workspace.clientHeight <= 520 ? 72 / pixelScale : 32;
   const outdoorMargin = () => Math.ceil(outdoorHeight() * (painter?.aspectRatio || 0.57) / 2) + 8;
   const listen = (target, event, handler, options) => {
     target.addEventListener(event, handler, options);
@@ -73,7 +75,8 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     held.forEach(action => game?.input(action, false)); held.clear();
     inputSources.clear();
     ['up', 'down', 'left', 'right', 'action'].forEach(action => game?.input(action, false));
-    player.moving = false;
+    player.moving = false; outer.moving = false;
+    outdoorControls?.querySelectorAll('[data-walk]').forEach(button => button.classList.remove('is-held'));
   }
   function sync() {
     workspace.dataset.arcadeState = mode;
@@ -84,7 +87,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     cabinets.hidden = mode !== 'room';
     inputPanel.hidden = !['room', 'game'].includes(mode);
     screen.hidden = mode !== 'game';
-    building.disabled = mode === 'approaching';
+    outdoorControls.hidden = mode !== 'desktop';
     surfaces.forEach(surface => { surface.inert = mode !== 'desktop'; });
     entryButtons.forEach(button => {
       button.setAttribute('aria-pressed', String(mode !== 'desktop'));
@@ -95,17 +98,16 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     });
     actionButton.textContent = mode === 'game' ? 'Action ●' : near ? `Play ${near.title}` : 'Choose game';
     actionButton.disabled = mode === 'room' ? !near : mode === 'game' && ['snake', 'pong'].includes(currentCabinet.id);
-    world.querySelector('[data-arcade-subtitle]').textContent = mode === 'approaching'
-      ? 'Vivek is running to the entrance…' : 'Walk, explore, and find your next favourite.';
+    world.querySelector('[data-arcade-subtitle]').textContent = 'Take your time. Find your next favourite.';
   }
   function stopGame() {
     clearInput(); saveBest(); game?.destroy(); game = undefined;
   }
   function exit({ restoreFocus = true } = {}) {
     if (mode === 'desktop') return;
-    stopGame(); mode = 'desktop'; path = []; pendingCabinet = undefined; near = undefined;
+    stopGame(); mode = 'desktop'; near = undefined;
     sync(); onActiveChange(false);
-    outer.y = ROOM.height - 32; outer.speed = 0; outer.rest = 0.6;
+    outer.y = ROOM.height - outdoorGround();
     if (restoreFocus) {
       const target = previousFocus?.isConnected && previousFocus.getClientRects().length ? previousFocus : building;
       target.focus({ preventScroll: true });
@@ -116,26 +118,15 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   function enterRoom({ fromGame = false } = {}) {
     if (fromGame) stopGame();
     inputPanel.inert = false;
-    mode = 'room'; pendingCabinet = undefined; path = []; near = undefined;
+    mode = 'room'; near = undefined;
     if (!fromGame) player = { x: ROOM.width / 2, y: ROOM.height - 26, direction: 'down', moving: false, phase: 0 };
     clearInput(); sync(); fitRoom(); world.focus({ preventScroll: true });
-    announce('Welcome to Vivek Arcade. Walk with arrows or WASD, or click a cabinet to walk there and play.');
+    announce('Welcome to Vivek Arcade. Hold arrows or WASD to walk. Release to stop. Click a cabinet to play.');
     last = 0; wake();
   }
   function enter() {
     if (mode !== 'desktop') { exit(); return; }
-    previousFocus = document.activeElement; mode = 'approaching'; onActiveChange(true); sync();
-    updateApproachTarget();
-    world.focus({ preventScroll: true });
-    announce('Vivek is running to the arcade entrance.');
-    if (motion.matches) enterRoom();
-    last = 0; wake();
-  }
-  function updateApproachTarget() {
-    const imageRect = building.querySelector('img').getBoundingClientRect();
-    const desktopRect = workspace.getBoundingClientRect();
-    approachTarget = { x: (imageRect.left + imageRect.width / 2 - desktopRect.left) / pixelScale,
-      y: (imageRect.top + imageRect.height * 0.91 - desktopRect.top) / pixelScale };
+    previousFocus = document.activeElement; onActiveChange(true); enterRoom();
   }
   function syncRound() {
     result.hidden = round === 'running';
@@ -191,14 +182,10 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   }
   function selectCabinet(cabinet) {
     if (mode !== 'room') return;
-    clearInput(); pendingCabinet = cabinet;
-    path = findWalkPath(player, { x: cabinet.x, y: cabinet.y });
-    world.focus({ preventScroll: true });
-    announce(`Walking to ${cabinet.title}.`); wake();
-    if (!path.length && nearestCabinet(player)?.id === cabinet.id) launch(cabinet);
+    clearInput(); launch(cabinet);
   }
   function input(action, pressed = true, source = action) {
-    if (!['room', 'game'].includes(mode) || (mode === 'game' && round !== 'running')) return;
+    if (mode === 'game' && round !== 'running') return;
     const sources = inputSources.get(action) || new Set();
     const wasHeld = sources.size > 0;
     if (pressed) sources.add(source); else sources.delete(source);
@@ -208,12 +195,18 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     // action only after its last input source lets go.
     if (wasHeld === (sources.size > 0)) return;
     if (mode === 'game') { game.input(action, sources.size > 0); return; }
+    if (mode === 'desktop') {
+      outdoorControls.querySelectorAll('[data-walk]').forEach(button => button.classList.toggle('is-held', held.has(button.dataset.walk)));
+      if (action === 'action') return;
+      if (!pressed && !['up', 'down', 'left', 'right'].some(direction => held.has(direction))) outer.moving = false;
+      wake(); return;
+    }
     if (action === 'action') {
       if (pressed && near) selectCabinet(near);
-      else if (pressed) announce('Walk to a cabinet first, or click one to walk there.');
+      else if (pressed) announce('Walk to a cabinet first, or click one to play.');
       return;
     }
-    if (pressed) { path = []; pendingCabinet = undefined; }
+    if (!pressed && !['up', 'down', 'left', 'right'].some(direction => held.has(direction))) player.moving = false;
     wake();
   }
   function updateHint() {
@@ -224,23 +217,15 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     actionButton.textContent = near ? `Play ${near.title}` : 'Choose game';
     actionButton.disabled = !near;
     roomHint.textContent = near ? `${near.title} · Enter / E / Choose game to play. Or click any cabinet.`
-      : 'Walk with arrows / WASD, or click the floor. Enter / E at a cabinet to play.';
+      : 'Hold arrows / WASD to walk. Release to stop. Click a cabinet, or press Enter / E nearby.';
   }
   function movePlayer(dt) {
     const startX = player.x, startY = player.y;
-    let dx = 0, dy = 0;
-    if (path.length) {
-      const target = path[0], distance = Math.hypot(target.x - player.x, target.y - player.y);
-      if (distance <= dt * 74) { player.x = target.x; player.y = target.y; path.shift(); }
-      else { dx = (target.x - player.x) / distance; dy = (target.y - player.y) / distance; }
-      if (!path.length && pendingCabinet) { const cabinet = pendingCabinet; pendingCabinet = undefined; launch(cabinet); return; }
-    } else {
-      dx = Number(held.has('right')) - Number(held.has('left'));
-      dy = Number(held.has('down')) - Number(held.has('up'));
-      const length = Math.hypot(dx, dy); if (length) { dx /= length; dy /= length; }
-    }
+    let dx = Number(held.has('right')) - Number(held.has('left'));
+    let dy = Number(held.has('down')) - Number(held.has('up'));
+    const length = Math.hypot(dx, dy); if (length) { dx /= length; dy /= length; }
     if (dx || dy) {
-      const step = dt * 74;
+      const step = dt * 44;
       if (canWalk(player.x + dx * step, player.y)) player.x += dx * step;
       if (canWalk(player.x, player.y + dy * step)) player.y += dy * step;
     }
@@ -253,9 +238,23 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
       player.phase = advanceGait(player.phase, distance, roomCharacterHeight());
     }
     updateHint();
-    // A cabinet route can cross the entrance on a compact viewport. Finish the
-    // requested cabinet interaction instead of interpreting it as a door exit.
-    if (player.moving && !pendingCabinet && player.y > ROOM.height - 21 && Math.abs(player.x - ROOM.width / 2) < 24) exit();
+    if (player.moving && player.y > ROOM.height - 21 && Math.abs(player.x - ROOM.width / 2) < 24) exit();
+  }
+  function moveOutdoor(dt) {
+    let dx = Number(held.has('right')) - Number(held.has('left'));
+    let dy = Number(held.has('down')) - Number(held.has('up'));
+    const length = Math.hypot(dx, dy); if (length) { dx /= length; dy /= length; }
+    const startX = outer.x, startY = outer.y, step = dt * outdoorHeight() * 0.48, margin = outdoorMargin();
+    outer.x = Math.max(margin, Math.min(ROOM.width - margin, outer.x + dx * step));
+    const ground = ROOM.height - outdoorGround();
+    outer.y = Math.max(ground - 20, Math.min(ground + 4, outer.y + dy * step));
+    const distance = Math.hypot(outer.x - startX, outer.y - startY);
+    outer.moving = distance > 0.001;
+    if (outer.moving) {
+      if (dx) { outer.facing = dx < 0 ? -1 : 1; outer.direction = dx < 0 ? 'left' : 'right'; }
+      else if (dy) outer.direction = dy < 0 ? 'up' : 'down';
+      outer.phase = advanceGait(outer.phase, distance, outdoorHeight());
+    }
   }
   function fitRoom() {
     view = { scale: pixelScale, x: Math.floor((workspace.clientWidth - ROOM.width * pixelScale) / 2), y: 0 };
@@ -280,8 +279,6 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   }
   function resize() {
     const fraction = { x: player.x / ROOM.width, y: player.y / ROOM.height };
-    const destination = path.at(-1);
-    const destinationFraction = destination && { x: destination.x / ROOM.width, y: destination.y / ROOM.height };
     pixelScale = workspace.clientWidth >= 900 && workspace.clientHeight >= 512 ? 2 : 1;
     const compact = workspace.clientHeight <= 520;
     const short = workspace.clientHeight <= 400;
@@ -297,12 +294,8 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     ctx.setTransform(resolution, 0, 0, resolution, 0, 0); characterCtx.setTransform(resolution, 0, 0, resolution, 0, 0);
     player.x = Math.round(fraction.x * ROOM.width); player.y = Math.round(fraction.y * ROOM.height);
     if (!canWalk(player.x, player.y)) { player.x = ROOM.width / 2; player.y = ROOM.height - 26; }
-    if (pendingCabinet) path = findWalkPath(player, pendingCabinet);
-    else if (destinationFraction) path = findWalkPath(player, { x: destinationFraction.x * ROOM.width, y: destinationFraction.y * ROOM.height });
-    else path = [];
     const margin = outdoorMargin();
-    outer.x = Math.min(ROOM.width - margin, Math.max(margin, outer.x)); outer.y = ROOM.height - 32;
-    if (mode === 'approaching') updateApproachTarget();
+    outer.x = Math.min(ROOM.width - margin, Math.max(margin, outer.x)); outer.y = ROOM.height - outdoorGround();
     ctx.imageSmoothingEnabled = false; fitRoom(); fitGame(); refresh();
     if (mode === 'room') updateHint();
   }
@@ -318,11 +311,14 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   }
   function drawOutdoor() {
     ctx.save(); ctx.scale(pixelScale, pixelScale);
-    drawOutside(ctx, { width: ROOM.width, height: ROOM.height, palette, time });
+    drawOutside(ctx, { width: ROOM.width, height: ROOM.height, palette, time, groundOffset: outdoorGround() });
     ctx.restore();
     characterCtx.save(); characterCtx.scale(pixelScale, pixelScale);
-    painter?.draw(characterCtx, { x: outer.x, y: outer.y, height: outdoorHeight(), phase: outer.phase,
-      pose: !motion.matches && (mode === 'approaching' || outer.speed > 0.2) ? 'run' : 'idle', facing: outer.facing });
+    const moving = outer.moving && !motion.matches;
+    if (['up', 'down'].includes(outer.direction)) painter?.drawRoom(characterCtx, { x: outer.x, y: outer.y,
+      height: outdoorHeight(), phase: outer.phase, moving, direction: outer.direction });
+    else painter?.draw(characterCtx, { x: outer.x, y: outer.y, height: outdoorHeight(), phase: outer.phase,
+      pose: moving ? 'run' : 'idle', facing: outer.facing });
     characterCtx.restore();
   }
   function draw() {
@@ -335,18 +331,13 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     frame = 0;
     if (disposed || document.hidden || !windowFocused) { last = 0; return; }
     const dt = last ? Math.min(0.04, (now - last) / 1000) : 0; last = now; time += dt;
-    if (mode === 'desktop' && !motion.matches) {
-      const min = outdoorMargin(), max = Math.max(min, Math.min(ROOM.width - min, ROOM.width * (workspace.clientWidth <= 760 ? 0.52 : 0.64)));
-      stepPatrol(outer, dt, { min, max, height: outdoorHeight() });
-    } else if (mode === 'approaching') {
-      const dx = approachTarget.x - outer.x, dy = approachTarget.y - outer.y, distance = Math.hypot(dx, dy);
-      if (distance < 2) enterRoom();
-      else { const step = Math.min(distance, dt * 125); outer.x += dx / distance * step; outer.y += dy / distance * step; outer.phase = advanceGait(outer.phase, step, outdoorHeight()); outer.facing = dx >= 0 ? 1 : -1; }
-    } else if (mode === 'room') movePlayer(dt);
+    if (mode === 'desktop') moveOutdoor(dt);
+    else if (mode === 'room') movePlayer(dt);
     draw();
     // A transition inside this tick may already have scheduled the next frame.
     // Go through wake() so entering or exiting never creates duplicate loops.
-    if (mode === 'approaching' || (mode === 'room' && (held.size || path.length || !motion.matches)) || (mode === 'desktop' && !motion.matches)) wake();
+    if ((mode === 'room' && (held.size || !motion.matches)) || (mode === 'desktop' && held.size)) wake();
+    else last = 0;
   }
   function wake() { if (!frame && !disposed && !document.hidden && windowFocused) frame = requestAnimationFrame(tick); }
 
@@ -357,7 +348,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   }
   CABINETS.forEach(cab => {
     const button = document.createElement('button'); button.type = 'button'; button.className = 'cabinet-hotspot'; button.dataset.cabinet = cab.id;
-    button.setAttribute('aria-label', `Walk to ${cab.title} and play`); button.innerHTML = `<span>${cab.title}<small>PLAY ↗</small></span>`;
+    button.setAttribute('aria-label', `Play ${cab.title}`); button.innerHTML = `<span>${cab.title}<small>PLAY ↗</small></span>`;
     listen(button, 'click', () => selectCabinet(cab)); cabinets.append(button);
   });
   entryButtons.forEach(button => listen(button, 'click', enter));
@@ -381,12 +372,20 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
       }
     });
   });
-  listen(worldCanvas, 'pointerdown', event => {
-    if (mode !== 'room' || event.button !== 0) return;
-    const r = workspace.getBoundingClientRect();
-    const target = { x: (event.clientX - r.left - view.x) / view.scale, y: (event.clientY - r.top - view.y) / view.scale };
-    if (!canWalk(target.x, target.y)) return;
-    clearInput(); pendingCabinet = undefined; path = findWalkPath(player, target); world.focus({ preventScroll: true }); wake();
+  outdoorControls.querySelectorAll('[data-walk]').forEach(button => {
+    listen(button, 'pointerdown', event => {
+      if (mode !== 'desktop' || event.button !== 0) return;
+      event.preventDefault(); button.setPointerCapture(event.pointerId); workspace.focus({ preventScroll: true });
+      input(button.dataset.walk, true, `pointer:${event.pointerId}`);
+    });
+    const release = event => input(button.dataset.walk, false, `pointer:${event.pointerId}`);
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(type => listen(button, type, release));
+    listen(button, 'click', event => {
+      if (event.detail !== 0 || mode !== 'desktop') return;
+      workspace.focus({ preventScroll: true });
+      const source = Symbol('walk control activation'); input(button.dataset.walk, true, source);
+      later(() => input(button.dataset.walk, false, source), 160);
+    });
   });
   listen(gameCanvas, 'pointerdown', event => {
     if (currentCabinet?.id === 'runner' && round === 'running' && event.button === 0) {
@@ -394,35 +393,40 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     }
   });
   listen(document, 'keydown', event => {
-    if (mode === 'desktop' || event.defaultPrevented) return;
+    if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
     if (mode === 'game' && round !== 'running' && event.key === 'Tab') {
       const buttons = [...result.querySelectorAll('button')];
       const index = buttons.indexOf(document.activeElement);
       const next = event.shiftKey ? (index <= 0 ? buttons.length - 1 : index - 1) : (index + 1) % buttons.length;
       event.preventDefault(); buttons[next].focus(); return;
     }
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' && mode !== 'desktop') {
       event.preventDefault(); event.stopImmediatePropagation();
       if (mode === 'game') { if (round === 'running') pause(); else enterRoom({ fromGame: true }); }
       else exit(); return;
     }
-    if (!world.contains(event.target) || event.target.closest('input,textarea,select,[contenteditable]')) return;
+    if (event.target.closest('input,textarea,select,[contenteditable]')) return;
+    if (mode === 'desktop') {
+      if (!(workspace.contains(event.target) || event.target === document.body)
+        || event.target.closest('.app-window,.start-menu,.desktop-icons')) return;
+    } else if (!world.contains(event.target)) return;
     const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
     if (event.repeat) { if (keyActions[key]) event.preventDefault(); return; }
     if (mode === 'game' && key === 'p') { event.preventDefault(); if (round === 'paused') resume(); else pause(); return; }
     if (mode === 'game' && key === 'r') { event.preventDefault(); restart(); return; }
     if (event.target.closest('button,a')) return;
     const action = keyActions[key]; if (!action) return;
+    if (mode === 'desktop' && action === 'action') return;
     event.preventDefault(); input(action, true, `key:${event.code || key}`);
   }, true);
   listen(document, 'keyup', event => { const key = event.key.length === 1 ? event.key.toLowerCase() : event.key; if (keyActions[key]) input(keyActions[key], false, `key:${event.code || key}`); });
   listen(document, 'focusin', event => {
     if (world.contains(event.target)) return;
     if (mode === 'game') pause({ focus: false });
-    else { clearInput(); path = []; pendingCabinet = undefined; }
+    else { clearInput(); draw(); }
   });
   listen(window, 'blur', () => {
-    windowFocused = false; pause({ focus: false }); clearInput(); path = []; pendingCabinet = undefined;
+    windowFocused = false; pause({ focus: false }); clearInput(); draw();
     cancelAnimationFrame(frame); frame = 0; last = 0;
   });
   listen(window, 'focus', () => { windowFocused = true; last = 0; wake(); });
