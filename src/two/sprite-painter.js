@@ -1,6 +1,7 @@
 const sheets = new Map();
-const WALK_URL = '/2d/vivek-walk-v2.png';
-const ROOM_URL = '/2d/vivek-room-v2.png';
+const WALK_URL = '/2d/vivek-walk-v3.png';
+const POSE_URL = '/2d/vivek-walk-v2.png';
+const ROOM_URL = '/2d/vivek-room-v3.png';
 
 // Isolate the person from any tiny neighboring-frame pixels at a grid edge.
 function silhouette(data, width, height) {
@@ -77,24 +78,36 @@ function drawPose(context, sheet, index, { x, y, height, facing = 1 }) {
 
 /** Whole, cached poses preserve the same identity outdoors and inside. */
 export async function createPixelPainter() {
-  const [walk, room] = await Promise.all([loadSheet(WALK_URL, 5, 2, 9), loadSheet(ROOM_URL, 4, 3, 12)]);
+  const [walk, poses, room] = await Promise.all([
+    loadSheet(WALK_URL, 4, 2, 8),
+    loadSheet(POSE_URL, 5, 2, 9),
+    loadSheet(ROOM_URL, 4, 2, 8),
+  ]);
   const tick = time => Math.floor(Math.max(0, Number.isFinite(time) ? time : 0) * 16);
   const cycle = (phase, count) => Math.floor(((phase % 1 + 1) % 1) * count) % count;
   return {
-    aspectRatio: walk.aspectRatio,
+    aspectRatio: Math.max(walk.aspectRatio, poses.aspectRatio),
     draw(context, options) {
       const step = Number.isFinite(options.phase) ? cycle(options.phase, 8) : tick(options.time) % 8;
-      const index = options.pose === 'run' ? 1 + step : options.pose === 'jump' ? 9 : 0;
-      drawPose(context, walk, index, options);
+      if (options.pose === 'run') drawPose(context, walk, step, options);
+      else drawPose(context, poses, options.pose === 'jump' ? 9 : 0, options);
     },
     drawRoom(context, { direction = 'down', moving = false, time = 0, phase, ...options }) {
       if (![options.x, options.y, options.height].every(Number.isFinite) || options.height <= 0) return;
-      const row = direction === 'up' ? 2 : direction === 'left' || direction === 'right' ? 1 : 0;
+      const sideways = direction === 'left' || direction === 'right';
+      const row = direction === 'up' ? 1 : 0;
+      // Each row contains both alternating foot contacts, separated by a passing pose.
       const sequence = [1, 2, 3, 2], position = Number.isFinite(phase) ? cycle(phase, sequence.length) : Math.floor(tick(time) / 2) % sequence.length;
       const step = moving ? sequence[position] : 0;
       context.save(); context.fillStyle = 'rgba(12,19,25,.14)';
       context.beginPath(); context.ellipse(options.x, options.y - 1, options.height * 0.18, 2, 0, 0, Math.PI * 2); context.fill(); context.restore();
-      drawPose(context, room, row * 4 + step, { ...options, facing: direction === 'left' ? -1 : 1 });
+      const facing = direction === 'left' ? -1 : 1;
+      if (sideways) {
+        if (moving) {
+          const sideStep = Number.isFinite(phase) ? cycle(phase, 8) : tick(time) % 8;
+          drawPose(context, walk, sideStep, { ...options, facing });
+        } else drawPose(context, room, 0, { ...options, facing: 1 });
+      } else drawPose(context, room, row * 4 + step, { ...options, facing });
     },
   };
 }
