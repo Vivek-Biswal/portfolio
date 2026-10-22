@@ -24,6 +24,7 @@ Edit Profile, About, Contact, Skills, Projects, Notes, Now or Website settings.
 **Publish** updates the single published Firestore document used by all three worlds.
 New page requests show the publication immediately; already-open interactive worlds refresh within 30 seconds or when refocused.
 The script-free 1D page shows updates on its next reload.
+Vercel builds package public page templates inside the server function and remove matching static HTML and contact downloads from the hosted output. This lets the CMS routes serve current content instead of an older static copy. Ordinary local builds retain static pages for offline preview; use `--server-only` with the packaging and verification scripts to check hosted output locally.
 History can restore a previous publication. Concurrent draft changes are rejected rather than overwritten.
 The downloadable text profile and contact card also use published content.
 
