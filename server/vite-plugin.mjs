@@ -1,9 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import { handleRequest } from './handler.mjs';
+import { runScheduledGithubSync } from './github.mjs';
 const pages={'/':'index','/index.html':'index','/1d/':'1d','/1d/index.html':'1d','/2d/':'2d','/2d/index.html':'2d','/3d/':'3d','/3d/index.html':'3d','/work/dimensional-portfolio.html':'project','/work/notes.html':'notes','/work/now.html':'now'};
 const templates={index:'index.html','1d':'1d/index.html','2d':'2d/index.html','3d':'3d/index.html',project:'work/dimensional-portfolio.html',notes:'work/notes.html',now:'work/now.html',admin:'admin/dashboard/index.html'};
 function attach(server,development){server.middlewares.use(async(req,res,next)=>{
   const original=new URL(req.url,'http://localhost');const path=original.pathname;
+  if(/^\/api\/github-sync\/?$/.test(path)){await runScheduledGithubSync(req,res);return;}
   if(path==='/0d/vivek-biswal.txt'||path==='/0d/vivek-biswal.vcf') {
     req.url='/api/portfolio?action='+(path.endsWith('.txt')?'profile':'contact-card');await handleRequest(req,res);return;
   }

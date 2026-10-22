@@ -79,7 +79,7 @@ test('request body size and content type are enforced',async()=>{
 const response=()=>({statusCode:200,headers:{},setHeader(k,v){this.headers[k]=v;},end(value=''){this.body=value;}});
 test('unauthenticated dashboard redirects; editing and private data APIs deny access',async()=>{
  const res=response();await handleRequest({url:'/api/portfolio?action=admin-page',method:'GET',headers:{}},res);assert.equal(res.statusCode,303);assert.equal(res.headers.Location,'/admin/login/');
- for(const [action,method] of [['draft','GET'],['draft','PUT'],['publish','POST'],['restore','POST'],['revisions','GET'],['media-list','GET'],['media-upload','POST'],['preview','GET']]){const r=response();await handleRequest({url:'/api/portfolio?action='+action,method,headers:{}},r);assert.equal(r.statusCode,401,action);assert.ok(!String(r.body).includes('private workspace'));}
+ for(const [action,method] of [['draft','GET'],['draft','PUT'],['publish','POST'],['restore','POST'],['revisions','GET'],['media-list','GET'],['media-upload','POST'],['preview','GET'],['github-inbox','GET'],['github-sync','POST'],['github-review','POST']]){const r=response();await handleRequest({url:'/api/portfolio?action='+action,method,headers:{}},r);assert.equal(r.statusCode,401,action);assert.ok(!String(r.body).includes('private workspace'));}
 });
 test('public template traversal is rejected',async()=>{
  const r=response();await handleRequest({url:'/api/portfolio?action=public&page=../../admin',method:'GET',headers:{}},r);assert.equal(r.statusCode,404);

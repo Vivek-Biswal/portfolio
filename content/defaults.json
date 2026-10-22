@@ -23,9 +23,28 @@
     "location": "",
     "heading": "Let’s make something interesting.",
     "message": "A project, a collaboration, or an interesting idea? I’d love to hear about it.",
-    "socialLinks": [],
+    "socialLinks": [
+      {
+        "label": "LinkedIn",
+        "url": "https://www.linkedin.com/in/vivek-biswal/"
+      },
+      {
+        "label": "X",
+        "url": "https://x.com/vivekbiswal2006"
+      },
+      {
+        "label": "GitHub",
+        "url": "https://github.com/Vivek-Biswal"
+      }
+    ],
     "resumeUrl": "/0d/vivek-biswal.txt",
-    "contactCardUrl": "/0d/vivek-biswal.vcf"
+    "contactCardUrl": "/0d/vivek-biswal.vcf",
+    "booking": {
+      "url": "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ03Y15qQsL_blpaxmBktDuqZ2LDSH474J3poheDLaDt8zH-lsXhaV_fq4QiZXs4fmi6Qr13LOOs",
+      "label": "Book a conversation",
+      "durationMinutes": 30,
+      "timezone": "Asia/Kolkata"
+    }
   },
   "skills": [
     "HTML",

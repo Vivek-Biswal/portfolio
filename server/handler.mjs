@@ -6,6 +6,7 @@ import { HttpError, readJson, assertCsrf, protectResponse, cookie, csrfToken, pa
 import { validateContent } from './schema.mjs';
 import { renderPublic } from './render-public.mjs';
 import { profileText,contactCard } from './downloads.mjs';
+import { listGithubInbox, syncGithubRepos, reviewGithubRepo } from './github.mjs';
 const json=(res,status,value)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(value));};
 const html=(res,value)=>{res.setHeader('Content-Type','text/html; charset=utf-8');res.end(value);};
 const redirect=(res,path)=>{res.statusCode=303;res.setHeader('Location',path);res.end();};
@@ -85,6 +86,9 @@ export async function handleRequest(req,res,options={}) {
     const admin=await requireAdmin(req);
     if(req.method!=='GET')assertCsrf(req);
     const {auth,db,bucket}=services();
+    if(action==='github-inbox') {method(req,'GET');return json(res,200,await listGithubInbox({db}));}
+    if(action==='github-sync') {method(req,'POST');await readJson(req,1000);return json(res,200,await syncGithubRepos({db,actor:admin}));}
+    if(action==='github-review') {method(req,'POST');const body=await readJson(req,20000);return json(res,200,await reviewGithubRepo({db,actor:admin,body}));}
     if(action==='preview') {
       method(req,'GET');const page=url.searchParams.get('page')||'1d';
       if(!['1d','2d','3d'].includes(page))throw new HttpError(404,'Preview not found.');

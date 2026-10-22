@@ -59,6 +59,18 @@ summary { cursor: pointer; text-decoration: underline; text-underline-offset: 3p
 details p { margin: 12px 0 0; padding-left: 18px; }
 .reading-list { margin: 18px 0 24px; }
 .contact-email { font-size: 21px; overflow-wrap: anywhere; }
+.contact-channels { margin-top: 26px; border-top: 1px solid var(--rule); }
+.contact-channel { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 76px; padding: 15px 0; border-bottom: 1px solid var(--rule); color: var(--ink); text-decoration: none; }
+.contact-channel:visited { color: var(--ink); }
+.channel-copy { display: grid; min-width: 0; gap: 2px; }
+.channel-copy strong { font-size: 18px; font-weight: 500; }
+.channel-copy > span { color: var(--ink-muted); font-size: 13px; overflow-wrap: anywhere; }
+.channel-arrow { flex-shrink: 0; font: 21px/1 system-ui, sans-serif; color: var(--ink-muted); }
+.contact-channel:hover strong { text-decoration: underline; text-underline-offset: 4px; }
+.booking-note, .contact-meta { color: var(--ink-muted); font-size: 13px; margin-top: 18px; }
+.booking-note + .contact-meta { margin-top: -6px; }
+.project-actions { display: flex; flex-wrap: wrap; gap: 4px 24px; margin-top: 16px; }
+.project-action { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; }
 .site-footer { padding: 28px 0 38px; color: var(--ink-muted); font-size: 13px; }
 .site-footer p { margin-bottom: 8px; }
 .breadcrumbs { margin: 28px 0; font-size: 14px; }
