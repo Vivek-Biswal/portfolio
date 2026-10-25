@@ -15,8 +15,10 @@ export function publicBookingUrl(value) {
   const safe = webUrl(value);
   if (!safe) return '';
   const url = new URL(safe);
-  if (url.protocol !== 'https:') return '';
-  if (url.hostname === 'cal.com' && /^\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+\/?$/.test(url.pathname)) return safe;
+  if (url.protocol !== 'https:' || url.port) return '';
+  const originalPath = value.match(/^https:\/\/[^/?#]+([^?#]*)/i)?.[1] || '/';
+  if (originalPath !== url.pathname) return '';
+  if (url.hostname === 'cal.com' && /^\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_-]+)?\/?$/.test(url.pathname)) return safe;
   if (url.hostname === 'calendar.google.com' && /^\/calendar\/(?:u\/\d+\/)?appointments\/schedules\/[a-zA-Z0-9_-]+\/?$/.test(url.pathname)) return safe;
   if (url.hostname === 'calendar.app.google' && /^\/[a-zA-Z0-9_-]+\/?$/.test(url.pathname)) return safe;
   return '';
@@ -28,7 +30,11 @@ export function contactChannels(content) {
   if (contact.email) channels.push({id:'email', label:'Email', detail:contact.email, url:emailHref(contact.email), external:false});
   const booking = contact.booking || {};
   const bookingUrl = publicBookingUrl(booking.url);
-  if (bookingUrl) channels.push({id:'meet', label:booking.label || 'Book a conversation', detail:`${booking.durationMinutes || 30} minutes · Choose a time`, url:bookingUrl, external:true});
+  if (bookingUrl) {
+    const destination = new URL(bookingUrl);
+    const profile = destination.hostname === 'cal.com' && destination.pathname.split('/').filter(Boolean).length === 1;
+    channels.push({id:'meet', label:booking.label || 'Book a conversation', detail:profile ? `${destination.hostname}${destination.pathname.replace(/\/$/,'')} · Choose a meeting` : `${booking.durationMinutes || 30} minutes · Choose a time`, url:bookingUrl, external:true});
+  }
   const socials = (contact.socialLinks || []).map(item => ({...item, url:webUrl(item.url)})).filter(item => item.url);
   const known = [
     {id:'linkedin', label:'LinkedIn', host:'linkedin.com', detail:'Connect professionally'},

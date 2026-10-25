@@ -8,7 +8,7 @@ Existing production login: https://vivekbiswal.vercel.app/admin/login/
 
 Use your existing password and current six-digit authenticator code if you have already enrolled. The following steps are for initial setup or password recovery; the authenticator setup key is not entered again on every login.
 
-1. Enter `vivekbiswal.dev@gmail.com` and click **Forgot your password?** if you have not chosen a password or need to reset it.
+1. Enter `vivekbiswal.com@gmail.com` and click **Forgot your password?** if you have not chosen a password or need to reset it.
 2. Open the Firebase reset email and choose your own password of at least 12 characters.
 3. Sign in. The website sends an email verification link if your email is unverified.
 4. Verify your email, then sign in again.
@@ -57,11 +57,11 @@ This setup adds no paid API, payment processing or paid scheduling service. Exis
 
 In **Contact**, manage the email address, optional phone/location, heading, message, resume/contact-card URLs and social links. LinkedIn, X/Twitter and GitHub links appear as named channels when configured. All worlds use the same published values while keeping their individual layouts. The pixel Contact window also offers **Copy email**, **Save contact** and **Download profile** when the relevant links are present.
 
-Under **Meeting scheduling**, enter the public booking-page URL, button label, meeting length and timezone. Supported booking links are a Google Calendar appointment schedule, its `calendar.app.google` short link, or a public Cal.com event. A `meet.google.com` room URL is not a booking page and is rejected.
+Under **Meeting scheduling**, enter the public booking-page URL, button label, meeting length and timezone. Supported booking links are a public Cal.com profile or event, a Google Calendar appointment schedule, or its `calendar.app.google` short link. A `meet.google.com` room URL is not a booking page and is rejected.
 
-For this portfolio, the requested booking setup is **Saturday, 2:00–5:00 PM IST (`Asia/Kolkata`), 30-minute meetings**, with Google Meet and a required meeting-purpose field. Manage the real availability and booking form in Google Calendar's appointment schedule. The duration/timezone fields in the CMS describe the link; editing them does not change the provider's actual schedule.
+The portfolio links to **https://cal.com/vivek-biswal**, the connected Cal.com profile. Its public 15- and 30-minute meeting types are managed in Cal.com. The website does not set available hours, video providers, booking questions, email verification, or approval rules; configure those on the relevant Cal.com event type.
 
-To create or replace the booking page, open Google Calendar on desktop → **Create** → **Appointment schedule**. Set availability, duration, Google Meet and the required purpose question, save, then copy the public booking link into Contact. A personal Google account can use one booking page without purchasing premium scheduling features. No Calendar API key, OAuth client or email-sending API is required by the portfolio. [Google appointment features](https://support.google.com/calendar/answer/16287038).
+To change the meeting types, availability, video provider, purpose questions, email verification, or approval requirements, open your Cal.com event settings. Copy a public profile or event URL into Contact → Meeting scheduling, then save and publish. The connected Cal.com plugin can inspect event types and availability; creating or cancelling an actual meeting is a separate action requiring confirmation.
 
 Save the draft and publish to display the booking channel in every world. Visitors choose a time on the provider's page; the provider manages availability, Meet links, booking confirmations, cancellation and rescheduling. Merely opening the portfolio's link does not confirm a meeting. An empty booking URL keeps email/social contact available and shows the fallback **Meetings by email for now**.
 
@@ -69,7 +69,7 @@ Save the draft and publish to display the booking channel in every world. Visito
 
 - Firebase project: `vivek-biswal`; Standard Firestore in Mumbai.
 - Email/password sign-in and TOTP MFA enabled; local preview domains authorized.
-- Owner account provisioned for the email above, with a private active owner record and admin claim.
+- The primary contact email is `vivekbiswal.com@gmail.com`. That address has an additional private active `admin` record and admin claim; the original owner account remains available. Email verification and TOTP enrollment are still required before dashboard access.
 - Shared published content and draft initialized.
 - Dedicated server account has Firebase Auth admin and Datastore user roles.
 - Firebase server credentials were configured in private local and Vercel environments during the earlier production deployment. No browser code or Git-tracked file should contain them.

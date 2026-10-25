@@ -1,7 +1,7 @@
 VIVEK BISWAL
 Personal profile
 
-Email: vivekbiswal.dev@gmail.com
+Email: vivekbiswal.com@gmail.com
 
 ABOUT
 I'm a curious builder exploring design, technology, and what the web can
@@ -19,4 +19,4 @@ HTML, CSS, JavaScript, TypeScript, Canvas, pixel art, and Vite.
 
 GET IN TOUCH
 For a project, a collaboration, or an interesting idea, email:
-vivekbiswal.dev@gmail.com
+vivekbiswal.com@gmail.com

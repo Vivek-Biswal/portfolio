@@ -28,7 +28,7 @@ captioned accordingly. The 3D prototype retains the original project's credits.
 ## Contact
 
 The email links open the visitor's email application and use
-`vivekbiswal.dev@gmail.com`. There is no contact form or message-delivery backend.
+`vivekbiswal.com@gmail.com`. There is no contact form or message-delivery backend.
 `public/0d/vivek-biswal.vcf` is a downloadable contact card.
 `public/0d/vivek-biswal.txt` is a short draft profile, not a credentials-based résumé.
 Update both downloads if the name, email, or bio changes.

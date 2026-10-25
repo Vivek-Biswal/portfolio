@@ -37,7 +37,7 @@ test('content validation rejects unknown fields, unsafe URLs, duplicate IDs and 
 test('all public renderers use the same edited About and Contact fields',()=>{
  const c=copy();c.about.paragraphs=['Shared about revision'];c.contact.email='shared@example.com';
  const home=readFileSync('index.html','utf8'),line=readFileSync('2d/index.html','utf8');
- for(const [page,template] of [['1d',home],['2d',line]]){const html=renderPublic(template,page,c);assert.match(html,/Shared about revision/);assert.match(html,/shared@example.com/);assert.ok(!html.includes('vivekbiswal.dev@gmail.com'));}
+ for(const [page,template] of [['1d',home],['2d',line]]){const html=renderPublic(template,page,c);assert.match(html,/Shared about revision/);assert.match(html,/shared@example.com/);assert.ok(!/vivekbiswal\.(?:dev|com)(?:@|%40)gmail\.com/i.test(html));}
  const pixel=buildApps(c);assert.match(pixel.about.html,/Shared about revision/);assert.match(pixel.contact.html,/shared@example.com/);
  assert.ok(!/<script\b/i.test(renderPublic(home,'1d',c)),'1D must remain script-free');
 });

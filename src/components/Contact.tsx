@@ -8,7 +8,7 @@ const Contact = () => (
       <div className="contact-flex">
         <div className="contact-box">
           <h4>Say hello</h4>
-          <p><a href="mailto:vivekbiswal.dev@gmail.com" data-cursor="disable">vivekbiswal.dev@gmail.com</a></p>
+          <p><a href="mailto:vivekbiswal.com@gmail.com" data-cursor="disable">vivekbiswal.com@gmail.com</a></p>
           <h4>Curiosity is a good starting point.</h4>
           <p>Have an idea or a project in mind? Send me a note.</p>
         </div>

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { publicBookingUrl } from '../src/shared/contact.js';
 const text = max => z.string().trim().max(max);
 const required = max => text(max).min(1);
 const url = z.string().max(2048).refine(value => {
@@ -15,15 +16,8 @@ const url = z.string().max(2048).refine(value => {
 const id = required(80).regex(/^[a-z0-9][a-z0-9-]*$/);
 const paragraphs = z.array(required(4000)).min(1).max(20);
 const bookingUrl = url.refine(value => {
-  if (!value) return true;
-  try {
-    const parsed = new URL(value);
-    return parsed.protocol === 'https:' && !parsed.username && !parsed.password && (
-      parsed.hostname === 'cal.com' && /^\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+\/?$/.test(parsed.pathname) ||
-      parsed.hostname === 'calendar.google.com' && /^\/calendar\/(?:u\/\d+\/)?appointments\/schedules\/[a-zA-Z0-9_-]+\/?$/.test(parsed.pathname) ||
-      parsed.hostname === 'calendar.app.google' && /^\/[a-zA-Z0-9_-]+\/?$/.test(parsed.pathname));
-  } catch { return false; }
-}, 'Use a public Cal.com event or Google Calendar appointment booking link.');
+  return !value || Boolean(publicBookingUrl(value));
+}, 'Use a public Cal.com profile/event or Google Calendar appointment booking link.');
 export const projectSchema = z.object({id,title:required(200),summary:required(2000),details:text(6000),url,image:url,category:required(100),year:required(20),tags:z.array(required(50)).max(20),githubId:z.number().int().positive().max(Number.MAX_SAFE_INTEGER).optional(),repositoryUrl:url.default(''),demoUrl:url.default('')}).strict();
 export const contentSchema = z.object({
   schemaVersion:z.literal(1),

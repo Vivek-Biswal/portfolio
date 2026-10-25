@@ -9,6 +9,8 @@ import {contactChannels, contactRowsHtml, publicBookingUrl, bookingNote, project
 
 const copy=()=>structuredClone(defaults);
 const validBookingUrls=[
+  'https://cal.com/vivek-biswal',
+  'https://cal.com/vivek-biswal/',
   'https://cal.com/vivek-biswal/intro',
   'https://cal.com/vivek-biswal/intro/',
   'https://calendar.google.com/calendar/appointments/schedules/Public_schedule-123',
@@ -27,7 +29,12 @@ const invalidBookingUrls=[
   'https://calendar.app.google.evil.example/schedule-id',
   'https://owner:secret@cal.com/vivek-biswal/intro',
   'https://owner@calendar.google.com/calendar/appointments/schedules/schedule-id',
-  'https://cal.com/vivek-biswal',
+  'https://cal.com/',
+  'https://cal.com/vivek-biswal:8443',
+  'https://cal.com:8443/vivek-biswal/intro',
+  'https://cal.com/vivek-biswal/../other',
+  'https://cal.com/vivek-biswal/%2e%2e/other',
+  'https://cal.com/%76ivek-biswal',
   'https://cal.com/vivek-biswal/intro/extra',
   'https://cal.com/vivek%20biswal/intro',
   'https://calendar.google.com/calendar/u/me/appointments/schedules/schedule-id',
@@ -125,6 +132,15 @@ test('unconfigured booking keeps working email and social links with an honest f
     assert.ok(html.includes('Meetings by email for now.'),name);
     assert.deepEqual([...html.matchAll(/data-channel="([^"]+)"/g)].map(match=>match[1]),['email','linkedin','x','github'],name);
   }
+});
+
+test('a Cal.com profile opens its meeting list without advertising one fixed duration',()=>{
+  const c=fixture();c.contact.booking.url='https://cal.com/vivek-biswal';
+  const channel=contactChannels(c).find(row=>row.id==='meet');
+  assert.equal(channel.url,c.contact.booking.url);
+  assert.match(channel.detail,/cal\.com\/vivek-biswal/);
+  assert.ok(!channel.detail.includes('30 minutes'));
+  for(const [name,html] of publicViews(c))assert.match(html,/href="https:\/\/cal\.com\/vivek-biswal"[^>]*target="_blank"/,name);
 });
 
 test('untrusted contact copy is escaped and unsafe social URLs never become navigation',()=>{

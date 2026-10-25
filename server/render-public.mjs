@@ -13,7 +13,7 @@ export function renderPublic(template,page,c) {
   html=html.replace(/(<a[^>]*class="wordmark"[^>]*>)[\s\S]*?<\/a>/,(_,start)=>start+e(c.profile.name)+'</a>');
   html=html.replace(/(<a[^>]*class="signature"[^>]*>)[\s\S]*?<\/a>/,(_,start)=>start+e(first.toLowerCase())+'<span aria-hidden="true">.</span></a>');
   html=html.replace(/(<footer class="footer"><span>)[\s\S]*?<\/span>/,(_,start)=>start+e(c.settings.copyright)+'</span>');
-  html=html.replace(/vivekbiswal\.dev@gmail\.com/g,e(c.contact.email));
+  html=html.replace(/vivekbiswal\.(?:dev|com)(@|%40)gmail\.com/g,(_,separator)=>separator==='%40'?e(encodeURIComponent(c.contact.email)):e(c.contact.email));
   html=html.replace(/© 2026 Vivek Biswal[^<]*/g,e(c.settings.copyright));
   if(page==='index'||page==='1d') {
     html=html.replace(/(<section class="intro"[^>]*>)[\s\S]*?<\/section>/,(_,start)=>start+`<div><p class="eyebrow">A personal corner of the internet.</p>${heading('h1','intro-title',`Hello, I’m ${first}.`)}<p class="lead">${e(c.profile.headline)}</p><p>${e(c.profile.introduction)}</p><p class="intro-links"><a href="#work">Explore my work</a> <span aria-hidden="true">·</span> <a href="${emailHref(c.contact.email)}">Say hello</a></p></div><figure class="portrait"><img src="${e(c.profile.dottedPortrait||c.profile.portrait)}" width="1254" height="1254" alt="${e(c.profile.name)}" fetchpriority="high" /><figcaption>${e(c.profile.portraitCaption)}</figcaption></figure></section>`);
