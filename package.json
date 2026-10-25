@@ -13,7 +13,8 @@
     "test:arcade": "node --test scripts/test-locomotion.mjs scripts/test-arcade-controller.mjs scripts/test-arcade-world.mjs scripts/test-arcade-games.mjs scripts/test-glitch-run.mjs",
     "bootstrap:admin": "node --env-file=.env.local scripts/bootstrap-admin.mjs",
     "test:runtime": "node --no-experimental-require-module --test scripts/test-jwks-compat.mjs",
-    "test:integrations": "node --test scripts/test-github.mjs scripts/test-contact.mjs"
+    "test:integrations": "node --test scripts/test-github.mjs scripts/test-contact.mjs",
+    "test:notes": "node --test scripts/test-notes.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

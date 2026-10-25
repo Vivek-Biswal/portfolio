@@ -1,5 +1,6 @@
 import {escapeHtml} from '../shared/content.js';
 import { apps, updateApps, getContent } from './content.js';
+import { renderNotesApp } from './app-content.js';
 import { subscribeContent } from '../shared/public-client.js';
 import { mountCompanion } from './companion.js';
 import { mountArcade } from './arcade.js';
@@ -17,6 +18,9 @@ const windows = new Map();
 let topOrder = 10;
 let activeId = null;
 let game;
+let notesSelection = {kind:'index'};
+let notesRouteActive = false;
+let appliedNotesHash = null;
 let preference = { wallpaper: 'lavender', scanlines: false };
 try {
   const saved = JSON.parse(localStorage.getItem('vivek-2d-display') || 'null');
@@ -77,9 +81,13 @@ function activateNext() {
   activeId = null;
   if (next) activate(next.id, true);
 }
-function closeWindow(id) {
+function closeWindow(id,{updateHistory=true}={}) {
   const state = windows.get(id);
   if (!state) return;
+  if (id === 'notes') {
+    if (updateHistory && notesRouteActive && readNotesLocation()) history.pushState(null,'',location.pathname+location.search);
+    notesRouteActive=false;notesSelection={kind:'index'};appliedNotesHash=location.hash;
+  }
   state.resizeObserver?.disconnect();
   state.cleanupCompanion?.();
   state.element.remove(); state.task.remove(); windows.delete(id);
@@ -148,14 +156,14 @@ function openApp(id, opener = null) {
   const element = document.createElement('section');
   element.className = 'app-window'; element.dataset.app = id; element.tabIndex = -1;
   element.setAttribute('role','dialog'); element.setAttribute('aria-labelledby',`title-${id}`);
-  element.innerHTML = `<header class="window-titlebar" tabindex="0" aria-label="${escapeHtml(app.title)} title bar. Use arrow keys to move the window.">${icon(app.icon)}<h2 id="title-${id}"></h2><div class="window-controls"><button data-action="minimize" aria-label="Minimize ${escapeHtml(app.title)} window">_</button><button data-action="maximize" aria-label="Maximize ${escapeHtml(app.title)} window" aria-pressed="false">□</button><button data-action="close" aria-label="Close ${escapeHtml(app.title)} window">×</button></div></header><div class="window-body">${app.html}</div><footer class="window-footer"><span>VivekOS / ${id}</span><span>3D · A personal experiment</span></footer>`;
+  element.innerHTML = `<header class="window-titlebar" tabindex="0" aria-label="${escapeHtml(app.title)} title bar. Use arrow keys to move the window.">${icon(app.icon)}<h2 id="title-${id}"></h2><div class="window-controls"><button data-action="minimize" aria-label="Minimize ${escapeHtml(app.title)} window">_</button><button data-action="maximize" aria-label="Maximize ${escapeHtml(app.title)} window" aria-pressed="false">□</button><button data-action="close" aria-label="Close ${escapeHtml(app.title)} window">×</button></div></header><div class="window-body">${id==='notes'?renderNotesApp(getContent(),notesSelection):app.html}</div><footer class="window-footer"><span>VivekOS / ${id}</span><span>3D · A personal experiment</span></footer>`;
   element.querySelector('h2').textContent = app.title;
   const task = document.createElement('button');
   task.className = 'task-button'; task.innerHTML = `${icon(app.icon)}<span></span>`;
   task.querySelector('span').textContent = app.title;
   task.setAttribute('aria-controls',`window-${id}`); element.id = `window-${id}`;
   const count = windows.size;
-  const state = { id, element, task, opener, minimized:false, maximized:false, x:Math.max(155,(layer.clientWidth-610)/2)+count*24, y:Math.max(24,(layer.clientHeight-400)/3)+count*22 };
+  const state = { id, element, task, opener, minimized:false, maximized:false, x:(id==='notes'?Math.max(16,(layer.clientWidth-Math.min(940,layer.clientWidth-32))/2):Math.max(155,(layer.clientWidth-610)/2))+count*24, y:Math.max(24,(layer.clientHeight-400)/3)+count*22 };
   windows.set(id,state); layer.append(element); tasks.append(task);
   if (id === 'about') state.cleanupCompanion = mountCompanion(element);
   if (typeof ResizeObserver !== 'undefined') {
@@ -176,10 +184,60 @@ function openApp(id, opener = null) {
   activate(id,true); syncSettings(); announce(`${app.title} opened.`);
 }
 
+function readNotesLocation(){
+  if(location.hash==='#notes')return {kind:'index'};
+  if(location.hash==='#now')return {kind:'now'};
+  if(location.hash.startsWith('#note-')){
+    try{return {kind:'note',id:decodeURIComponent(location.hash.slice(6))};}
+    catch{return {kind:'index'};}
+  }
+  return null;
+}
+function notesHash(selection){return selection.kind==='now'?'#now':selection.kind==='note'?'#note-'+encodeURIComponent(selection.id):'#notes';}
+function navigateNotes(selection,{opener=null,historyMode='push',focus=true}={}){
+  const content=getContent();
+  const valid=selection?.kind==='now'||selection?.kind==='note'&&content.notes.some(note=>note.id===selection.id);
+  notesSelection=valid?selection:{kind:'index'};
+  const hash=notesHash(notesSelection);
+  if(location.hash!==hash){
+    // Missing or removed notes resolve to the collection instead of an empty reader.
+    const mode=historyMode==='none'?'replace':historyMode;
+    history[mode+'State'](null,'',location.pathname+location.search+hash);
+  }
+  appliedNotesHash=hash;notesRouteActive=true;
+  openApp('notes',opener);
+  const state=windows.get('notes'),body=state.element.querySelector('.window-body');
+  body.innerHTML=renderNotesApp(content,notesSelection);body.scrollTop=0;
+  if(focus)body.querySelector('[data-note-focus]')?.focus({preventScroll:true});
+  const title=notesSelection.kind==='note'?content.notes.find(note=>note.id===notesSelection.id).title:notesSelection.kind==='now'?content.now.title:'Notes & ideas';
+  announce(title+' opened in your notebook.');
+}
+function applyNotesLocation({focus=true}={}){
+  if(appliedNotesHash===location.hash&&windows.has('notes'))return;
+  appliedNotesHash=location.hash;
+  const selection=readNotesLocation();
+  if(selection)navigateNotes(selection,{historyMode:'none',focus});
+  else if(notesRouteActive&&windows.has('notes'))closeWindow('notes',{updateHistory:false});
+}
+window.addEventListener('hashchange',()=>applyNotesLocation());
+window.addEventListener('popstate',()=>applyNotesLocation());
+
 document.addEventListener('click', async event => {
   if (!startMenu.contains(event.target) && !startButton.contains(event.target)) setStart(false);
+  const noteRoute=event.target.closest('a[data-notes-route]');
+  if(noteRoute&&!event.defaultPrevented&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey){
+    const url=new URL(noteRoute.href);
+    if(url.origin===location.origin&&url.pathname==='/3d/'){
+      event.preventDefault();
+      const hash=url.hash;
+      let selection={kind:'index'};
+      if(hash==='#now')selection={kind:'now'};
+      else if(hash.startsWith('#note-')){try{selection={kind:'note',id:decodeURIComponent(hash.slice(6))};}catch{/* Open the index for malformed links. */}}
+      navigateNotes(selection);return;
+    }
+  }
   const opener = event.target.closest('[data-open]');
-  if (opener) { openApp(opener.dataset.open,opener); return; }
+  if (opener) { if(opener.dataset.open==='notes')navigateNotes(windows.has('notes')?notesSelection:{kind:'index'},{opener});else openApp(opener.dataset.open,opener); return; }
   const wallpaper = event.target.closest('button[data-wallpaper]');
   if (wallpaper) { preference.wallpaper = wallpaper.dataset.wallpaper; saveSettings(); return; }
   if (event.target.closest('[data-reset-desktop]')) {
@@ -213,7 +271,10 @@ document.addEventListener('keydown',event=> {
   if (event.defaultPrevented || game?.active) return;
   if (event.key !== 'Escape') return;
   if (!startMenu.hidden) { setStart(false); startButton.focus(); }
-  else if (activeId && layer.contains(document.activeElement)) closeWindow(activeId);
+  else if (activeId && layer.contains(document.activeElement)) {
+    if(activeId==='notes'&&notesSelection.kind!=='index'){event.preventDefault();navigateNotes({kind:'index'});}
+    else closeWindow(activeId);
+  }
 });
 window.addEventListener('resize',()=>windows.forEach(placeWindow));
 function updateClock() {
@@ -231,6 +292,7 @@ game = mountArcade(document.querySelector('.workspace'), {
   },
   announce,
 });
+applyNotesLocation({focus:false});
 
 subscribeContent(content=>{
   updateApps(content);
@@ -246,16 +308,29 @@ subscribeContent(content=>{
   if(!savedDisplay) {preference.wallpaper=content.settings.defaultWallpaper;syncSettings();}
   document.querySelectorAll('[data-arcade-enter]').forEach(button=>{button.hidden=!content.settings.arcadeEnabled;});
   if(!content.settings.arcadeEnabled && game?.active)game.exit({restoreFocus:false});
+  const removedNote=notesSelection.kind==='note'&&!content.notes.some(note=>note.id===notesSelection.id);
+  if(removedNote){
+    notesSelection={kind:'index'};
+    if(notesRouteActive&&readNotesLocation()){history.replaceState(null,'',location.pathname+location.search+'#notes');appliedNotesHash='#notes';}
+    announce('This note is no longer published. The notebook index is open.');
+  }
   windows.forEach(state=>{
-    const scroll=state.element.querySelector('.window-body').scrollTop;
+    const body=state.element.querySelector('.window-body');
+    const scroll=body.scrollTop;
+    const restoreNotesFocus=state.id==='notes'&&body.contains(document.activeElement);
+    const focusedNoteHref=restoreNotesFocus?document.activeElement.closest('[data-notes-route]')?.getAttribute('href'):null;
     state.cleanupCompanion?.();state.cleanupCompanion=undefined;
-    state.element.querySelector('.window-body').innerHTML=apps[state.id].html;
+    body.innerHTML=state.id==='notes'?renderNotesApp(content,notesSelection):apps[state.id].html;
     state.element.querySelector('h2').textContent=apps[state.id].title;
     state.element.querySelector('.window-titlebar').setAttribute('aria-label',apps[state.id].title+' title bar. Use arrow keys to move the window.');
     state.element.querySelectorAll('[data-action]').forEach(button=>button.setAttribute('aria-label',button.dataset.action+' '+apps[state.id].title+' window'));
     state.element.querySelector('.window-footer span').textContent=content.profile.name.split(' ')[0]+'OS / '+state.id;
     state.task.querySelector('span').textContent=apps[state.id].title;
     if(state.id==='about'){state.cleanupCompanion=mountCompanion(state.element);state.cleanupCompanion.setPaused?.(game?.active);}
-    state.element.querySelector('.window-body').scrollTop=scroll;
+    body.scrollTop=state.id==='notes'&&removedNote?0:scroll;
+    if(restoreNotesFocus){
+      const previousLink=focusedNoteHref?[...body.querySelectorAll('[data-notes-route]')].find(link=>link.getAttribute('href')===focusedNoteHref):null;
+      (previousLink||body.querySelector('[data-note-focus]'))?.focus({preventScroll:true});
+    }
   });syncSettings();
 });

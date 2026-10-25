@@ -56,5 +56,5 @@ subscribeContent(content=>{
       else replaceContent(target,source);
     }
   }
-  document.dispatchEvent(new Event('portfolio:content-updated'));
+  document.dispatchEvent(new CustomEvent('portfolio:content-updated',{detail:{content}}));
 });
