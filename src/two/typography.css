@@ -45,3 +45,11 @@
   .arcade-screen-actions button{font-size:14px}
   .arcade-game-instructions{font-size:12px;line-height:1.25}
 }
+/* Short desktop windows still need a clear walking lane below the introduction. */
+@media (min-width:761px) and (max-height:620px) {
+  .desktop-intro { top:24px; max-width:46%; }
+  .desktop-intro .intro-kicker { font-size:11px; margin-bottom:12px; }
+  .desktop-intro h1 { font-size:22px; line-height:1.4; margin-bottom:12px; }
+  .desktop-intro>p:not(.intro-kicker) { font-size:16px; line-height:1.4; margin-bottom:12px; }
+  .desktop-intro .pixel-button { font-size:12px; padding:8px 12px; }
+}

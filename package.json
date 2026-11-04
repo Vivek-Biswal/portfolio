@@ -14,7 +14,8 @@
     "bootstrap:admin": "node --env-file=.env.local scripts/bootstrap-admin.mjs",
     "test:runtime": "node --no-experimental-require-module --test scripts/test-jwks-compat.mjs",
     "test:integrations": "node --test scripts/test-github.mjs scripts/test-contact.mjs",
-    "test:notes": "node --test scripts/test-notes.mjs"
+    "test:notes": "node --test scripts/test-notes.mjs",
+    "test:studio": "node --test scripts/test-studio.mjs scripts/test-studio-cat.mjs scripts/test-studio-asset.mjs scripts/test-studio-interaction.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

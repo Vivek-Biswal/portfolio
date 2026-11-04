@@ -14,7 +14,7 @@ class Hub {
   }
 }
 
-async function fixture(t, { width = 320, height = 256, reducedMotion = false } = {}) {
+async function fixture(t, { width = 320, height = 256, reducedMotion = false, callbacks = {} } = {}) {
   const originalGlobals = new Map();
   const originalRoom = { ...ROOM }, originalCabinets = CABINETS.map(cab => ({ ...cab }));
   const install = (name, value) => { originalGlobals.set(name, Object.getOwnPropertyDescriptor(globalThis, name)); Object.defineProperty(globalThis, name, { configurable: true, writable: true, value }); };
@@ -36,6 +36,7 @@ async function fixture(t, { width = 320, height = 256, reducedMotion = false } =
       if (selector === '[data-input]') return this.children.filter(child => child.dataset.input);
       if (selector === '[data-walk]') return this.children.filter(child => child.dataset.walk);
       if (selector === 'button') return this.children.filter(child => child.kind === 'button');
+      if (selector === '[data-arcade-room]') return this.children.flatMap(child=>[...(child.dataset.arcadeRoom!==undefined?[child]:[]),...child.querySelectorAll(selector)]);
       return [];
     }
     setAttribute(name, value) { this.attributes[name] = value; }
@@ -72,6 +73,7 @@ async function fixture(t, { width = 320, height = 256, reducedMotion = false } =
   const worldCanvas = workspace.querySelector('.world-canvas'), controls = workspace.querySelector('.outdoor-controls');
   for (const direction of ['up', 'down', 'left', 'right']) { const button = new Element('button'); button.dataset.walk = direction; controls.append(button); }
   const screen = world.querySelector('.arcade-screen'), result = screen.querySelector('.arcade-result');
+  const returnButton = screen.querySelector('[data-arcade-room]');returnButton.kind='button';returnButton.dataset.arcadeRoom='';
   const panel = world.querySelector('.arcade-input'), action = world.querySelector('.arcade-action'); action.kind = 'button'; action.dataset.input = 'action'; panel.append(action);
   for (const direction of ['up', 'down', 'left', 'right']) { const button = new Element('button'); button.dataset.input = direction; panel.append(button); }
   const continueButton = screen.querySelector('[data-arcade-continue]'); continueButton.kind = 'button'; result.append(continueButton); result.append(new Element('button'));
@@ -84,8 +86,9 @@ async function fixture(t, { width = 320, height = 256, reducedMotion = false } =
   install('getComputedStyle', () => ({ paddingTop: '0', paddingBottom: '0', getPropertyValue: () => '#e4e4df' }));
   install('requestAnimationFrame', callback => { const id = next++; frames.set(id, callback); return id; }); install('cancelAnimationFrame', id => frames.delete(id));
   install('ResizeObserver', class { constructor(callback) { this.callback = callback; observers.push(this); } observe() {} disconnect() {} });
-  install('localStorage', { getItem: () => null, setItem: noop });
-  const arcade = mountArcade(workspace);
+  const scores = new Map();
+  install('localStorage', { getItem: key => scores.get(key)??null, setItem: (key,value) => scores.set(key,value) });
+  const arcade = mountArcade(workspace,callbacks);
   t.after(() => { arcade.destroy(); assert.equal(frames.size, 0, 'Destroy must stop every animation loop'); Object.assign(ROOM, originalRoom); CABINETS.forEach((cab, index) => Object.assign(cab, originalCabinets[index])); for (const [name, descriptor] of originalGlobals) { if (descriptor) Object.defineProperty(globalThis, name, descriptor); else delete globalThis[name]; } });
   for (let index = 0; index < 12; index++) await Promise.resolve();
   const characterCanvas = workspace.querySelector('.pixel-playground').children.find(child => child.className === 'character-canvas');
@@ -94,7 +97,7 @@ async function fixture(t, { width = 320, height = 256, reducedMotion = false } =
   const actor = () => draws.findLast(draw => draw.canvas === (workspace.dataset.arcadeState === 'desktop' ? characterCanvas : worldCanvas));
   tick(1);
   assert.ok(actor(), 'Fixture must observe a rendered character');
-  return { arcade, workspace, world, worldCanvas, building, controls, action, screen, panel, doc, win, tick, key, actor, createElement: kind => new Element(kind), get pendingFrames() { return frames.size; }, resize(newWidth, newHeight) { workspace.clientWidth = newWidth; workspace.clientHeight = newHeight; observers[0].callback(); } };
+  return { arcade, workspace, world, worldCanvas, building, controls, action, screen, panel, returnButton, scores, doc, win, tick, key, actor, createElement: kind => new Element(kind), get pendingFrames() { return frames.size; }, resize(newWidth, newHeight) { workspace.clientWidth = newWidth; workspace.clientHeight = newHeight; observers[0].callback(); } };
 }
 
 test('the outdoor character stays still until a direction is held and stops on release', async t => {
@@ -108,6 +111,15 @@ test('the outdoor character stays still until a direction is held and stops on r
   const stopped = f.actor(); f.tick(120);
   assert.equal(f.actor().x, stopped.x, 'Releasing a direction must stop without coasting');
   assert.deepEqual(f.actor().crop, start.crop, 'The released character returns to its idle pose');
+});
+
+test('resizing between desktop and mobile preserves the outdoor walking position proportionally',async t=>{
+  const f=await fixture(t,{width:1200,height:700});
+  const fraction=f.actor().x/ROOM.width;
+  f.resize(360,600);f.tick(1);
+  assert.ok(Math.abs(f.actor().x/ROOM.width-fraction)<.001,'Narrowing the viewport must not pin the character to its right edge');
+  f.resize(1200,700);f.tick(1);
+  assert.ok(Math.abs(f.actor().x/ROOM.width-fraction)<.001,'Changing render scale must preserve the walking position');
 });
 
 test('building and cabinet clicks open their destination without starting an automatic walk', async t => {
@@ -205,4 +217,70 @@ test('window blur releases held movement and pauses an active game', async t => 
   f.win.emit('blur');
   assert.equal(f.screen.querySelector('[data-arcade-pause]').textContent, 'Resume');
   assert.equal(f.pendingFrames, 0, 'Neither the room nor the game may keep running in the background');
+});
+
+test('a studio game returns through its bridge without stealing restored focus or losing best scores', async t=>{
+  const changes=[],messages=[];let f,studioFocus;
+  f=await fixture(t,{callbacks:{onReturnToStudio:()=>true,onActiveChange(active){changes.push(active);if(!active)studioFocus.focus();},announce:message=>messages.push(message)}});
+  studioFocus=f.createElement('canvas');f.workspace.append(studioFocus);
+  f.scores.set('vivek-arcade-best-snake','320');
+  f.arcade.setSuspended(true);
+  assert.equal(f.arcade.play('snake'),true);
+  assert.equal(f.workspace.dataset.arcadeState,'game');
+  assert.equal(f.screen.querySelector('[data-arcade-best]').textContent,'320');
+  f.returnButton.emit('click');
+  assert.equal(f.workspace.dataset.arcadeState,'desktop');
+  assert.equal(f.arcade.active,false);
+  assert.deepEqual(changes,[true,false]);
+  assert.equal(f.doc.activeElement,studioFocus,'The parent restored studio focus must survive exit');
+  assert.equal(f.scores.get('vivek-arcade-best-snake'),'320');
+  assert.ok(!messages.some(message=>message.startsWith('Back to the desktop')),'Do not announce the wrong destination');
+  assert.equal(f.pendingFrames,0,'Suspended exterior must not restart after the game');
+});
+
+test('Escape first pauses a studio game, then returns to the studio instead of the old room',async t=>{
+  let returned=0;
+  const f=await fixture(t,{callbacks:{onReturnToStudio:()=>true,onActiveChange:active=>{if(!active)returned++;}}});
+  f.arcade.play('blocks');f.tick(5);
+  f.key('keydown','Escape');
+  assert.equal(f.screen.querySelector('[data-arcade-pause]').textContent,'Resume');
+  assert.equal(returned,0);
+  f.key('keydown','Escape');
+  assert.equal(returned,1);
+  assert.equal(f.workspace.dataset.arcadeState,'desktop');
+});
+
+test('legacy game return still opens the legacy room when no studio owns the visit',async t=>{
+  const f=await fixture(t);
+  f.arcade.play('pong');f.returnButton.emit('click');
+  assert.equal(f.workspace.dataset.arcadeState,'room');
+  assert.equal(f.doc.activeElement,f.world);
+});
+
+test('studio suspension releases exterior input and keeps it stopped until a new hold',async t=>{
+  const f=await fixture(t);f.key('keydown','d','KeyD');f.tick(10);
+  const start=f.actor().x;f.arcade.setSuspended(true);f.workspace.classList.add('is-studio');
+  f.key('keydown','ArrowRight');f.tick(60);
+  assert.equal(f.actor().x,start);assert.equal(f.pendingFrames,0);
+  f.workspace.classList.remove('is-studio');f.arcade.setSuspended(false);f.tick(30);
+  assert.equal(f.actor().x,start,'Returning outside must not resume the old held key');
+  f.key('keydown','d','KeyD');f.tick(10);assert.ok(f.actor().x>start);
+});
+
+test('invalid game ids do not change state and a destroyed controller cannot launch',async t=>{
+  const changes=[];const f=await fixture(t,{callbacks:{onActiveChange:active=>changes.push(active)}});
+  assert.equal(f.arcade.play('not-a-game'),false);
+  assert.equal(f.workspace.dataset.arcadeState,'desktop');assert.deepEqual(changes,[]);
+  f.arcade.destroy();assert.equal(f.arcade.play('snake'),false);assert.deepEqual(changes,[]);
+});
+
+test('the fallback arcade can open after a failed studio load and is unavailable after disposal',async t=>{
+  const f=await fixture(t);
+  f.arcade.setSuspended(true);
+  assert.equal(f.arcade.enter(),true);
+  assert.equal(f.workspace.dataset.arcadeState,'room');
+  assert.equal(f.doc.activeElement,f.world);
+  f.arcade.play('pong');f.returnButton.emit('click');
+  assert.equal(f.workspace.dataset.arcadeState,'room');
+  f.arcade.destroy();assert.equal(f.arcade.enter(),false);
 });

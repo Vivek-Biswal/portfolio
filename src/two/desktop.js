@@ -18,6 +18,7 @@ const windows = new Map();
 let topOrder = 10;
 let activeId = null;
 let game;
+let studio, studioLoading = false, studioGame = false;
 let notesSelection = {kind:'index'};
 let notesRouteActive = false;
 let appliedNotesHash = null;
@@ -30,6 +31,15 @@ try {
 
 const icon = name => `<svg aria-hidden="true"><use href="#icon-${name}"/></svg>`;
 function announce(message) { status.textContent = message; }
+function syncStudioChrome() {
+  const inside = Boolean(studio?.active);
+  document.querySelectorAll('[data-arcade-enter]').forEach(button=>{
+    button.setAttribute('aria-pressed',String(inside || studioGame));
+    button.setAttribute('aria-label',studioGame?'Return to the studio':inside?'Return outside':'Enter the open studio');
+    button.setAttribute('aria-controls',studioGame?'arcade-world':'open-studio');
+    if(button.classList.contains('game-toggle'))button.querySelector('span').textContent=inside?'Outside':'Studio';
+  });
+}
 function setStart(open) {
   startMenu.hidden = !open;
   startButton.setAttribute('aria-expanded', String(open));
@@ -289,13 +299,68 @@ game = mountArcade(document.querySelector('.workspace'), {
   onActiveChange: active => {
     if (active) setStart(false);
     windows.forEach(state => state.cleanupCompanion?.setPaused?.(active));
+    if (!active && studioGame) {
+      studioGame=false; studio?.show(); syncStudioChrome();
+      announce('Back in the studio. Your position and game records are kept.');
+    }
   },
+  onReturnToStudio: () => studioGame,
   announce,
+});
+// Capture the entrance before the legacy arcade click listener. The old games
+// keep their own controllers and scores; the studio owns exploration only.
+document.querySelectorAll('[data-arcade-enter]').forEach(button=>{
+  button.addEventListener('click',async event=>{
+    if (game.active) return;
+    event.preventDefault();event.stopImmediatePropagation();setStart(false);
+    if(studioLoading)return;
+    if(studio?.active){studio.hide();return;}
+    [...windows.values()].filter(state=>!state.minimized).forEach(state=>minimize(state.id));
+    game.setSuspended(true);
+    if(studio){studio.show();syncStudioChrome();return;}
+    studioLoading=true;button.setAttribute('aria-busy','true');announce('Opening the studio.');
+    try {
+      const {mountStudio}=await import('./studio.js');
+      studio=await mountStudio(document.querySelector('.workspace'),{
+        openApp(id){if(id==='notes')navigateNotes(windows.has('notes')?notesSelection:{kind:'index'});else openApp(id);},announce,
+        playGame(id){
+          studioGame=true;
+          if(!game.play(id)){studioGame=false;studio?.show();}
+          syncStudioChrome();
+        },
+        onExit(){
+          game.setSuspended(false);syncStudioChrome();
+          const building=document.querySelector('.arcade-building');
+          (building.hidden?startButton:building).focus({preventScroll:true});announce('Back outside.');
+        },
+      });
+      const host=document.querySelector('.studio');if(host)host.id='open-studio';
+      if(!getContent().settings.arcadeEnabled)studio.hide();
+      syncStudioChrome();
+    } catch(error){
+      game.setSuspended(false);syncStudioChrome();
+      (button.hidden?startButton:button).focus({preventScroll:true});
+      // Keep the existing games available on devices without WebGL, or when
+      // the room asset cannot be fetched. The public content apps also remain usable.
+      game.enter();
+      announce('The 3D studio could not load. The classic arcade is open instead. Return outside to try the studio again.');
+      console.warn('Studio load failed',error);
+    }
+    finally{studioLoading=false;button.removeAttribute('aria-busy');}
+  },true);
+});
+document.querySelector('.arcade-building>span').textContent='Enter the open studio ↗';
+document.querySelector('.arcade-building').setAttribute('aria-label','Enter the open studio');
+syncStudioChrome();
+window.addEventListener('pagehide',event=>{
+  if(event.persisted)return;
+  studio?.destroy();game.destroy();
 });
 applyNotesLocation({focus:false});
 
 subscribeContent(content=>{
   updateApps(content);
+  studio?.refresh();
   document.title=content.settings.siteTitle+' — 3D';
   const logo=document.querySelector('.os-logo');
   logo.firstChild.textContent=content.profile.name.split(' ')[0];
@@ -307,7 +372,12 @@ subscribeContent(content=>{
   try {savedDisplay=Boolean(localStorage.getItem('vivek-2d-display'));}catch{/* Apply the published default when storage is blocked. */}
   if(!savedDisplay) {preference.wallpaper=content.settings.defaultWallpaper;syncSettings();}
   document.querySelectorAll('[data-arcade-enter]').forEach(button=>{button.hidden=!content.settings.arcadeEnabled;});
-  if(!content.settings.arcadeEnabled && game?.active)game.exit({restoreFocus:false});
+  if(!content.settings.arcadeEnabled){
+    studioGame=false;
+    if(game?.active)game.exit({restoreFocus:false});
+    if(studio?.active)studio.hide();
+    game?.setSuspended(false);syncStudioChrome();
+  }
   const removedNote=notesSelection.kind==='note'&&!content.notes.some(note=>note.id===notesSelection.id);
   if(removedNote){
     notesSelection={kind:'index'};

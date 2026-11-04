@@ -13,7 +13,7 @@ const keyActions = { ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down', Arrow
 const scoreKey = id => id === 'runner' ? 'vivek-glitch-run-best' : `vivek-arcade-best-${id}`;
 const scoreNumber = value => Number.isFinite(Number(value)) ? Math.max(0, Math.floor(Number(value))) : 0;
 
-export function mountArcade(workspace, { onActiveChange = () => {}, announce = () => {} } = {}) {
+export function mountArcade(workspace, { onActiveChange = () => {}, announce = () => {}, onReturnToStudio } = {}) {
   const worldCanvas = workspace.querySelector('.world-canvas'), ctx = worldCanvas.getContext('2d');
   const characterCanvas = document.createElement('canvas');
   characterCanvas.className = 'character-canvas';
@@ -40,6 +40,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   const sessionBests = new Map();
   let mode = 'desktop', painter, frame = 0, last = 0, time = 0, disposed = false;
   let windowFocused = true;
+  let suspended = false;
   let pixelScale = 2;
   let palette, view = { x: 0, y: 0, scale: 1 }, previousFocus;
   let outer = { x: 80, y: 80, facing: 1, phase: 0, moving: false, direction: 'right' };
@@ -105,17 +106,19 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   }
   function exit({ restoreFocus = true } = {}) {
     if (mode === 'desktop') return;
+    const returningToStudio = Boolean(onReturnToStudio?.());
     stopGame(); mode = 'desktop'; near = undefined;
     sync(); onActiveChange(false);
     outer.y = ROOM.height - outdoorGround();
-    if (restoreFocus) {
+    if (restoreFocus && !returningToStudio) {
       const target = previousFocus?.isConnected && previousFocus.getClientRects().length ? previousFocus : building;
       target.focus({ preventScroll: true });
     }
-    announce('Back to the desktop. Your windows and game records are kept.');
+    if (!returningToStudio) announce('Back to the desktop. Your windows and game records are kept.');
     last = 0; wake();
   }
   function enterRoom({ fromGame = false } = {}) {
+    if (fromGame && onReturnToStudio?.()) { exit({restoreFocus:false}); return; }
     if (fromGame) stopGame();
     inputPanel.inert = false;
     mode = 'room'; near = undefined;
@@ -161,6 +164,9 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   }
   function launch(cabinet) {
     stopGame(); currentCabinet = cabinet; mode = 'game'; round = 'running'; score = 0; best = getBest(cabinet.id);
+    screen.querySelectorAll('[data-arcade-room]').forEach(button=>{
+      button.textContent=onReturnToStudio?.()?'Back to studio ↗':'Back to arcade ↗';
+    });
     gameCanvas.width = 360; gameCanvas.height = 260;
     screen.querySelector('.arcade-screen-title').textContent = cabinet.title;
     gameCanvas.setAttribute('aria-label', `${cabinet.title} game. Controls are described below.`);
@@ -185,6 +191,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     clearInput(); launch(cabinet);
   }
   function input(action, pressed = true, source = action) {
+    if (mode === 'desktop' && suspended) return;
     if (mode === 'game' && round !== 'running') return;
     const sources = inputSources.get(action) || new Set();
     const wasHeld = sources.size > 0;
@@ -279,6 +286,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   }
   function resize() {
     const fraction = { x: player.x / ROOM.width, y: player.y / ROOM.height };
+    const outdoorFraction = outer.x / ROOM.width;
     pixelScale = workspace.clientWidth >= 900 && workspace.clientHeight >= 512 ? 2 : 1;
     const compact = workspace.clientHeight <= 520;
     const short = workspace.clientHeight <= 400;
@@ -295,7 +303,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     player.x = Math.round(fraction.x * ROOM.width); player.y = Math.round(fraction.y * ROOM.height);
     if (!canWalk(player.x, player.y)) { player.x = ROOM.width / 2; player.y = ROOM.height - 26; }
     const margin = outdoorMargin();
-    outer.x = Math.min(ROOM.width - margin, Math.max(margin, outer.x)); outer.y = ROOM.height - outdoorGround();
+    outer.x = Math.min(ROOM.width - margin, Math.max(margin, outdoorFraction * ROOM.width)); outer.y = ROOM.height - outdoorGround();
     ctx.imageSmoothingEnabled = false; fitRoom(); fitGame(); refresh();
     if (mode === 'room') updateHint();
   }
@@ -329,7 +337,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   }
   function tick(now) {
     frame = 0;
-    if (disposed || document.hidden || !windowFocused) { last = 0; return; }
+    if (disposed || document.hidden || !windowFocused || (suspended && mode === 'desktop')) { last = 0; return; }
     const dt = last ? Math.min(0.04, (now - last) / 1000) : 0; last = now; time += dt;
     if (mode === 'desktop') moveOutdoor(dt);
     else if (mode === 'room') movePlayer(dt);
@@ -339,12 +347,12 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     if ((mode === 'room' && (held.size || !motion.matches)) || (mode === 'desktop' && held.size)) wake();
     else last = 0;
   }
-  function wake() { if (!frame && !disposed && !document.hidden && windowFocused) frame = requestAnimationFrame(tick); }
+  function wake() { if (!frame && !disposed && !document.hidden && windowFocused && !(suspended && mode === 'desktop')) frame = requestAnimationFrame(tick); }
 
   if (!ctx || !characterCtx) {
     entryButtons.forEach(button => { button.disabled = true; });
     building.querySelector('span').textContent = 'Arcade needs canvas support';
-    return { active: false, exit() {}, refresh() {}, destroy() {} };
+    return { active: false, enter() { return false; }, play() { return false; }, setSuspended() {}, exit() {}, refresh() {}, destroy() {} };
   }
   CABINETS.forEach(cab => {
     const button = document.createElement('button'); button.type = 'button'; button.className = 'cabinet-hotspot'; button.dataset.cabinet = cab.id;
@@ -393,6 +401,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     }
   });
   listen(document, 'keydown', event => {
+    if (workspace.classList.contains('is-studio')) return;
     if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
     if (mode === 'game' && round !== 'running' && event.key === 'Tab') {
       const buttons = [...result.querySelectorAll('button')];
@@ -448,6 +457,26 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   createPixelPainter().then(value => { if (!disposed) { painter = value; if (mode === 'desktop') outer.x = ROOM.width * 0.37; draw(); wake(); } }).catch(() => {});
   wake();
   return { get active() { return mode !== 'desktop'; }, exit, refresh,
+    enter() {
+      if(disposed)return false;
+      suspended=false;enter();return true;
+    },
+    play(id) {
+      const cabinet = CABINETS.find(item=>item.id===id);
+      if (!cabinet || disposed) return false;
+      previousFocus = document.activeElement; clearInput(); onActiveChange(true);
+      try { launch(cabinet); return true; }
+      catch (error) {
+        stopGame(); mode = 'desktop'; near = undefined; sync(); onActiveChange(false);
+        announce('This game could not start. Please choose another cabinet.');
+        console.warn('Arcade game failed to start', error); return false;
+      }
+    },
+    setSuspended(value) {
+      suspended = Boolean(value); clearInput(); last = 0;
+      if (suspended && mode === 'desktop') { cancelAnimationFrame(frame); frame = 0; }
+      else wake();
+    },
     destroy() { stopGame(); disposed = true; cancelAnimationFrame(frame); observer.disconnect(); stageObserver.disconnect(); timers.forEach(clearTimeout); cleanups.forEach(cleanup => cleanup()); characterCanvas.remove(); },
   };
 }
