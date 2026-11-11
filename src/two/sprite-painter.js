@@ -76,6 +76,12 @@ function drawPose(context, sheet, index, { x, y, height, facing = 1 }) {
   context.restore();
 }
 
+/** Station poses share one scale: seated frames must never be stretched to standing height. */
+export async function createStudioPosePainter() {
+  const sheet = await loadSheet('/2d/vivek-station-poses-v1.png', 4, 2, 1);
+  return {draw(context, index, options) {drawPose(context, sheet, index, options);}};
+}
+
 /** Whole, cached poses preserve the same identity outdoors and inside. */
 export async function createPixelPainter() {
   const [walk, poses, room] = await Promise.all([

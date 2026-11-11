@@ -2,14 +2,48 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {PerspectiveCamera,Vector3,Vector2,Raycaster,Plane} from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {createSpriteAnimationClock} from '../src/two/studio-pixel-avatar.js';
+import {createSpriteAnimationClock,stationPose} from '../src/two/studio-pixel-avatar.js';
 import {roomFocusPose,configureRoomCamera} from '../src/two/studio-camera.js';
 import {STATIONS,CABINETS} from '../src/two/studio-world.js';
+import {createInteractionController} from '../src/two/studio-interaction.js';
+
+test('sitting lowers through distinct poses and standing reverses them without hiding',()=>{
+ const sit=[0,.21,.41,.61,.8].map(t=>stationPose('sit_down',t));
+ assert.deepEqual(sit,[0,1,2,3,3]);
+ assert.deepEqual([0,.28,.56,.84,1.1].map(t=>stationPose('stand_up',t)),[3,2,1,0,0]);
+ for(const action of ['seated_idle','typing','arcade_play','book_open','page_turn','phone_pickup','phone_putdown','release']){
+  for(const time of [0,.1,.4,.8,1.3,5])assert.ok(Number.isInteger(stationPose(action,time)),`${action} has visible artwork`);
+ }
+ assert.equal(stationPose('phone_pickup',1.3),6);
+ assert.equal(stationPose('phone_putdown',1.3),3);
+ assert.notEqual(stationPose('typing',0),stationPose('typing',.21));
+});
+
+test('sprite callbacks drive every station through sitting, content, standing and safe cancellation',()=>{
+ for(const station of [...STATIONS,...CABINETS])for(const cancelAt of [null,'sitting','using','viewing']){
+  const clock=createSpriteAnimationClock();let views=0,restores=0;
+  const controller=createInteractionController({onChange({state,token}){
+   const clip={aligning:'idle',sitting:'sit_down',using:station.game?'arcade_play':station.id==='notes'?'book_open':station.id==='contact'?'phone_pickup':'typing','putting-away':station.id==='contact'?'phone_putdown':'release',standing:'stand_up'}[state];
+   if(clip)clock.play(clip,{loop:false,finish:()=>controller.complete(token)});
+   else clock.play(state==='viewing'?'seated_idle':'idle');
+  },onView(){views++;},onRestore(){restores++;}});
+  controller.start(station);
+  for(let i=0;i<200&&controller.busy;i++){
+   if(controller.state===cancelAt||controller.state==='viewing')controller.close();
+   if(!['aligning','exploring'].includes(controller.state))assert.notEqual(stationPose(clock.name,clock.time),null);
+   clock.update(.1);
+  }
+  assert.equal(controller.state,'exploring',`${station.id} recovers after ${cancelAt}`);
+  assert.equal(restores,1);assert.equal(views,cancelAt==='sitting'||cancelAt==='using'?0:1);
+  controller.start(station);controller.skip(()=>clock.settle());assert.equal(controller.state,'viewing');
+  controller.close();controller.skip(()=>clock.settle());assert.equal(controller.state,'exploring');
+ }
+});
 
 test('sprite actions complete once, allow chained actions, and invalidate skipped callbacks',()=>{
  const clock=createSpriteAnimationClock();let completed=0;
  clock.play('sit_down',{loop:false,finish(){completed++;clock.play('book_open',{loop:false,finish:()=>completed++});}});
- clock.update(.5);assert.equal(completed,1);clock.update(1.4);clock.update(2);assert.equal(completed,2);
+ clock.update(.9);assert.equal(completed,1);clock.update(1.4);clock.update(2);assert.equal(completed,2);
  clock.play('stand_up',{loop:false,finish:()=>completed++});clock.settle();clock.update(5);assert.equal(completed,2);
  clock.play('walk');clock.update(10);assert.equal(completed,2);clock.dispose();clock.update(10);assert.equal(completed,2);
 });

@@ -10,9 +10,16 @@ longer loaded by the studio. The character-phase history below describes that ea
 - `studio-pixel-avatar.js` reuses the outdoor character's complete standing and
   eight-frame walking poses. The sprite faces the camera and mirrors with movement.
   Artwork is not cut into limbs or stretched into a simulated seated pose.
-- Station transitions crossfade the sprite into the focused object experience and
-  restore it when returning to exploration. Projects, notebook, contact and games
-  retain the existing interaction controller, cancellation and saved position.
+- Station transitions now render authored 2D sitting, seated interaction and
+  standing poses at full opacity. The previous fade-out was removed. Four sitting
+  keyframes play forward when sitting and backward when standing, with separate
+  keyboard, book and phone poses. Every frame uses the standing frame scale, so
+  seated characters are not stretched taller. The interaction controller,
+  cancellation and saved exploration position remain shared across all stations.
+- New sprite: `public/2d/vivek-station-poses-v1.png` (transparent RGBA, 4 by 2
+  frames), created with the built-in image generator. Prompt and reference are
+  recorded in `docs/station-sprite-prompt.md`. This is a sprite animation, not a
+  rigged hand/seat constraint solver; final seat contact needs browser review.
 - Scroll over the area you want to inspect to zoom toward the pointer. Right-drag
   or Shift-drag pans; left-drag rotates. Touch uses two fingers to pan/pinch.
 - The area selector smoothly frames Projects, Ideas, Arcade or Contact without
@@ -22,7 +29,7 @@ longer loaded by the studio. The character-phase history below describes that ea
   and all seven cabinets fit their area views, and check sprite action completion
   and cancellation. The browser-control tool failed to initialize on this date,
   so these changes have not yet had a fresh visual browser review.
-- Validation: all 29 studio tests, the production build and distribution checks
+- Validation: all 31 studio tests, the production build and distribution checks
   passed. Vite still reports the existing large studio bundle warning.
 
 ## Working flow

@@ -30,7 +30,8 @@ export async function createStudioProps(scene){
    if(station?.id==='notes'){hinge.rotation.z=amount*Math.PI*.98;leaf.rotation.z=Math.sin(turn)*Math.PI;}
    if(station?.id==='contact'){
     if(avatar?.userData.pixelCharacter){
-     receiver.position.copy(cradle);receiver.position.y+=amount*.09;receiver.rotation.z=amount*.12;
+     // The phone pose includes its receiver; remove the cradle copy while held.
+     receiver.visible=amount<.65;receiver.position.copy(cradle);receiver.rotation.z=0;
     }else{
     // Follow the animated hand in world space, blending out of the cradle.
     const hand=avatar?.getObjectByName('handR')||avatar?.getObjectByName('hand.R');
@@ -42,6 +43,6 @@ export async function createStudioProps(scene){
   },
   page(){turn=.001;},
   update(dt){if(turn>0){turn+=dt*Math.PI/.65;if(turn>=Math.PI){turn=0;leaf.rotation.z=0;}else leaf.rotation.z=Math.sin(turn)*Math.PI;}},
-  reset(){hinge.rotation.z=0;leaf.rotation.z=0;receiver.position.copy(cradle);receiver.rotation.set(0,0,0);screens.forEach(s=>{s.material.opacity=0;s.material.emissiveIntensity=0;});},
+  reset(){receiver.visible=true;hinge.rotation.z=0;leaf.rotation.z=0;receiver.position.copy(cradle);receiver.rotation.set(0,0,0);screens.forEach(s=>{s.material.opacity=0;s.material.emissiveIntensity=0;});},
  };
 }
