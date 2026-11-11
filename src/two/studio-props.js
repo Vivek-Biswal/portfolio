@@ -29,10 +29,14 @@ export async function createStudioProps(scene){
    amount=THREE.MathUtils.clamp(amount,0,1);
    if(station?.id==='notes'){hinge.rotation.z=amount*Math.PI*.98;leaf.rotation.z=Math.sin(turn)*Math.PI;}
    if(station?.id==='contact'){
+    if(avatar?.userData.pixelCharacter){
+     receiver.position.copy(cradle);receiver.position.y+=amount*.09;receiver.rotation.z=amount*.12;
+    }else{
     // Follow the animated hand in world space, blending out of the cradle.
     const hand=avatar?.getObjectByName('handR')||avatar?.getObjectByName('hand.R');
     const point=hand?hand.getWorldPosition(new THREE.Vector3()):new THREE.Vector3(4.94,1.4,4.6);
     receiver.position.copy(cradle).lerp(point,Math.min(1,amount*5));receiver.rotation.z=amount*Math.PI/2;
+    }
    }
    const screen=screens.get(station?.id);if(screen){screen.material.opacity=amount*.72;screen.material.emissiveIntensity=amount*.65;}
   },

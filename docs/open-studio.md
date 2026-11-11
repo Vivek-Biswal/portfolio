@@ -1,9 +1,29 @@
 # Open studio implementation
 
 Local preview: run `npm run dev`, open `/3d/`, then choose the studio building.
-The current local preview includes the rigged character and station interaction pass.
-It has not been deployed. The character is an editable stylized interpretation;
-the final likeness and close-up animation polish still need visual acceptance.
+The current local preview uses the detailed animated 2D character in the 3D studio.
+It has not been deployed. Earlier Blender character files are preserved but are no
+longer loaded by the studio. The character-phase history below describes that earlier pass.
+
+## Current character and camera update — 2026-11-11
+
+- `studio-pixel-avatar.js` reuses the outdoor character's complete standing and
+  eight-frame walking poses. The sprite faces the camera and mirrors with movement.
+  Artwork is not cut into limbs or stretched into a simulated seated pose.
+- Station transitions crossfade the sprite into the focused object experience and
+  restore it when returning to exploration. Projects, notebook, contact and games
+  retain the existing interaction controller, cancellation and saved position.
+- Scroll over the area you want to inspect to zoom toward the pointer. Right-drag
+  or Shift-drag pans; left-drag rotates. Touch uses two fingers to pan/pinch.
+- The area selector smoothly frames Projects, Ideas, Arcade or Contact without
+  moving the character. View restores the room overview. Minimum zoom distance is
+  now 3 units instead of 9, and the orbit target is no longer fixed at the centre.
+- Local tests exercise the real OrbitControls wheel/pan behavior, verify Projects
+  and all seven cabinets fit their area views, and check sprite action completion
+  and cancellation. The browser-control tool failed to initialize on this date,
+  so these changes have not yet had a fresh visual browser review.
+- Validation: all 29 studio tests, the production build and distribution checks
+  passed. Vite still reports the existing large studio bundle warning.
 
 ## Working flow
 
@@ -11,7 +31,7 @@ the final likeness and close-up animation polish still need visual acceptance.
 - Arrows/WASD or held touch arrows move the character relative to the camera.
   Releasing the input stops movement. Clicking a distant object marks its interaction
   point without starting an automatic walk.
-- Drag the canvas to orbit, scroll/pinch to zoom, and use Reset view to return.
+- Drag the canvas to orbit, scroll/pinch to zoom, pan to inspect corners, and use View to return.
 - Approach a desk, phone, or game cabinet, then click its label/object, press E,
   or use the action button. Projects, Notes, and Contact reuse the existing CMS content.
 - E near a station starts alignment, sitting, object use and the focused reader.

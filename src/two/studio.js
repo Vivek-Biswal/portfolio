@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
-import {loadStudioAvatar} from './studio-avatar.js';
+import {loadStudioPixelAvatar} from './studio-pixel-avatar.js';
+import {configureRoomCamera,roomFocusPose} from './studio-camera.js';
 import {createInteractionController} from './studio-interaction.js';
 import {ANCHORS,alignmentPath} from './studio-anchors.js';
 import {createStudioProps,isAnimatedStudioMesh} from './studio-props.js';
@@ -18,10 +19,10 @@ import './studio.css';
 /** A lazy loaded room; readers and games remain owned by the existing desktop. */
 export async function mountStudio(workspace,{openApp,playGame,onExit,announce}) {
   const host=document.createElement('section');host.className='studio';host.setAttribute('aria-label','Open studio');
-  host.innerHTML=`<header class="studio-header"><div class="studio-toolbar"><button data-help aria-expanded="false" aria-controls="studio-help">? Help</button><button data-view aria-label="Reset view">↺ View</button><button data-leave aria-label="Outside">Outside ↗</button></div></header><p class="studio-status" role="status">Opening the doors…</p><nav class="studio-labels" aria-label="Studio destinations"></nav><div class="studio-controls"><div class="studio-dpad" role="group" aria-label="Walk"><button data-dir="up" aria-label="Walk forward">↑</button><button data-dir="left" aria-label="Walk left">←</button><button data-dir="down" aria-label="Walk backward">↓</button><button data-dir="right" aria-label="Walk right">→</button></div><div class="studio-interact" hidden><button class="studio-action" disabled></button></div></div><div class="studio-sequence" hidden><span role="status"></span><button data-skip>Skip animation</button><button data-cancel>Cancel ×</button></div><aside class="studio-help" id="studio-help" hidden><strong>Make yourself at home.</strong><p>Hold WASD or arrows to walk. Release to stop. On touch screens, hold the direction buttons.</p><p>Drag to orbit. Scroll or pinch to zoom. Click an object to highlight it, walk close, then press E to sit and use it.</p><p>Escape closes an experience. Skip animation goes directly to its content.</p><button data-help-close>Got it</button><button data-fallback>Open accessible desktop</button></aside>`;
+  host.innerHTML=`<header class="studio-header"><div class="studio-toolbar"><select data-area aria-label="Focus room area"><option value="">Room view</option><option value="projects">Projects</option><option value="notes">Ideas</option><option value="arcade">Arcade</option><option value="contact">Contact</option></select><button data-help aria-expanded="false" aria-controls="studio-help">? Help</button><button data-view aria-label="Reset view">↺ View</button><button data-leave aria-label="Outside">Outside ↗</button></div></header><p class="studio-status" role="status">Opening the doors…</p><nav class="studio-labels" aria-label="Studio destinations"></nav><div class="studio-controls"><div class="studio-dpad" role="group" aria-label="Walk"><button data-dir="up" aria-label="Walk forward">↑</button><button data-dir="left" aria-label="Walk left">←</button><button data-dir="down" aria-label="Walk backward">↓</button><button data-dir="right" aria-label="Walk right">→</button></div><div class="studio-interact" hidden><button class="studio-action" disabled></button></div></div><div class="studio-sequence" hidden><span role="status"></span><button data-skip>Skip animation</button><button data-cancel>Cancel ×</button></div><aside class="studio-help" id="studio-help" hidden><strong>Make yourself at home.</strong><p>Hold WASD or arrows to walk. Release to stop. On touch screens, hold the direction buttons.</p><p>Drag to orbit. Right-drag or Shift-drag to pan. Scroll over an area to zoom toward it. On touch screens, use two fingers to pan and pinch to zoom. Choose an area above for a closer view. Click an object to highlight it, walk close, then press E to use it.</p><p>Escape closes an experience. Skip animation goes directly to its content.</p><button data-help-close>Got it</button><button data-fallback>Open accessible desktop</button></aside>`;
   workspace.append(host);workspace.classList.add('is-studio');
   const status=host.querySelector('.studio-status'),action=host.querySelector('.studio-action');
-  let renderer,disposed=false,ready=false,visible=true,reading=false,contextLost=false,frame=0,last=0,near,selected,avatar,interaction,props,reader,sequence=null,saved=null,propAmount=0,locomoting=false;
+  let renderer,disposed=false,ready=false,visible=true,reading=false,contextLost=false,frame=0,last=0,near,selected,avatar,interaction,props,reader,sequence=null,saved=null,propAmount=0,locomoting=false,viewTween=null;
   const held=new Map(),listeners=[];
   const listen=(el,type,fn,options)=>{el.addEventListener(type,fn,options);listeners.push(()=>el.removeEventListener(type,fn,options));};
   const scene=new THREE.Scene();scene.background=new THREE.Color('#e9b78e');scene.fog=new THREE.Fog('#b5a0aa',35,78);
@@ -33,8 +34,8 @@ export async function mountStudio(workspace,{openApp,playGame,onExit,announce}) 
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   function disposeScene(){const materials=new Set();scene.traverse(o=>{o.geometry?.dispose();(o.material?Array.isArray(o.material)?o.material:[o.material]:[]).forEach(m=>materials.add(m));});materials.forEach(m=>m.dispose());}
   function clear(){held.clear();host.querySelectorAll('.is-held').forEach(b=>b.classList.remove('is-held'));}
-  function reset(){const portrait=host.clientWidth/host.clientHeight<.8;camera.position.set(10,portrait?18:11,portrait?18:20);controls.target.set(0,portrait?.8:1.4,0);controls.update();}
-  function leave(){reader?.close(true);interaction?.reset();clear();visible=false;host.hidden=true;workspace.classList.remove('is-studio');cancelAnimationFrame(frame);frame=0;onExit();}
+  function reset(){viewTween=null;host.querySelector('[data-area]').value='';if(controls)controls.enabled=!interaction?.busy;const portrait=host.clientWidth/host.clientHeight<.8;camera.position.set(10,portrait?18:11,portrait?18:20);controls.target.set(0,portrait?.8:1.4,0);controls.update();}
+  function leave(){viewTween=null;reader?.close(true);interaction?.reset();clear();visible=false;host.hidden=true;workspace.classList.remove('is-studio');cancelAnimationFrame(frame);frame=0;onExit();}
   listen(host.querySelector('[data-leave]'),'click',leave);
   requestAnimationFrame(()=>host.classList.add('is-ready'));
   try {
@@ -51,8 +52,8 @@ export async function mountStudio(workspace,{openApp,playGame,onExit,announce}) 
       contextLost=false;renderer.shadowMap.needsUpdate=true;last=0;
       status.textContent='The view is ready again.';wake();
     });
-    controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=!reducedMotion.matches;controls.dampingFactor=.08;controls.enablePan=false;
-    controls.minDistance=9;controls.maxDistance=34;controls.minPolarAngle=.38;controls.maxPolarAngle=1.25;
+    controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=!reducedMotion.matches;controls.dampingFactor=.08;configureRoomCamera(controls);
+    controls.minDistance=3;controls.maxDistance=34;controls.minPolarAngle=.38;controls.maxPolarAngle=1.25;
     controls.touches.ONE=THREE.TOUCH.ROTATE;controls.touches.TWO=THREE.TOUCH.DOLLY_PAN;
     reset();listen(host.querySelector('[data-view]'),'click',reset);
     addStudioEnvironment(scene);
@@ -72,7 +73,7 @@ export async function mountStudio(workspace,{openApp,playGame,onExit,announce}) 
     const retainedMaterials=new Set([...batches.core.keys()]);
     gltf.scene.traverse(o=>{if(o.isMesh&&isAnimatedStudioMesh(o.name)){o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material])if(!retainedMaterials.has(m))m.dispose();}});
     for(const side of hiddenSides){walls[side].opacity=0;walls[side].group.visible=false;}
-    avatar=await loadStudioAvatar();scene.add(avatar.root);props=await createStudioProps(scene);
+    avatar=await loadStudioPixelAvatar();scene.add(avatar.root);props=await createStudioProps(scene);
   } catch(error) {
     disposed=true;listeners.forEach(fn=>fn());controls?.dispose();disposeScene();renderer?.dispose();host.remove();workspace.classList.remove('is-studio');throw error;
   }
@@ -137,9 +138,9 @@ export async function mountStudio(workspace,{openApp,playGame,onExit,announce}) 
   }
   interaction=createInteractionController({
     onChange({state,station,token}){
-      clear();sequence=null;controls.enabled=state==='exploring';controls.minDistance=state==='exploring'?9:.3;
+      clear();sequence=null;controls.enabled=state==='exploring';controls.minDistance=state==='exploring'?3:.3;
       host.dataset.interaction=state;host.querySelector('.studio-controls').hidden=state!=='exploring';
-      host.querySelector('[data-view]').disabled=state!=='exploring';host.querySelector('[data-help]').disabled=state!=='exploring';
+      host.querySelector('[data-area]').disabled=state!=='exploring';host.querySelector('[data-view]').disabled=state!=='exploring';host.querySelector('[data-help]').disabled=state!=='exploring';
       const sequenceUI=host.querySelector('.studio-sequence');sequenceUI.hidden=['exploring','viewing'].includes(state);
       sequenceUI.querySelector('span').textContent=({aligning:'Taking your place…',sitting:'Getting comfortable…',using:'Opening your workspace…','putting-away':'Putting things away…',standing:'Back to the studio…'})[state]||'';
       if(state==='aligning')travel(saved.path,()=>faceStation(station,token));
@@ -175,7 +176,7 @@ export async function mountStudio(workspace,{openApp,playGame,onExit,announce}) 
   function interact(target=near){
     if(!target||reading||interaction.busy)return;clear();
     if(target.id==='exit'){leave();return;}
-    const station=ANCHORS[target.id],path=alignmentPath(player,station);
+    cancelViewTravel();const station=ANCHORS[target.id],path=alignmentPath(player,station);
     if(!path){status.hidden=false;status.textContent='Approach the front of this chair first. The gold ring marks the clear path.';selected=target;return;}
     saved={player:{...player},camera:camera.position.clone(),target:controls.target.clone(),facing:avatar.root.rotation.y,path};
     status.hidden=true;interaction.start(station);if(reducedMotion.matches)interaction.skip(settle);
@@ -183,6 +184,16 @@ export async function mountStudio(workspace,{openApp,playGame,onExit,announce}) 
   listen(host.querySelector('[data-skip]'),'click',()=>interaction.skip(settle));
   function cancel(){reader.close(true);interaction.close();if(reducedMotion.matches)interaction.skip(settle);}
   listen(host.querySelector('[data-cancel]'),'click',cancel);
+  function cancelViewTravel(){if(!viewTween)return;viewTween=null;controls.enabled=!interaction.busy;}
+  listen(renderer.domElement,'pointerdown',cancelViewTravel,true);
+  listen(renderer.domElement,'wheel',cancelViewTravel,{capture:true,passive:true});
+  listen(host.querySelector('[data-area]'),'change',event=>{
+    if(interaction.busy)return;
+    const to=roomFocusPose(event.target.value);if(!to){reset();return;}
+    controls.enableDamping=false;controls.update();controls.enableDamping=!reducedMotion.matches;
+    viewTween={time:0,from:camera.position.clone(),target:controls.target.clone(),to};controls.enabled=false;
+    renderer.domElement.focus({preventScroll:true});
+  });
   const help=host.querySelector('.studio-help'),helpButton=host.querySelector('[data-help]');
   function showHelp(value){help.hidden=!value;helpButton.setAttribute('aria-expanded',String(value));clear();if(!value)renderer.domElement.focus();}
   listen(helpButton,'click',()=>showHelp(help.hidden));listen(host.querySelector('[data-help-close]'),'click',()=>showHelp(false));
@@ -234,7 +245,7 @@ export async function mountStudio(workspace,{openApp,playGame,onExit,announce}) 
       if(walking!==locomoting){avatar.play(walking?'walk':'idle');locomoting=walking;}
       if(walking){const angle=Math.atan2(player.x-before.x,player.z-before.z);const delta=THREE.MathUtils.euclideanModulo(angle-avatar.root.rotation.y+Math.PI,Math.PI*2)-Math.PI;avatar.root.rotation.y+=delta*(1-Math.exp(-dt*16));status.hidden=true;}
     }
-    avatar.update(dt,{walking:walking||sequence?.kind==='travel',speed:sequence?.kind==='travel'?1.2:dt?distance/dt:0,reduced:reducedMotion.matches});
+    avatar.faceCamera(camera);avatar.update(dt,{walking:walking||sequence?.kind==='travel',speed:sequence?.kind==='travel'?1.2:dt?distance/dt:0,reduced:reducedMotion.matches});
     if(sequence){const current=sequence;current.time+=dt;const t=reducedMotion.matches?1:Math.min(1,current.time/current.duration);current.update(t);if(t===1&&sequence===current){sequence=null;current.finish?.();}}
     if(reducedMotion.matches&&interaction.busy&&interaction.state!=='viewing')interaction.skip(settle);
     props.update(reducedMotion.matches?0:dt);
@@ -246,7 +257,9 @@ export async function mountStudio(workspace,{openApp,playGame,onExit,announce}) 
     near=interaction.busy?undefined:nearestTarget(player);if(near?.id===selected?.id)selected=undefined;
     const target=selected||near;marker.visible=!!target;if(target)marker.position.set(target.x,floorHeight(target.x,target.z)+.09,target.z);
     action.disabled=!near;action.textContent=near?`E · ${near.action}`:'';host.querySelector('.studio-interact').hidden=!near;
+    if(viewTween){const tween=viewTween;tween.time+=dt;const t=reducedMotion.matches?1:Math.min(1,tween.time/.55),q=smooth(t);camera.position.lerpVectors(tween.from,tween.to.position,q);controls.target.lerpVectors(tween.target,tween.to.target,q);camera.lookAt(controls.target);if(t===1){viewTween=null;controls.enabled=!interaction.busy;}}
     if(controls.enabled)controls.update();camera.updateMatrixWorld();
+    renderer.domElement.dataset.cameraTarget=controls.target.toArray().map(n=>n.toFixed(2)).join(',');
     hiddenSides=cutawaySides(camera.position.x-controls.target.x,camera.position.z-controls.target.z,hiddenSides);renderer.domElement.dataset.cutaway=hiddenSides.join(',');
     for(const [side,wall] of Object.entries(walls)){
       const goal=hiddenSides.includes(side)?0:1;wall.opacity=reducedMotion.matches?goal:THREE.MathUtils.damp(wall.opacity,goal,12,dt||.016);

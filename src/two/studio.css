@@ -22,6 +22,9 @@
 .studio button:hover { background: #fffdf6; box-shadow: 0 4px 16px #31453218; }
 .studio button:focus-visible { outline: 3px solid #987336; outline-offset: 3px; }
 .studio-toolbar { display: flex; gap: 8px; pointer-events: auto; flex-shrink: 0; }
+.studio-toolbar select { width:124px; min-height:44px; padding:8px 12px; border:1px solid #324f3826; border-radius:12px; background:#fffdf0f5; color:#22372d; font:500 13px Arial,sans-serif; cursor:pointer; }
+.studio-toolbar select:focus-visible { outline:3px solid #987336; outline-offset:3px; }
+@media (max-width:760px) { .studio-toolbar { gap:5px; } .studio-toolbar select { width:100px; padding:8px; font-size:12px; } }
 .studio-status {
   position: absolute; left: 50%; top: 24px; transform: translateX(-50%);
   font: 12px/1.5 Arial,sans-serif; background: #fffdf0ed; border: 1px solid #324f3812;
