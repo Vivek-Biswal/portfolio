@@ -2,10 +2,14 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {ANCHORS} from './studio-anchors.js';
 
-export const isAnimatedStudioMesh=name=>/^(Open_journal|Telephone_base|Telephone_dial|Dial_hole|Telephone_receiver|Receiver_end|Keyboard|Keyboard_key)/.test(name);
+export const isAnimatedStudioMesh=name=>/^(Open_journal|Journal_writing|Telephone_base|Telephone_dial|Dial_hole|Telephone_receiver|Receiver_end|Keyboard|Keyboard_key)/.test(name);
 
 export async function createStudioProps(scene){
  const gltf=await new GLTFLoader().loadAsync('/studio/studio-props.glb');
+ return mountStudioProps(scene,gltf);
+}
+
+export function mountStudioProps(scene,gltf){
  const root=gltf.scene;root.name='Studio_interactive_props';scene.add(root);
  root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
  const hinge=root.getObjectByName('Journal_cover_hinge'),leaf=root.getObjectByName('Journal_page_hinge'),receiver=root.getObjectByName('Telephone_receiver');
@@ -14,7 +18,7 @@ export async function createStudioProps(scene){
  const screens=new Map();
  for(const station of Object.values(ANCHORS)){
   const contact=new THREE.Object3D();contact.name=`${station.id}_hand_contact`;contact.position.set(station.hand.x,station.hand.y,station.hand.z);root.add(contact);
-  const seat=new THREE.Object3D();seat.name=`${station.id}_seat`;seat.position.set(station.seat.x,station.seat.y+.58,station.seat.z);root.add(seat);
+  const seat=new THREE.Object3D();seat.name=`${station.id}_seat`;seat.position.set(station.seat.x,station.seat.y+station.seatSurface,station.seat.z);root.add(seat);
   if(station.game||station.id==='projects'){
    const material=new THREE.MeshStandardMaterial({color:'#7eac9e',emissive:'#76bcaa',emissiveIntensity:0,transparent:true,opacity:0,roughness:.3});
    const screen=new THREE.Mesh(new THREE.PlaneGeometry(station.game?.62:1.8,station.game?.65:.45),material);screen.name=`${station.id}_screen`;
@@ -31,7 +35,7 @@ export async function createStudioProps(scene){
    if(station?.id==='contact'){
     if(avatar?.userData.pixelCharacter){
      // The phone pose includes its receiver; remove the cradle copy while held.
-     receiver.visible=amount<.65;receiver.position.copy(cradle);receiver.rotation.z=0;
+     receiver.visible=avatar.userData.spritePose!==6;receiver.position.copy(cradle);receiver.rotation.z=0;
     }else{
     // Follow the animated hand in world space, blending out of the cradle.
     const hand=avatar?.getObjectByName('handR')||avatar?.getObjectByName('hand.R');

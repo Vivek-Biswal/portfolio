@@ -5,6 +5,27 @@ The current local preview uses the detailed animated 2D character in the 3D stud
 It has not been deployed. Earlier Blender character files are preserved but are no
 longer loaded by the studio. The character-phase history below describes that earlier pass.
 
+## Screenshot collision fixes — 2026-11-11
+
+- The character is now an upright, yaw-facing mesh rather than a camera-pitched
+  Three.js Sprite. Its head stays over its feet when orbiting or zooming, preventing
+  the upper body from passing through tables and arcade cabinets.
+- All seated frames register their pelvis to the real seat centre and top surface
+  (.585 for desk chairs, .583 for the runtime-scaled arcade stools). Mirroring does
+  not move that contact point. Station-facing direction comes from the destination
+  camera, not the last walking direction. Alpha-tested depth writing preserves
+  normal furniture occlusion without drawing the character over everything.
+- Rebuilt `studio-props.blend` and `studio-props.glb`: book, phone and keyboard are
+  fully supported by their tabletops. Cover/page pivots sit at the book surface, so
+  opening cannot swing covers below the table. The old static notebook writing is
+  excluded from batching. The cradle receiver follows the actual sprite pose.
+- Tests inspect the real exported furniture and moving props, verify all ten seat
+  contacts, and sample book opening positions. The archived 3D rig test explicitly
+  retains its original cradle coordinates; the live scene uses the new 2D layout.
+- Browser and Windows inspection kernels both failed to initialize. Offline Blender
+  geometry review images are in `tmp/studio-fixes/`; these are asset-placement
+  checks, not live browser screenshots or verification of transition timing.
+
 ## Current character and camera update — 2026-11-11
 
 - `studio-pixel-avatar.js` reuses the outdoor character's complete standing and
@@ -29,7 +50,7 @@ longer loaded by the studio. The character-phase history below describes that ea
   and all seven cabinets fit their area views, and check sprite action completion
   and cancellation. The browser-control tool failed to initialize on this date,
   so these changes have not yet had a fresh visual browser review.
-- Validation: all 31 studio tests, the production build and distribution checks
+- Validation: all 35 studio tests, the production build and distribution checks
   passed. Vite still reports the existing large studio bundle warning.
 
 ## Working flow

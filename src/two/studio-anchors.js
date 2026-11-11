@@ -4,7 +4,7 @@ export const ANCHORS=Object.fromEntries([...STATIONS,...CABINETS].map(s=>{
  const seat={x:s.game?s.obstacle.x-(side?1.08:0):s.x,z:s.obstacle.z+(s.game?(side?0:1.08):1),y:s.elevation||0};
  const forward={x:side?1:0,z:side?0:-1};
  return [s.id,{...s,seat,approach:{x:s.x,z:s.z},exit:{x:s.x,z:s.z},facing:side?Math.PI/2:Math.PI,
-  forward,hand:{x:seat.x+forward.x*.43,y:seat.y+.98,z:seat.z+forward.z*.43},
+  seatSurface:s.game?.583:.585,forward,hand:{x:seat.x+forward.x*.43,y:seat.y+.98,z:seat.z+forward.z*.43},
   camera:{position:{x:seat.x+(side?-2.7:1.5),y:seat.y+2.7,z:seat.z+(side?1.5:2.7)},target:{x:s.obstacle.x,y:seat.y+1.15,z:s.obstacle.z}}
  }];
 }));

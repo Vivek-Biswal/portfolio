@@ -33,19 +33,30 @@ export function stationPose(name,time=0){
  return 3;
 }
 
+// Only yaw toward the viewer. A THREE.Sprite pitches with the camera, moving
+// its head backwards through the desk/cabinet when viewed from above.
+export function createUprightCharacter(map){
+ const material=new THREE.MeshBasicMaterial({map,alphaTest:.35,depthWrite:true,toneMapped:false,side:THREE.DoubleSide});
+ const geometry=new THREE.PlaneGeometry(1.76,2.2);geometry.translate(0,1.1,0);
+ const mesh=new THREE.Mesh(geometry,material);mesh.name='Upright_character_artwork';
+ return mesh;
+}
+export function orientCharacterPlane(mesh,root,camera){
+ mesh.rotation.set(0,Math.atan2(camera.position.x-root.position.x,camera.position.z-root.position.z)-root.rotation.y,0);
+}
+
 export async function loadStudioPixelAvatar(){
  const [painter,stationPainter]=await Promise.all([createPixelPainter(),createStudioPosePainter()]),canvas=document.createElement('canvas');canvas.width=512;canvas.height=640;
  const context=canvas.getContext('2d');if(!context)throw Error('Character canvas is unavailable');
  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.minFilter=THREE.LinearFilter;texture.magFilter=THREE.NearestFilter;texture.generateMipmaps=false;
- const material=new THREE.SpriteMaterial({map:texture,transparent:true,alphaTest:.03,depthWrite:false,toneMapped:false});
- const sprite=new THREE.Sprite(material);sprite.center.set(.5,0);sprite.scale.set(1.76,2.2,1);
+ const sprite=createUprightCharacter(texture),material=sprite.material;
  const root=new THREE.Group();root.name='Vivek_2D_character';root.userData.pixelCharacter=true;root.add(sprite);
- const clock=createSpriteAnimationClock();let phase=0,previous='',facing=1;
+ const clock=createSpriteAnimationClock();let phase=0,previous='',facing=1,seatSurface=.585;
  const forward=new THREE.Vector3(),right=new THREE.Vector3();
  function draw(moving){
   const pose=stationPose(clock.name,clock.time),key=`${pose===null?(moving?Math.floor(phase*8)%8:'idle'):('seat'+pose)}:${facing}`;
   if(key===previous)return;previous=key;context.clearRect(0,0,512,640);
-  const options={x:256,y:638,height:600,facing};
+  const options={x:256,y:638,height:600,facing,seatSurface};
   if(pose===null)painter.draw(context,{...options,pose:moving?'run':'idle',phase});
   else stationPainter.draw(context,pose,options);
   root.userData.spritePose=pose===null?(moving?'walk':'idle'):pose;
@@ -53,6 +64,14 @@ export async function loadStudioPixelAvatar(){
  }
  draw(false);
  return {root,play:(name,options)=>clock.play(name,options),settle:()=>clock.settle(),
+  setStation(station){
+   seatSurface=station?.seatSurface??.585;
+   if(station){
+    const dx=station.camera.position.x-station.seat.x,dz=station.camera.position.z-station.seat.z;
+    facing=station.forward.x*dz-station.forward.z*dx<0?-1:1;
+   }
+   previous='';
+  },
   update(dt,{walking=false,speed=1.65,reduced=false}={}){
    clock.update(dt);
    // Every interaction uses an opaque authored pose; the character never disappears.
@@ -61,11 +80,12 @@ export async function loadStudioPixelAvatar(){
    draw(walking&&!reduced);
   },
   faceCamera(camera){
+   orientCharacterPlane(sprite,root,camera);
    // Keep the seated silhouette stable while the camera focuses on the object.
    if(clock.name!=='idle'&&clock.name!=='walk')return;
    forward.set(Math.sin(root.rotation.y),0,Math.cos(root.rotation.y));right.setFromMatrixColumn(camera.matrixWorld,0);
    const side=forward.dot(right);if(Math.abs(side)>.12)facing=side<0?-1:1;
   },
-  dispose(){clock.dispose();texture.dispose();material.dispose();},
+  dispose(){clock.dispose();texture.dispose();material.dispose();sprite.geometry.dispose();},
  };
 }

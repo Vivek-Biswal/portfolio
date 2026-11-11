@@ -144,7 +144,7 @@ export async function mountStudio(workspace,{openApp,playGame,onExit,announce}) 
       const sequenceUI=host.querySelector('.studio-sequence');sequenceUI.hidden=['exploring','viewing'].includes(state);
       sequenceUI.querySelector('span').textContent=({aligning:'Taking your place…',sitting:'Getting comfortable…',using:'Opening your workspace…','putting-away':'Putting things away…',standing:'Back to the studio…'})[state]||'';
       if(state==='aligning')travel(saved.path,()=>faceStation(station,token));
-      if(state==='sitting')animate('sit_down',token);
+      if(state==='sitting'){avatar.setStation(station);animate('sit_down',token);}
       if(state==='using'){
         const clip=station.game?'arcade_play':station.id==='notes'?'book_open':station.id==='contact'?'phone_pickup':'typing';
         animate(clip,token);sequence={time:0,duration:1.1,update(t){propAmount=smooth(t);props.set(station,propAmount,avatar.root);focusCamera(station,propAmount);}};
@@ -245,7 +245,7 @@ export async function mountStudio(workspace,{openApp,playGame,onExit,announce}) 
       if(walking!==locomoting){avatar.play(walking?'walk':'idle');locomoting=walking;}
       if(walking){const angle=Math.atan2(player.x-before.x,player.z-before.z);const delta=THREE.MathUtils.euclideanModulo(angle-avatar.root.rotation.y+Math.PI,Math.PI*2)-Math.PI;avatar.root.rotation.y+=delta*(1-Math.exp(-dt*16));status.hidden=true;}
     }
-    avatar.faceCamera(camera);avatar.update(dt,{walking:walking||sequence?.kind==='travel',speed:sequence?.kind==='travel'?1.2:dt?distance/dt:0,reduced:reducedMotion.matches});
+    avatar.update(dt,{walking:walking||sequence?.kind==='travel',speed:sequence?.kind==='travel'?1.2:dt?distance/dt:0,reduced:reducedMotion.matches});
     if(sequence){const current=sequence;current.time+=dt;const t=reducedMotion.matches?1:Math.min(1,current.time/current.duration);current.update(t);if(t===1&&sequence===current){sequence=null;current.finish?.();}}
     if(reducedMotion.matches&&interaction.busy&&interaction.state!=='viewing')interaction.skip(settle);
     props.update(reducedMotion.matches?0:dt);
@@ -258,7 +258,7 @@ export async function mountStudio(workspace,{openApp,playGame,onExit,announce}) 
     const target=selected||near;marker.visible=!!target;if(target)marker.position.set(target.x,floorHeight(target.x,target.z)+.09,target.z);
     action.disabled=!near;action.textContent=near?`E · ${near.action}`:'';host.querySelector('.studio-interact').hidden=!near;
     if(viewTween){const tween=viewTween;tween.time+=dt;const t=reducedMotion.matches?1:Math.min(1,tween.time/.55),q=smooth(t);camera.position.lerpVectors(tween.from,tween.to.position,q);controls.target.lerpVectors(tween.target,tween.to.target,q);camera.lookAt(controls.target);if(t===1){viewTween=null;controls.enabled=!interaction.busy;}}
-    if(controls.enabled)controls.update();camera.updateMatrixWorld();
+    if(controls.enabled)controls.update();camera.updateMatrixWorld();avatar.faceCamera(camera);
     renderer.domElement.dataset.cameraTarget=controls.target.toArray().map(n=>n.toFixed(2)).join(',');
     hiddenSides=cutawaySides(camera.position.x-controls.target.x,camera.position.z-controls.target.z,hiddenSides);renderer.domElement.dataset.cutaway=hiddenSides.join(',');
     for(const [side,wall] of Object.entries(walls)){

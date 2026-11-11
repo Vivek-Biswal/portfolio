@@ -72,14 +72,16 @@ test('walk export starts immediately and alternates planted feet without sliding
  assert.ok(sample(.75).footL.y>sample(.75).footR.y+.06);
 });
 
-test('telephone grip reaches the cradle and places the earpiece beside the same rigged ear',async()=>{
+test('archived 3D telephone grip retains its authored cradle and earpiece contact',async()=>{
  async function load(path){const b=readFileSync(new URL(path,import.meta.url));return new GLTFLoader().parseAsync(b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength),'');}
- const [avatar,props]=await Promise.all([load('../public/studio/studio-avatar.glb'),load('../public/studio/studio-props.glb')]);
+ const avatar=await load('../public/studio/studio-avatar.glb');
  const station=ANCHORS.contact,root=avatar.scene,mixer=new AnimationMixer(root),clip=avatar.animations.find(c=>c.name==='phone_pickup'),action=mixer.clipAction(clip).play();
  root.position.set(station.seat.x,.04,station.seat.z);root.rotation.y=station.facing;
  const hand=root.getObjectByName('handR');
- action.time=0;mixer.update(0);root.updateMatrixWorld(true);props.scene.updateMatrixWorld(true);
- assert.ok(hand.getWorldPosition(new Vector3()).distanceTo(props.scene.getObjectByName('Telephone_receiver').getWorldPosition(new Vector3()))<.025,'pickup starts at the cradle');
+ action.time=0;mixer.update(0);root.updateMatrixWorld(true);
+ // The archived rig is no longer used in the studio. Its original contact must
+ // not change when the live 2D scene moves the phone safely onto the desktop.
+ assert.ok(hand.getWorldPosition(new Vector3()).distanceTo(new Vector3(4.75,1.28,4.05))<.025,'pickup starts at its authored cradle');
  action.time=clip.duration*.999;mixer.update(0);root.updateMatrixWorld(true);
  const earpiece=hand.getWorldPosition(new Vector3()).add(new Vector3(.025,.17,0));
  const ear=root.getObjectByName('head').localToWorld(new Vector3(-.153,.225,-.005));

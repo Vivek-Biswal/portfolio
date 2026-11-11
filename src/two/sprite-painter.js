@@ -77,9 +77,22 @@ function drawPose(context, sheet, index, { x, y, height, facing = 1 }) {
 }
 
 /** Station poses share one scale: seated frames must never be stretched to standing height. */
+// Pelvis contact landmarks in the original 1774x887 sheet, not head centres.
+// A fixed hip anchor prevents the character sliding sideways between seated frames.
+const stationHips = [[216,250],[640,280],[1068,310],[1503,323],[178,766],[622,767],[1066,768],[1508,768]];
+export function stationFramePlacement(frame,standingHeight,index,{height=600,seatSurface=.585}={}) {
+  const scale=height/standingHeight,[hipX,hipY]=stationHips[index];
+  const hipPixelY=640-(seatSurface-.04)/2.2*640;
+  return {x:(frame.x-hipX)*scale,y:index>=3?hipPixelY+(frame.y-hipY)*scale:638-frame.height*scale,
+    width:frame.width*scale,height:frame.height*scale,hipX:0,hipY:hipPixelY};
+}
 export async function createStudioPosePainter() {
   const sheet = await loadSheet('/2d/vivek-station-poses-v1.png', 4, 2, 1);
-  return {draw(context, index, options) {drawPose(context, sheet, index, options);}};
+  return {draw(context,index,options) {
+    const frame=sheet.frames[index],rect=stationFramePlacement(frame,sheet.standingHeight,index,options);
+    context.save();context.imageSmoothingEnabled=false;context.translate(options.x,0);context.scale(options.facing<0?-1:1,1);
+    context.drawImage(sheet.image,frame.x,frame.y,frame.width,frame.height,rect.x,rect.y,rect.width,rect.height);context.restore();
+  }};
 }
 
 /** Whole, cached poses preserve the same identity outdoors and inside. */
