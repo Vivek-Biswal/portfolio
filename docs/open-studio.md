@@ -5,6 +5,26 @@ The current local preview uses the detailed animated 2D character in the 3D stud
 It has not been deployed. Earlier Blender character files are preserved but are no
 longer loaded by the studio. The character-phase history below describes that earlier pass.
 
+## Object-specific readers — 2026-11-11
+
+- Contact opens an internet-phone shell with a browser strip, contact-channel tiles,
+  save-contact/profile links and a home indicator. Links still come from the shared
+  contact helpers; no external page is embedded or contacted until its link is used.
+- Notes open a cloth-bound journal with paper leaves, a centre gutter, a ribbon,
+  folio numbers and an endpaper for odd spreads. Phones show one page at a time.
+  Long articles, empty collections and CMS updates retain the existing reader flow.
+- Projects open a monitor with its own desktop wallpaper, file window, folder
+  navigation and project detail view. Project links and technologies remain shared.
+- Studio games use a cabinet marquee, a per-game accent, framed canvas, score panel
+  and physical-looking controls. The existing game controller and score storage are
+  unchanged. The regular outdoor arcade retains its existing styles.
+- Project navigation no longer triggers the notebook animation. Controls retain
+  keyboard focus, the dialog close/Escape flow and reduced-motion support.
+- `tmp/studio-readers-preview.html` opens the three readers directly with clearly
+  labelled sample content. It is a development-only fixture, excluded from builds.
+  The browser kernel still cannot initialize, so a visual desktop/mobile review
+  and real-device performance verification remain outstanding.
+
 ## Screenshot collision fixes — 2026-11-11
 
 - The character is now an upright, yaw-facing mesh rather than a camera-pitched
@@ -50,7 +70,7 @@ longer loaded by the studio. The character-phase history below describes that ea
   and all seven cabinets fit their area views, and check sprite action completion
   and cancellation. The browser-control tool failed to initialize on this date,
   so these changes have not yet had a fresh visual browser review.
-- Validation: all 35 studio tests, the production build and distribution checks
+- Validation: all 39 studio tests, the production build and distribution checks
   passed. Vite still reports the existing large studio bundle warning.
 
 ## Working flow

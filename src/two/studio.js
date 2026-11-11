@@ -15,6 +15,7 @@ import {addStudioEnvironment} from './studio-environment.js';
 import {createCatController} from './studio-cat.js';
 import {createStudioCat} from './studio-cat-model.js';
 import './studio.css';
+import './studio-experiences.css';
 
 /** A lazy loaded room; readers and games remain owned by the existing desktop. */
 export async function mountStudio(workspace,{openApp,playGame,onExit,announce}) {

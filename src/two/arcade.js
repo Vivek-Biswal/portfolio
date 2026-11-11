@@ -168,6 +168,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
       button.textContent=onReturnToStudio?.()?'Back to studio ↗':'Back to arcade ↗';
     });
     gameCanvas.width = 360; gameCanvas.height = 260;
+    screen.dataset.game=cabinet.id;
     screen.querySelector('.arcade-screen-title').textContent = cabinet.title;
     gameCanvas.setAttribute('aria-label', `${cabinet.title} game. Controls are described below.`);
     screen.querySelector('[data-arcade-score]').textContent = '0';
