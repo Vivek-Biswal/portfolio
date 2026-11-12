@@ -1,6 +1,7 @@
 import {gsap} from 'gsap';
 import {ScrollTrigger} from 'gsap/ScrollTrigger';
 import {letterScatter,textSegments,motionIsEnabled,fittedNameSize} from './kinetic-math.js';
+import {mountSectionMotion} from './section-motion.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -111,6 +112,13 @@ export function mountKineticJourney(){
     const item=splitGlyphs(title);restorers.push(item.restore);
     gsap.from(item.chars,{yPercent:mobile?45:85,rotation:i=>(i%2?1:-1)*6,opacity:.15,stagger:.025,ease:'power2.out',scrollTrigger:{trigger:title,start:'top 93%',end:'top 58%',scrub:.7,invalidateOnRefresh:true}});
    }
+   // Text-only spans preserve the identity of the real project/note links.
+   // Longer CMS titles use the same entrance as a block to limit DOM overhead.
+   for(const title of query('.project-title-text, .note-list strong')){
+    let targets=[title];
+    if(textSegments(title.textContent).length<=120){const item=splitGlyphs(title);restorers.push(item.restore);targets=item.chars;}
+    gsap.from(targets,{yPercent:60,rotation:i=>i%3===0?-9:4,opacity:.1,stagger:{amount:.25,from:'start'},ease:'power3.out',scrollTrigger:{trigger:title.closest('.project-heading')||title.closest('a'),start:'top 94%',end:'top 64%',scrub:.6,invalidateOnRefresh:true}});
+   }
 
    query('.letter-cloud span').forEach((glyph,i)=>{
     const section=glyph.closest('.motion-intro')||glyph.parentElement;
@@ -140,9 +148,11 @@ export function mountKineticJourney(){
    const pointer=event=>{if(event.pointerType==='touch'||document.hidden||document.querySelector('dialog[open]'))return;const x=event.clientX/innerWidth-.5,y=event.clientY/innerHeight-.5;pointerTweens.forEach(tween=>{tween.x(x*tween.amount);tween.y(y*tween.amount);});};
    const rest=()=>pointerTweens.forEach(tween=>{tween.x(0);tween.y(0);});
    window.addEventListener('pointermove',pointer,{passive:true});window.addEventListener('blur',rest);document.addEventListener('visibilitychange',rest);
+   const disposeSections=mountSectionMotion({mobile,refresh});
    for(const image of query('.journey img'))if(!image.complete){image.addEventListener('load',refresh,{once:true});imageListeners.push(image);}
    refresh();
    return ()=>{
+    disposeSections();
     window.removeEventListener('pointermove',pointer);window.removeEventListener('blur',rest);document.removeEventListener('visibilitychange',rest);
     imageListeners.forEach(image=>image.removeEventListener('load',refresh));restorers.reverse().forEach(restore=>restore());document.body.classList.remove('motion-enabled');
    };

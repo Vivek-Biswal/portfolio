@@ -4,6 +4,17 @@ The `/2d/` portfolio now uses oversized typography, a tilted portrait, scroll-dr
 letter assembly/dispersal, a moving typographic ribbon, ambient lighting, project
 image parallax and rotating graphic marks. Native page scrolling remains in control.
 
+The second pass gives each chapter its own interaction: hero typography stickers,
+a scattered-to-settled CMS skill constellation, unfolding project previews with
+oversized numbers and category bands, fanned paper note cards, and a large scrolling
+HELLO strip with staggered contact panels. Project and note titles now animate too.
+Fine-pointer devices add restrained image tilt and magnetic arrow movement.
+
+Native About/project disclosures reuse one entrance animation each. The notebook
+has a reading progress line and transitions only on opening or navigating to a new
+article; CMS refreshes keep the current reading position without replaying motion.
+The site Motion off control also stops CSS transitions and reader entrances.
+
 `server/render-line.mjs` still reads the shared CMS fields. All four anchor sections,
 project links, note reader routes and complete no-script content remain available.
 New content refreshes the animation instances without retaining stale CMS elements.
@@ -18,6 +29,8 @@ Unicode graphemes and accessible original text.
 ## Files and validation
 
 - `src/one/kinetic-motion.js`: GSAP ScrollTrigger and lifecycle cleanup.
+- `src/one/section-motion.js`: chapter motion, pointer response and disclosure effects.
+- `src/one/section-energy.css`: chapter-specific art direction and mobile layouts.
 - `src/one/kinetic-math.js`: deterministic scatter and name fitting.
 - `src/one/journey.css`: responsive design, both color modes and print fallback.
 - `scripts/test-journey.mjs`, `scripts/test-kinetic.mjs`: content and motion checks.
@@ -42,4 +55,6 @@ keyboard flows and real-device performance still need a browser review.
 
 Validation completed: 9 journey/motion tests, 16 CMS tests, 12 notes tests,
 production build, distribution verification and HTTP 200 checks for the local page
-and motion modules. No public deployment was performed in this phase.
+and motion modules. These checks passed again for the second pass. Browser Use
+still reports disabled, so visual and real-device review remain unverified.
+No public deployment was performed in this phase.

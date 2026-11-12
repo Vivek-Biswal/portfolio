@@ -3,11 +3,24 @@ import {renderLineNotebook} from './notebook-content.js';
 import './notebook.css';
 
 let content=initialContent,selection=null,opener=null,returnHash='#ideas',ownedEntry=false,pendingFocus=null;
+let progressFrame=0;
 const notebook=document.createElement('dialog');
 notebook.className='line-notebook';
 notebook.setAttribute('aria-labelledby','notebook-title');
 notebook.setAttribute('aria-describedby','notebook-label');
 document.body.append(notebook);
+
+function updateReadingProgress(){
+  progressFrame=0;
+  const page=notebook.querySelector('[data-notebook-page]');
+  const range=page?Math.max(0,page.scrollHeight-page.clientHeight):0;
+  const progress=range>0?Math.min(1,Math.max(0,page.scrollTop/range)):1;
+  notebook.style.setProperty('--read-progress',String(progress));
+}
+function scheduleReadingProgress(){if(!progressFrame)progressFrame=requestAnimationFrame(updateReadingProgress);}
+// Capture scroll from the replaceable reader page, retaining a single handler.
+notebook.addEventListener('scroll',scheduleReadingProgress,true);
+window.addEventListener('resize',scheduleReadingProgress,{passive:true});
 
 function fromHash(){
   const hash=location.hash.slice(1);
@@ -26,6 +39,7 @@ function paint({refresh=false}={}){
   const href=notebook.contains(focused)&&focused.tagName==='A'?focused.getAttribute('href'):null;
   const closeFocused=notebook.contains(focused)&&focused.hasAttribute('data-notebook-close');
   notebook.innerHTML=html;
+  notebook.querySelector('[data-notebook-page]').classList.toggle('notebook-page-entering',!refresh);
   if(!notebook.open)notebook.showModal();
   if(refresh){
     notebook.querySelector('[data-notebook-page]').scrollTop=scroll;
@@ -35,6 +49,7 @@ function paint({refresh=false}={}){
     notebook.querySelector('[data-notebook-page]').scrollTop=0;
     notebook.querySelector('#notebook-title').focus({preventScroll:true});
   }
+  scheduleReadingProgress();
   return true;
 }
 function restoreFocus({defer=false}={}){
