@@ -27,9 +27,12 @@ export function mountSectionMotion({mobile,refresh}){
   const tags=copy.querySelectorAll('.tags li');
   if(tags.length)gsap.from(tags,{y:24,rotation:i=>i%2?9:-9,opacity:.1,stagger:.07,ease:'back.out(1.5)',scrollTrigger:{trigger:copy,start:'top 92%',end:'bottom 78%',scrub:.65}});
  });
- query('.note-list > a').forEach((note,i)=>{
+ query('.note-card').forEach((note,i)=>{
   const direction=i%2?1:-1;
-  track(note,{x:direction*(mobile?25:90),y:mobile?20:50,rotation:direction*(mobile?3:8),scale:.95,opacity:.18,ease:'power2.out'},'top 99%','top 66%');
+  track(note,{y:mobile?35:85,rotation:direction*(mobile?2:5),scale:.96,opacity:.25,ease:'power2.out'},'top 99%','top 58%');
+  const art=note.querySelector('.note-cover-art'),core=note.querySelector('.note-art-core');
+  if(art)gsap.fromTo(art,{yPercent:7},{yPercent:-7,ease:'none',scrollTrigger:{trigger:note,start:'top bottom',end:'bottom top',scrub:1.1}});
+  if(core)gsap.fromTo(core,{rotation:direction*-12,transformOrigin:'50% 50%'},{rotation:direction*12,ease:'none',scrollTrigger:{trigger:note,start:'top bottom',end:'bottom top',scrub:1.4}});
  });
  query('.contact-channel').forEach((channel,i)=>track(channel,{x:(mobile?25:70)*(i%2?1:-1),y:25,opacity:.15,rotation:i%2?2:-2,ease:'power2.out'},'top 98%','top 76%'));
  const orbit=document.querySelector('.contact-orbit');
@@ -38,7 +41,7 @@ export function mountSectionMotion({mobile,refresh}){
  // CSS handles static layouts. Desktop pointer effects never capture movement
  // or change destinations; focus and touch still use ordinary native links.
  if(!mobile&&matchMedia('(hover: hover) and (pointer: fine)').matches){
-  query('.project-preview, .portrait-frame').forEach(surface=>{
+  query('.project-preview, .portrait-frame, .note-cover').forEach(surface=>{
    gsap.set(surface,{transformPerspective:1000});
    const x=gsap.quickTo(surface,'rotationX',{duration:.65,ease:'power3.out'}),y=gsap.quickTo(surface,'rotationY',{duration:.65,ease:'power3.out'});
    const rest=()=>{x(0);y(0);};rests.push(rest);

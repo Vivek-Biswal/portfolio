@@ -165,3 +165,53 @@ test('an empty notes collection keeps current work available without phantom not
   assert.ok(renderNotesApp(content,{kind:'now'}).includes('CURRENT WORK'));
   assert.ok(renderLineNotebook(content,{kind:'now'}).includes('CURRENT WORK'));
 });
+
+// Art identity belongs to a stable note ID, independent of editorial ordering.
+const {noteArtwork,notePalette}=await import('../src/one/note-art.js');
+const artBody=id=>noteArtwork(id).replace(/^<svg\b[^>]*>/,'').replace(/<\/svg>$/,'');
+
+test('note cover artwork and palette are deterministic, safe values owned by stable IDs',()=>{
+  for(const id of ['dimensions','interfaces','avatar','a note / with punctuation','नमस्ते',null]){
+    assert.equal(noteArtwork(id),noteArtwork(id));
+    const palette=notePalette(id);
+    assert.deepEqual(Object.keys(palette).sort(),['accent','ink','paper']);
+    for(const color of Object.values(palette))assert.match(color,/^#[0-9a-f]{6}$/i);
+    const copy=notePalette(id);copy.paper='changed';
+    assert.deepEqual(notePalette(id),palette,'callers cannot mutate the stored palette');
+  }
+  const defaultIds=['dimensions','interfaces','avatar'];
+  assert.equal(new Set(defaultIds.map(id=>artBody(id))).size,3,'the three initial notes have distinct original compositions');
+});
+
+test('gallery and notebook retain the same cover artwork when notes move in the CMS',()=>{
+  const content=fixture(),selected=content.notes[1],expected=artBody(selected.id);
+  for(const order of [content.notes,[content.notes[2],content.notes[0],content.notes[1]]]){
+    content.notes=order;
+    const gallery=lineSections(content).ideas;
+    const reader=renderLineNotebook(content,{kind:'note',id:selected.id});
+    assert.ok(gallery.includes(expected),'gallery retains the stable note illustration');
+    assert.ok(reader.includes(expected),'reader uses the same illustration as its gallery cover');
+    assert.ok(reader.includes(escapeHtml(selected.title)),'the art does not replace the actual published title');
+    for(const paragraph of selected.paragraphs)assert.ok(reader.includes(escapeHtml(paragraph)));
+  }
+});
+
+test('decorative artwork may repeat safely on one page without SVG ID collisions',()=>{
+  const artworks=['dimensions','interfaces','avatar'].flatMap(id=>[noteArtwork(id),noteArtwork(id,{className:'notebook-cover-svg'})]);
+  for(const svg of artworks){
+    assert.match(svg,/^<svg\b[^>]*\bviewBox="0 0 600 440"/);
+    assert.match(svg,/^<svg\b[^>]*\baria-hidden="true"/);
+    assert.match(svg,/^<svg\b[^>]*\bfocusable="false"/);
+    assert.ok(!/\bid\s*=|\b(?:href|src)\s*=|url\(/i.test(svg),'art requires no IDs, fragment references or external resources');
+    assert.ok(!/<(?:script|foreignObject|text)\b/i.test(svg),'art cannot add executable content or duplicate article wording');
+  }
+});
+
+test('hostile note IDs and optional artwork classes cannot inject SVG markup or handlers',()=>{
+  const payload='\"><script>alert(1)</script><svg onload="alert(2)"><a href="javascript:alert(3)">';
+  const svg=noteArtwork(payload,{className:`safe-cover ${payload} retained-class`});
+  assert.ok(!svg.includes(payload));
+  assert.ok(!/<script\b|\bonload\s*=|\bhref\s*=|javascript:/i.test(svg));
+  assert.match(svg,/class="note-art safe-cover retained-class"/);
+  assert.deepEqual(notePalette(payload),notePalette(payload),'malicious input is only a deterministic hash seed');
+});

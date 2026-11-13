@@ -35,6 +35,7 @@ function paint({refresh=false}={}){
   if(!html)return false;
   const page=notebook.querySelector('[data-notebook-page]');
   const scroll=page?.scrollTop||0;
+  const indexScroll=notebook.querySelector('.notebook-index-links')?.scrollLeft||0;
   const focused=document.activeElement;
   const href=notebook.contains(focused)&&focused.tagName==='A'?focused.getAttribute('href'):null;
   const closeFocused=notebook.contains(focused)&&focused.hasAttribute('data-notebook-close');
@@ -43,11 +44,20 @@ function paint({refresh=false}={}){
   if(!notebook.open)notebook.showModal();
   if(refresh){
     notebook.querySelector('[data-notebook-page]').scrollTop=scroll;
+    notebook.querySelector('.notebook-index-links').scrollLeft=indexScroll;
     const replacement=href?[...notebook.querySelectorAll('a[href]')].find(link=>link.getAttribute('href')===href):closeFocused?notebook.querySelector('[data-notebook-close]'):null;
     (replacement||notebook.querySelector('#notebook-title')).focus({preventScroll:true});
   }else{
     notebook.querySelector('[data-notebook-page]').scrollTop=0;
     notebook.querySelector('#notebook-title').focus({preventScroll:true});
+    // Reveal the current tab without moving the article or the underlying page.
+    const strip=notebook.querySelector('.notebook-index-links');
+    const active=strip.querySelector('[aria-current]');
+    if(active){
+      const frame=strip.getBoundingClientRect(),item=active.getBoundingClientRect();
+      if(item.right>frame.right)strip.scrollLeft+=item.right-frame.right+5;
+      else if(item.left<frame.left)strip.scrollLeft-=frame.left-item.left+5;
+    }
   }
   scheduleReadingProgress();
   return true;

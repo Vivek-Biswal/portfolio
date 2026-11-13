@@ -114,7 +114,7 @@ export function mountKineticJourney(){
    }
    // Text-only spans preserve the identity of the real project/note links.
    // Longer CMS titles use the same entrance as a block to limit DOM overhead.
-   for(const title of query('.project-title-text, .note-list strong')){
+   for(const title of query('.project-title-text, .note-card-title')){
     let targets=[title];
     if(textSegments(title.textContent).length<=120){const item=splitGlyphs(title);restorers.push(item.restore);targets=item.chars;}
     gsap.from(targets,{yPercent:60,rotation:i=>i%3===0?-9:4,opacity:.1,stagger:{amount:.25,from:'start'},ease:'power3.out',scrollTrigger:{trigger:title.closest('.project-heading')||title.closest('a'),start:'top 94%',end:'top 64%',scrub:.6,invalidateOnRefresh:true}});
