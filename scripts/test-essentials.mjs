@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import defaults from '../content/defaults.json' with {type:'json'};
 import {renderPublic} from '../server/render-public.mjs';
-import {escapeHtml, emailHref, noteHref} from '../src/shared/content.js';
+import {escapeHtml, emailHref} from '../src/shared/content.js';
 
 const files={index:'index.html','1d':'1d/index.html',project:'work/dimensional-portfolio.html',notes:'work/notes.html',now:'work/now.html'};
 const template=page=>readFileSync(new URL('../'+files[page],import.meta.url),'utf8');
@@ -12,6 +12,7 @@ const homes=content=>['index','1d'].map(page=>[page,render(page,content)]);
 const hrefs=html=>[...html.matchAll(/\bhref="([^"]*)"/g)].map(match=>match[1]);
 const visibleText=html=>html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
 const countId=(html,id)=>[...html.matchAll(new RegExp(`\\bid="${id}"`,'g'))].length;
+const disclosure=(html,id)=>html.match(new RegExp(`<details\\b(?=[^>]*\\bid="${id}")[^>]*>[\\s\\S]*?</details>`))?.[0]||'';
 
 function fixture(revision='original'){
   const c=structuredClone(defaults);
@@ -39,6 +40,7 @@ test('all essentials routes stay script-free with usable native navigation',()=>
   for(const [page,html] of homes(c)){
     for(const id of ['about','work','notes','contact'])assert.equal(countId(html,id),1,`${page}: one destination for ${id}`);
     for(const href of ['#about','#work','#contact','/2d/','/3d/'])assert.ok(hrefs(html).includes(href),`${page}: missing navigation ${href}`);
+    assert.ok(!hrefs(html).some(href=>href.startsWith('/work/')),`${page}: portfolio reading stays on the home page`);
   }
 });
 
@@ -52,9 +54,13 @@ test('both home routes display the current shared profile, work, notes and conta
       for(const url of [project.url,project.repositoryUrl,project.demoUrl])assert.ok(hrefs(html).includes(escapeHtml(url)),`${page}: missing project destination ${url}`);
     }
     for(const note of c.notes){
-      for(const value of [note.title,note.summary])assert.ok(html.includes(escapeHtml(value)),`${page}: missing note field ${value}`);
-      assert.ok(hrefs(html).includes(noteHref(note)),`${page}: missing note destination ${note.id}`);
+      const article=disclosure(html,'note-'+note.id);
+      assert.match(article,/<summary\b/,`${page}: note ${note.id} has a native open/close control`);
+      for(const value of [note.title,note.summary,...note.paragraphs])assert.ok(article.includes(escapeHtml(value)),`${page}: missing inline note field ${value}`);
     }
+    const desk=disclosure(html,'now');
+    assert.match(desk,/<summary\b/,`${page}: current work has a native open/close control`);
+    for(const value of [c.now.title,c.now.introduction,...c.now.sections.flatMap(section=>[section.heading,...section.paragraphs])])assert.ok(desk.includes(escapeHtml(value)),`${page}: missing inline current-work field ${value}`);
     for(const url of [emailHref(c.contact.email),c.contact.resumeUrl,c.contact.contactCardUrl,c.contact.booking.url,...c.contact.socialLinks.map(link=>link.url)])assert.ok(hrefs(html).includes(escapeHtml(url)),`${page}: missing contact destination ${url}`);
     assert.ok(!/vivekbiswal\.(?:dev|com)(?:@|%40)gmail\.com/i.test(html),`${page}: stale contact address`);
   }
@@ -66,7 +72,10 @@ test('note IDs remain reachable after CMS reordering and readers retain complete
   const reader=render('notes',c);
   for(const note of c.notes){
     assert.equal(countId(reader,note.id),1,`one article anchor for ${note.id}`);
-    for(const [page,home] of homes(c))assert.ok(hrefs(home).includes(noteHref(note)),`${page}: current article link`);
+    for(const [page,home] of homes(c)){
+      assert.equal(countId(home,'note-'+note.id),1,`${page}: stable inline note anchor after reordering`);
+      assert.match(disclosure(home,'note-'+note.id),/<summary\b/,`${page}: reordered note remains operable`);
+    }
     for(const text of [note.title,note.summary,...note.paragraphs])assert.ok(reader.includes(escapeHtml(text)),`complete published article: ${text}`);
   }
   const now=render('now',c);
@@ -87,9 +96,43 @@ test('empty collections keep the essentials and readers usable without phantom c
     assert.ok(html.includes(escapeHtml(c.profile.name)),`${page}: shared owner remains available`);
   }
   for(const [page,html] of homes(c)){
-    assert.ok(hrefs(html).includes('/work/now.html'),`${page}: current work remains reachable`);
+    assert.match(disclosure(html,'now'),/<summary\b/,`${page}: current work remains reachable on the page`);
     assert.ok(hrefs(html).includes(emailHref(c.contact.email)),`${page}: contact remains usable`);
     for(const id of ['about','work','notes','contact'])assert.equal(countId(html,id),1,`${page}: empty collections preserve ${id}`);
+  }
+});
+
+test('project titles open complete inline details and only external project actions leave the page',()=>{
+  const c=fixture();
+  c.projects[0].url='/work/dimensional-portfolio.html';
+  c.projects.reverse();
+  for(const [page,html] of homes(c)){
+    assert.ok(!hrefs(html).some(href=>href.startsWith('/work/')),`${page}: local project reading does not navigate away`);
+    for(const project of c.projects){
+      const id='project-'+project.id,body=disclosure(html,id);
+      assert.equal(countId(html,id),1,`${page}: stable unique project anchor`);
+      assert.match(body,/<summary\b[^>]*>[\s\S]*?<\/summary>/,`${page}: project is a native disclosure`);
+      const summary=body.match(/<summary\b[^>]*>([\s\S]*?)<\/summary>/)?.[1]||'';
+      assert.ok(summary.includes(escapeHtml(project.title)),`${page}: clicking the project title opens it in place`);
+      assert.ok(!/<a\b/.test(summary),`${page}: project summary does not contain competing navigation`);
+      for(const value of [project.summary,project.details,project.image,...project.tags])assert.ok(body.includes(escapeHtml(value)),`${page}: complete inline project field ${value}`);
+      for(const url of [project.repositoryUrl,project.demoUrl])assert.ok(hrefs(body).includes(escapeHtml(url)),`${page}: actual project destination remains available`);
+      if(project.url.startsWith('https://'))assert.ok(hrefs(body).includes(escapeHtml(project.url)),`${page}: external project page remains available`);
+    }
+  }
+});
+
+test('long inline articles and current-work updates remain complete without duplicate anchors',()=>{
+  const c=fixture();
+  c.notes[0].paragraphs=Array.from({length:60},(_,i)=>`Paragraph ${i+1}: ${'A complete thought with room to breathe. '.repeat(35)}`);
+  c.now.sections.push({heading:'A second current focus',paragraphs:['The complete second current-work update.']});
+  for(const [page,html] of homes(c)){
+    const article=disclosure(html,'note-'+c.notes[0].id);
+    for(const paragraph of c.notes[0].paragraphs)assert.ok(article.includes(escapeHtml(paragraph)),`${page}: long article is not truncated`);
+    assert.ok(disclosure(html,'now').includes('The complete second current-work update.'),`${page}: all current-work sections are included`);
+    const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(match=>match[1]);
+    assert.equal(new Set(ids).size,ids.length,`${page}: expanding the home content does not duplicate IDs`);
+    assert.equal(renderPublic(html,page,c),html,`${page}: rerendering long inline content is idempotent`);
   }
 });
 

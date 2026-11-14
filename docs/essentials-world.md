@@ -1,26 +1,49 @@
 # 1D: the quiet edition
 
-The essentials at `/` and `/1d/` remain script-free HTML. The design uses system
-serif and monospace type, warm paper, fine rules, numbered margins and a restrained
-blue ink accent. There are no new dependencies, web fonts or external services.
+The essentials at `/` and `/1d/` remain script-free HTML. Reading text and controls
+use the existing locally hosted Manrope variable font; the hero and wordmark keep
+their serif character. Warm paper, fine rules and a restrained blue ink accent
+remain. No new dependencies or external services were added.
 
 Small interactions use native HTML and CSS:
 
 - The portrait's **Turn over** disclosure reveals a short note and the current
   CMS profile status. **Turn back** restores the portrait. The revealed note grows
   naturally for long status text and names instead of clipping them.
-- Project images and details open through **A closer look** disclosures.
+- Project titles, note titles and current work expand into complete inline readers.
 - Links respond subtly to hover/focus, and anchor navigation briefly marks the
   destination margin. Reduced motion disables transitions and smooth scrolling.
 - System/Light/Dark uses the existing CSS-only theme selector. No theme preference
   is written to browser storage.
 
-The Notes, Now and project reading pages use the same paper-and-ink treatment.
-Notes have a native contents list and stable article anchors; all published text
-remains in the document. The current contact, booking, social and project links
-still come from the shared CMS.
+Legacy Notes, Now and project reading URLs remain available for old links and
+other worlds. Home reading stays in the current document. Contact, booking,
+social and external project destinations still come from the shared CMS.
 
-## Quiet discoveries — 2026-11-14
+## Single-page reading and legibility — 2026-11-14
+
+- Notes contain every published paragraph in native disclosures with stable
+  `note-<CMS ID>` anchors. Multiple notes can stay open for comparison.
+- Projects contain summary, image, details, technologies and external destinations
+  under the title, using stable `project-<CMS ID>` anchors. Local `/work/` project
+  navigation is replaced by this inline story on the home routes only.
+- **Still on my desk** contains the entire shared Now collection. Footer Now and
+  hero Contact navigation stay within the page. Legacy readers remain supported.
+- Body text is 18px; controls are 14–15px and essential secondary labels are at
+  least 13px. Muted text has stronger contrast in both themes. Tight serif letter
+  spacing and the small monospace body/control styling have been removed.
+- Supported browsers animate disclosure height in both directions with native
+  `::details-content` and `interpolate-size`. Others retain native disclosures
+  with a short entrance fade. No fixed height truncates long CMS articles.
+  Reduced motion disables the transitions. Implementation reference:
+  [Chrome's native details guidance](https://developer.chrome.com/blog/styling-details).
+
+Validation: 9 essentials, 16 CMS, 16 notes and 31 integration tests passed, along
+with production build and distribution verification. Desktop/mobile visual review
+was unavailable (`Local browser access is unavailable for this chat`). Responsive
+rules are authored but this update has not been visually verified or deployed.
+
+## Earlier quiet discoveries — 2026-11-14
 
 The marked wordmark, italic first name and reversible portrait are preserved.
 The new presentation copy is shorter: “A little work. A little wonder.” introduces
@@ -50,6 +73,7 @@ disabled under reduced-motion preferences.
 - `server/render-public.mjs`: shared page rendering and stable CMS replacements.
 - `src/zero/zero.css`: responsive layout, themes, interactions and print rules.
 - `src/zero/discoveries.css`: simpler presentation and section-specific reveals.
+- `src/zero/reading.css`: readable typography, inline stories and disclosure motion.
 - `index.html`, `1d/index.html`, `work/*.html`: current offline templates.
 - `scripts/test-essentials.mjs`: shared content, native navigation, escaping,
   empty collections, rerendering and script-free contracts.

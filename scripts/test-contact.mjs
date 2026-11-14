@@ -174,13 +174,17 @@ test('manual project page, repository, and live demo are independent and duplica
   assert.equal(projectLinks({url:'javascript:alert(1)',repositoryUrl:'data:text/html,<script>',demoUrl:''}).length,0);
 });
 
-test('all project presentations retain manual links alongside real source and demo links',()=>{
+test('1D opens project content inline while other presentations retain manual pages and real external links',()=>{
   const c=fixture();
   c.projects=[{...c.projects[0],id:'approved-project',title:'Approved public project',url:'/work/manual-project.html',repositoryUrl:'https://github.com/Vivek-Biswal/approved-project',demoUrl:'https://approved-project.example.com/'}];
   const views=[...publicViews(c).slice(0,2),['3D',buildApps(c).projects.html],['work page',renderPublic(readFileSync('work/dimensional-portfolio.html','utf8'),'project',c)]];
   for (const [name,html] of views) {
     assert.ok(html.includes('Approved public project'),name);
-    assert.ok(html.includes('/work/manual-project.html'),name);
+    if(name==='1D') {
+      assert.ok(!html.includes('href="/work/manual-project.html"'),`${name}: project content stays in the current page`);
+      for(const value of [c.projects[0].summary,c.projects[0].details])assert.ok(html.includes(value),`${name}: inline project copy remains complete`);
+      assert.match(html,/<details\b[^>]*\bid="project-approved-project"/,`${name}: project has an operable inline destination`);
+    } else assert.ok(html.includes('/work/manual-project.html'),`${name}: existing project destination remains intact`);
     assert.ok(html.includes('https://github.com/Vivek-Biswal/approved-project'),name);
     assert.ok(html.includes('https://approved-project.example.com/'),name);
   }

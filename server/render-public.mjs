@@ -15,6 +15,8 @@ export function renderPublic(template,page,c) {
   html=html.replace(/(<p\b[^>]*\bdata-copyright[^>]*>)[\s\S]*?<\/p>/,(_,start)=>start+e(c.settings.copyright)+'</p>');
   html=html.replace(/(<p\b[^>]*\bdata-footer-contact[^>]*>)[\s\S]*?<\/p>/,(_,start)=>start+e(c.profile.name)+` · <a href="${emailHref(c.contact.email)}">${e(c.contact.email)}</a></p>`);
   if(page==='index'||page==='1d') {
+    html=html.replace('class="wordmark" href="/"','class="wordmark" href="#main"');
+    html=html.replace('<a href="/work/now.html">Now</a>','<a href="#now">Now</a>');
     html=html.replace(/(<section class="intro"[^>]*>)[\s\S]*?<\/section>/,(_,start)=>start+essentialsIntro(c)+'</section>');
     for(const [id,body] of Object.entries(essentialsSections(c)))html=section(html,id,body);
   }
