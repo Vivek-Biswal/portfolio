@@ -16,6 +16,7 @@
     "test:integrations": "node --test scripts/test-github.mjs scripts/test-contact.mjs",
     "test:journey": "node --test scripts/test-journey.mjs scripts/test-kinetic.mjs",
     "test:notes": "node --test scripts/test-notes.mjs",
+    "test:essentials": "node --test scripts/test-essentials.mjs",
     "test:studio": "node --test scripts/test-studio.mjs scripts/test-studio-cat.mjs scripts/test-studio-asset.mjs scripts/test-studio-interaction.mjs scripts/test-studio-pixel.mjs scripts/test-studio-readers.mjs"
   },
   "dependencies": {
