@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile, unlink } from 'node:fs/promises';
 import { renderPublic } from '../server/render-public.mjs';
 import defaults from '../content/defaults.json' with {type:'json'};
-const pages={'index.html':'index','1d/index.html':'1d','2d/index.html':'2d','3d/index.html':'3d','work/dimensional-portfolio.html':'project','work/notes.html':'notes','work/now.html':'now'};
+const pages={'index.html':'index','1d/index.html':'1d','2d/index.html':'2d','2d/work/index.html':'2d-work','3d/index.html':'3d','work/dimensional-portfolio.html':'project','work/notes.html':'notes','work/now.html':'now'};
 // Vercel serves matching files before rewrites. Hosted pages must therefore live
 // only in the function bundle, or the static defaults would shadow CMS content.
 const serverOnly=process.env.VERCEL==='1'||process.argv.includes('--server-only');

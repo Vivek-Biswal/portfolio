@@ -130,3 +130,32 @@ and distribution checks. Both local pages and their CSS return HTTP 200.
 Browser access was unavailable for this update, so sticky behavior, mobile
 wrapping and anchor positions still require a visual browser pass. Nothing was
 deployed publicly.
+
+## Dedicated 2D project pages, 2026-11-15
+
+The project preview, title and Explore project action now lead to
+`/2d/work/#project-<stable CMS ID>`. This is a separate full-page 2D presentation:
+large title and cover image, complete project detail text, tools, actual website,
+demo and repository links, and next-project navigation. The old `/work/` readers
+remain available to 1D. Legacy 1D reader URLs are not offered as the 2D primary
+project action; actual external destinations retain their own labeled actions.
+
+`src/one/project-content.js` renders the case studies and catalog from the shared
+CMS. Native fragment links and CSS target selection work in static previews and
+without JavaScript. `project-page.js` preserves the selected ID across published
+updates, reapplies visibility after node replacement, restores focus and scroll,
+and exposes the catalog if the selected project is removed. It shares the saved
+2D theme and motion preferences. `project-page.css` handles responsive layouts,
+finite entrance transitions, reduced motion and printing the selected project.
+
+The `2d-work` server template is included in development, build packaging and
+Vercel rewrites. Distribution checks cover eight public pages. Copyright updates
+on the main 2D page now preserve the footer motion button and its event handler.
+
+All 97 targeted tests pass (25 journey/project/controller, 16 CMS, 9 essentials,
+16 notes, 31 integration), together with the production build and distribution
+checks. Local HTTP checks confirm the new page and its JS/CSS assets return 200;
+the main 2D page has three links to the dedicated default project and no links to
+its old 1D reader. Browser access was unavailable: visual desktop/mobile layout,
+live focus/scroll restoration and real-device performance remain unverified.
+No paid dependencies or services were added. No public deployment was performed.

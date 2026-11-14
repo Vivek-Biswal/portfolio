@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const pages = {'index.html':'index', '1d/index.html':'1d', '2d/index.html':'2d', '3d/index.html':'3d',
+const pages = {'index.html':'index', '1d/index.html':'1d', '2d/index.html':'2d', '2d/work/index.html':'2d-work', '3d/index.html':'3d',
   'work/dimensional-portfolio.html':'project', 'work/now.html':'now', 'work/notes.html':'notes'};
 const routes = Object.keys(pages);
 const serverOnly = process.env.VERCEL === '1' || process.argv.includes('--server-only');
@@ -12,6 +12,7 @@ const expectedRewrites = {
   '/':'/api/portfolio?action=public&page=index',
   '/1d/':'/api/portfolio?action=public&page=1d',
   '/2d/':'/api/portfolio?action=public&page=2d',
+  '/2d/work/':'/api/portfolio?action=public&page=2d-work',
   '/3d/':'/api/portfolio?action=public&page=3d',
   ...Object.fromEntries(Object.entries(pages).map(([file, key])=>['/'+file, '/api/portfolio?action=public&page='+key])),
   '/0d/vivek-biswal.txt':'/api/portfolio?action=profile',
@@ -85,4 +86,4 @@ const lock = JSON.parse(readFileSync('package-lock.json', 'utf8'));
 assert.deepEqual(pkg.dependencies, lock.packages[''].dependencies, 'Lockfile dependencies differ');
 assert.deepEqual(pkg.devDependencies, lock.packages[''].devDependencies, 'Lockfile devDependencies differ');
 assert.ok(!pkg.dependencies['gsap-trial'], 'Remove trial animation plugins before deployment');
-console.log(`Verified three public worlds, seven ${serverOnly?'server-rendered':'static'} pages, script-free 1D, local assets, protected dashboard, excluded character scene and dependency lockfile${serverOnly?', and unshadowed CMS rewrites':''}.`);
+console.log(`Verified three public worlds, ${routes.length} ${serverOnly?'server-rendered':'static'} pages, script-free 1D, local assets, protected dashboard, excluded character scene and dependency lockfile${serverOnly?', and unshadowed CMS rewrites':''}.`);

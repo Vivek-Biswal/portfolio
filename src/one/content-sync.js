@@ -49,7 +49,8 @@ subscribeContent(content=>{
     if(target&&source)replaceContent(target,source);
   }
   document.title=next.title;
-  for(const selector of ['.signature','.footer','meta[name="description"]']) {
+  // Keep footer controls mounted while the published copyright changes.
+  for(const selector of ['.signature','.footer > span:first-child','meta[name="description"]']) {
     const target=document.querySelector(selector),source=next.querySelector(selector);
     if(target&&source) {
       if(target.tagName==='META')target.setAttribute('content',source.getAttribute('content'));

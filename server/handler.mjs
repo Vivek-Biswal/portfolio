@@ -41,7 +41,7 @@ export async function handleRequest(req,res,options={}) {
   try {
     if(action==='public') {
       method(req,'GET');const page=url.searchParams.get('page')||'index';
-      const templates={index:'index.html','1d':'1d.html','2d':'2d.html','3d':'3d.html',project:'project.html',notes:'notes.html',now:'now.html'};
+      const templates={index:'index.html','1d':'1d.html','2d':'2d.html','2d-work':'2d-work.html','3d':'3d.html',project:'project.html',notes:'notes.html',now:'now.html'};
       if(!templates[page])throw new HttpError(404,'Page not found.');
       const current=await getPublished();res.setHeader('Cache-Control','no-store');
       return html(res,renderPublic(await readTemplate(templates[page],options),page,current.content));

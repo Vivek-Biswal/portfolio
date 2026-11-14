@@ -78,6 +78,10 @@
       "destination": "/api/portfolio?action=public&page=2d"
     },
     {
+      "source": "/2d/work/",
+      "destination": "/api/portfolio?action=public&page=2d-work"
+    },
+    {
       "source": "/3d/",
       "destination": "/api/portfolio?action=public&page=3d"
     },
@@ -104,6 +108,10 @@
     {
       "source": "/2d/index.html",
       "destination": "/api/portfolio?action=public&page=2d"
+    },
+    {
+      "source": "/2d/work/index.html",
+      "destination": "/api/portfolio?action=public&page=2d-work"
     },
     {
       "source": "/3d/index.html",

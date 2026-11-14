@@ -1,6 +1,7 @@
 import { escapeHtml as e, emailHref } from '../src/shared/content.js';
 import {lineSections} from './render-line.mjs';
 import {essentialsIntro,essentialsSections,essentialsArticle} from './render-essentials.mjs';
+import {renderLineProjects} from '../src/one/project-content.js';
 const section=(html,id,body)=>html.replace(new RegExp(`(<section[^>]*\\bid="${id}"[^>]*>)[\\s\\S]*?</section>`),(_,start)=>start+body+'</section>');
 export function renderPublic(template,page,c) {
   let html=template.replace(/<script type="application\/json" id="portfolio-content">[\s\S]*?<\/script>/g,'');
@@ -23,6 +24,10 @@ export function renderPublic(template,page,c) {
   if(page==='2d') {
     for(const [id,body] of Object.entries(lineSections(c)))html=section(html,id,body);
   }
+  if(page==='2d-work') {
+    html=html.replace(/<main[^>]*>[\s\S]*?<\/main>/,()=>`<main class="case-main" id="case-main" tabindex="-1">${renderLineProjects(c)}</main>`);
+    html=html.replace(/<title>[\s\S]*?<\/title>/,()=>`<title>Selected work — ${e(c.profile.name)} — 2D</title>`);
+  }
   if(page==='3d') {
     html=html.replace(/(<a class="os-logo"[^>]*>)[\s\S]*?<\/a>/,(_,start)=>start+e(first)+'<span>OS</span><small>v.03</small></a>');
     html=html.replace(/<div class="desktop-intro">[\s\S]*?<\/div>/,`<div class="desktop-intro"><p class="intro-kicker">${e(c.profile.name.toUpperCase())} · WORLD 03</p><h1>${e(c.settings.pixelTitle).replaceAll('\n','<br />')}</h1><p>${e(c.settings.pixelSubtitle).replaceAll('\n','<br />')}</p><button type="button" class="pixel-button" data-open="about">Meet the person behind the pixels ↗</button></div>`);
@@ -30,7 +35,7 @@ export function renderPublic(template,page,c) {
   if(['project','notes','now'].includes(page)) {
     html=html.replace(/<main[^>]*>[\s\S]*?<\/main>/,()=>`<main class="page reading-page" id="main" tabindex="-1">${essentialsArticle(c,page)}</main>`);
   }
-  if(page==='2d'||page==='3d') {
+  if(page==='2d'||page==='3d'||page==='2d-work') {
     const payload=JSON.stringify(c).replaceAll('<','\\u003c').replaceAll('>','\\u003e').replaceAll('&','\\u0026');
     html=html.replace('</head>',`<script type="application/json" id="portfolio-content">${payload}</script></head>`);
   }
