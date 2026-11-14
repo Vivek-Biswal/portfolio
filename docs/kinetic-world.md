@@ -53,6 +53,8 @@ Unicode graphemes and accessible original text.
 - `src/one/portrait-playground-markup.js`: shared CMS portrait and signature markup.
 - `src/one/portrait-playground.css`, `portrait-playground.js`: the three compositions,
   native control styling, pointer response and drawing lifecycle.
+- `src/one/navigation.css`: persistent header, centered chapter navigation, mobile
+  second row and anchor clearance.
 - `src/one/section-motion.js`: chapter motion, pointer response and disclosure effects.
 - `src/one/section-energy.css`: chapter-specific art direction and mobile layouts.
 - `src/one/ideas-gallery.css`: illustrated Ideas gallery and responsive covers.
@@ -113,3 +115,18 @@ the last two CSS fixes, the contact signature, or mobile tapping could receive a
 final visual pass. The attempted viewport reset also failed after that loss of
 access. Real-device performance and OS reduced-motion were not browser-tested;
 the reduced-motion controller behavior is covered by automated tests.
+
+## Persistent headers, 2026-11-15
+
+1D and 2D keep their headers at the top using native CSS sticky positioning,
+retaining document flow without a layout jump. The 2D chapter navigation now sits
+in the header, centered on desktop and on a compact second row on mobile. The
+small brand tagline was removed; the motion preference moved to the footer.
+Theme and world switching remain in the header. Section anchor offsets account
+for the persistent headers in both worlds, and the 1D pages remain script-free.
+
+The journey, essentials and CMS suites pass all 43 checks, along with the build
+and distribution checks. Both local pages and their CSS return HTTP 200.
+Browser access was unavailable for this update, so sticky behavior, mobile
+wrapping and anchor positions still require a visual browser pass. Nothing was
+deployed publicly.

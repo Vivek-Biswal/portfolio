@@ -1,0 +1,65 @@
+/* The chapter navigation lives with the wordmark, leaving the artwork unobstructed. */
+:root{--header-height:88px}
+html{scroll-padding-top:calc(var(--header-height) + 16px)}
+.header{
+  position:sticky;top:0;z-index:50;height:var(--header-height);margin:0;
+  padding:0 var(--gutter);display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:24px;
+  border-bottom:1px solid var(--rule);background:var(--paper);
+  background:color-mix(in srgb,var(--paper) 94%,transparent);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+.header .signature{justify-self:start}
+.header-actions{display:flex;align-items:center;justify-content:flex-end;gap:22px;min-width:0}
+.header .dimensions{margin:0;flex-shrink:0}
+.header .theme-toggle{min-width:44px;justify-content:center}
+.header .waypoints{
+  position:relative;inset:auto;transform:none;justify-self:center;z-index:auto;
+  max-width:100%;padding:4px;gap:2px;box-shadow:none;
+  background:var(--surface);color:var(--ink);border-color:var(--rule);
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+.header .waypoints>a{min-height:42px;font-size:12px;padding:9px 15px;gap:7px}
+.header .waypoints>a>span{font-size:8px;color:var(--muted)}
+.header .waypoints>a[aria-current]{background:var(--accent);color:var(--paper)}
+.header .waypoints>a[aria-current]>span{color:inherit;opacity:.65}
+.header .waypoints>a:not([aria-current]):hover{background:var(--rule)}
+.header .progress{bottom:-8px;left:35%;width:30%;height:1px;background:var(--rule)}
+.header .progress-fill{background:var(--accent)}
+.footer{align-items:center;flex-wrap:wrap;padding-bottom:30px}
+.footer #motion-toggle{font-size:11px;letter-spacing:0;min-height:44px;gap:8px}
+.footer .motion-label{display:inline}
+.footer>a{display:inline-flex;align-items:center;min-height:44px}
+@media(prefers-reduced-motion:no-preference){
+  .header .waypoints>a{transition:background-color .2s ease,color .2s ease}
+}
+@media(max-width:1000px) and (min-width:761px){
+  .header{gap:16px;grid-template-columns:auto minmax(0,1fr) auto}
+  .header-actions{gap:10px}
+  .header .waypoints>a{padding-inline:12px}
+  .header .waypoints>a>span{display:none}
+}
+@media(max-width:760px){
+  :root{--header-height:126px}
+  .header{height:var(--header-height);grid-template-columns:1fr auto;grid-template-rows:44px 48px;gap:10px 16px;padding:12px var(--gutter)}
+  .header-actions{grid-column:2;grid-row:1;gap:10px}
+  .header .signature{grid-column:1;grid-row:1;font-size:27px}
+  .header .dimensions{padding:3px;gap:0}
+  .header .dimensions a{min-height:36px;min-width:35px;font-size:10px}
+  .header .theme-label{display:none}
+  .header .waypoints{grid-column:1 / -1;grid-row:2;width:100%;max-width:420px;padding:3px}
+  .header .waypoints>a{flex:1;justify-content:center;min-height:40px;font-size:12px;padding:8px 11px}
+  .header .progress{display:none}
+  .footer{column-gap:22px;row-gap:5px}
+}
+@media(max-width:370px){
+  .header{column-gap:8px}
+  .header .signature{font-size:24px}
+  .header-actions{gap:5px}
+  .header .waypoints>a{padding-inline:8px}
+  .header .waypoints>a>span{display:none}
+}
+@media print{
+  html{scroll-padding-top:0}
+  .header,.footer{display:none!important}
+}
