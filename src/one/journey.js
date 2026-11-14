@@ -1,6 +1,7 @@
 import './content-sync.js';
 import './notebook.js';
 import {mountKineticJourney} from './kinetic-motion.js';
+import {mountPortraitPlayground} from './portrait-playground.js';
 // Native links and details remain usable if this small enhancement cannot run.
 const root = document.documentElement;
 const themeButton = document.querySelector('.theme-toggle');
@@ -71,3 +72,4 @@ document.addEventListener('portfolio:content-updated', scheduleUpdate);
 window.addEventListener('load', scheduleUpdate, { once: true });
 updateJourney();
 mountKineticJourney();
+mountPortraitPlayground();

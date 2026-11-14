@@ -100,8 +100,9 @@ export function mountKineticJourney(){
    if(hero&&heroChars.length){
     gsap.to(heroChars,{x:i=>letterScatter(i,{mobile}).x,y:i=>letterScatter(i,{mobile}).y-50,rotation:i=>letterScatter(i,{mobile}).rotation,scale:i=>letterScatter(i,{mobile}).scale,opacity:.12,stagger:{amount:.12,from:'center'},ease:'none',scrollTrigger:{trigger:hero,start:'top top',end:'bottom top',scrub:mobile?.6:1.05,invalidateOnRefresh:true}});
    }
-   const portrait=document.querySelector('.hero-portrait');
-   if(hero&&portrait)gsap.to(portrait,{yPercent:mobile?-8:-19,rotation:mobile?3:8,scale:.92,ease:'none',scrollTrigger:{trigger:hero,start:'top top',end:'bottom top',scrub:1}});
+   // The outer print stage follows scroll; its inner layers own the remix and tilt.
+   const portrait=document.querySelector('.portrait-playground');
+   if(hero&&portrait)gsap.to(portrait,{yPercent:mobile?-3:-8,ease:'none',scrollTrigger:{trigger:hero,start:'top top',end:'bottom top',scrub:1}});
 
    // The statement assembles from a repeatable cloud, then stays readable.
    for(const phrase of query('[data-kinetic-phrase]')){

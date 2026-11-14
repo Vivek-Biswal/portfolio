@@ -1,0 +1,155 @@
+/* A small interactive print studio. All three compositions work without JS. */
+.journey #hello{overflow-x:clip}
+.journey .intro-grid{display:grid;grid-template-columns:1.06fr 1fr;gap:clamp(25px,3vw,55px);align-items:center;min-height:560px;padding:30px 0 45px}
+.journey .intro-copy{min-width:0;width:100%;align-self:center}
+.journey #hello-title{font-size:clamp(85px,15vw,230px);width:100%}
+.journey #hello-title .name-first,.journey #hello-title .name-last{max-width:100%}
+.portrait-playground{min-width:0;width:100%;position:relative;z-index:3;--poster-lime:#dcfa8b;--poster-lilac:#c5b4e6;--poster-ink:#25301d;--tilt-x:0deg;--tilt-y:0deg}
+.playground-heading{display:flex;justify-content:space-between;align-items:center;gap:18px;font-size:9px;line-height:1.6;letter-spacing:.09em;color:var(--muted);padding-bottom:14px}
+.playground-heading > span:first-child{display:flex;align-items:center;gap:8px;color:var(--ink)}
+.playground-heading i{width:5px;height:5px;display:block;border-radius:50%;background:var(--accent)}
+.playground-canvas{position:relative;isolation:isolate;aspect-ratio:1.08;min-width:0;border-block:1px solid var(--rule)}
+.playground-grid{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--accent) 9%,transparent),transparent 68%),radial-gradient(var(--rule) .7px,transparent .7px);background-size:auto,19px 19px;mask-image:radial-gradient(ellipse at center,#000,transparent 75%);pointer-events:none}
+.portrait-drift{position:absolute;inset:0;transform:perspective(1100px) rotateX(var(--tilt-y)) rotateY(var(--tilt-x));transform-style:preserve-3d;pointer-events:none}
+.poster-orbit{position:absolute;left:2%;top:6%;width:96%;height:85%;border:1px solid var(--rule);border-radius:50%;pointer-events:none;z-index:0}
+.orbit-back{transform:rotate(-27deg) scaleY(.75);border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.orbit-front{transform:rotate(34deg) scaleX(.7);border-style:dashed;opacity:.7}
+.poster-words{position:absolute;left:0;top:3%;z-index:1;font-size:clamp(45px,6.8vw,105px);font-weight:650;line-height:.85;letter-spacing:-.065em;pointer-events:none;color:var(--ink)}
+.poster-words em{font-family:Instrument,Georgia,serif;font-weight:400;color:var(--accent)}
+.poster-words > span{display:block}
+.poster-words .words-play,.poster-words .words-signed{display:none}
+.poster-paper{position:absolute;width:58%;height:73%;left:27%;top:15%;border-radius:2px;box-shadow:3px 7px 0 #0001;transform-origin:50% 80%;z-index:1;padding:20px;color:var(--poster-ink)}
+.paper-lime{background:var(--poster-lime);transform:rotate(-13deg) translate(-3%,3%)}
+.paper-lime > span{position:absolute;bottom:15px;left:15px;font-size:9px;line-height:1.5;font-weight:600;letter-spacing:.06em}
+.paper-lilac{background:var(--poster-lilac);transform:rotate(17deg) translate(1%,-1%)}
+.paper-lilac > span{display:block;font-size:12px;line-height:1.5;font-weight:600;letter-spacing:.04em}
+.paper-lilac b{font:italic 25px/1.2 Instrument,Georgia,serif;letter-spacing:0}
+.remix-photo{position:absolute;width:58%;left:27%;top:15%;margin:0;background:#f2efe4;color:#25301d;border:7px solid #f2efe4;box-shadow:0 22px 55px #0004;transform:rotate(7deg);transform-origin:50% 75%;z-index:3;overflow:hidden}
+.remix-image{position:relative;aspect-ratio:.84;overflow:hidden;background:#dadbd3}
+.remix-image img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 15%;filter:grayscale(1);transform:scale(1.01)}
+.remix-image::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,#fff2,transparent 45%,#c5b4e61c);pointer-events:none}
+.remix-photo figcaption{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 5px 5px;font-size:10px;font-weight:600;line-height:1.4}
+.remix-photo figcaption > span:first-child{overflow-wrap:anywhere}
+.remix-photo figcaption > span:last-child{font-size:7px;letter-spacing:.07em;white-space:nowrap}
+.poster-spark{position:absolute;right:1%;top:7%;width:16%;z-index:4;color:#eb9d7e;transform:rotate(13deg)}
+.poster-spark svg{display:block;width:100%;height:auto}
+.poster-stamp{position:absolute;right:0;bottom:6%;width:19%;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;background:var(--poster-lime);color:var(--poster-ink);font-size:9px;font-weight:650;letter-spacing:.08em;line-height:1.6;transform:rotate(13deg);z-index:5;box-shadow:4px 5px 0 #0002}
+.poster-stamp em{font:italic clamp(17px,2vw,30px)/1 Instrument,Georgia,serif;letter-spacing:-.035em}
+.poster-stamp b{font-size:20px;font-weight:400;line-height:1;margin-top:4px}
+.poster-autograph{position:absolute;left:0;bottom:8%;width:23%;display:flex;flex-direction:column;align-items:center;padding:12px 10px;background:var(--poster-lilac);color:#292333;transform:rotate(-12deg);z-index:5;box-shadow:4px 5px 0 #0002}
+.poster-autograph > span:not(.signature-fallback),.poster-autograph > small{font-size:7px;font-weight:600;line-height:1.5;letter-spacing:.12em;text-align:center}
+.poster-autograph .personal-signature{display:block;width:100%;height:clamp(70px,10vw,145px);margin-block:8px;color:inherit}
+.poster-autograph .signature-fallback{font:italic 30px/1.3 Instrument,Georgia,serif;max-width:100%;overflow-wrap:anywhere;padding-block:20px}
+.poster-doodle{position:absolute;left:7%;bottom:2%;width:40%;color:var(--accent);z-index:4;transform:rotate(-15deg);opacity:.75}
+.poster-doodle svg{display:block;width:100%;height:auto}
+.canvas-coordinate{position:absolute;left:0;bottom:2%;font-size:7px;letter-spacing:.08em;line-height:1.6;color:var(--muted);z-index:5;pointer-events:none}
+.playground-controls{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;padding-top:18px;position:relative;z-index:6}
+.composition-options{display:flex;gap:3px;min-width:0;padding:0;border:0;margin:0}
+.composition-options legend{font-size:10px;line-height:1.5;color:var(--muted);margin-bottom:9px;padding:0;letter-spacing:.04em}
+.composition-options label{position:relative;cursor:pointer}
+.composition-options input{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
+.composition-options label > span{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:8px 13px;border:1px solid var(--rule);border-radius:30px;font-size:12px;font-weight:500;color:var(--muted)}
+.composition-options small{font-size:8px;font-weight:400;opacity:.7}
+.composition-options input:checked + span{color:var(--paper);background:var(--accent);border-color:var(--accent)}
+.composition-options input:focus-visible + span{outline:2px solid var(--accent);outline-offset:4px}
+.portrait-remix{display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;border:0;border-bottom:1px solid var(--rule);background:transparent;padding:8px 3px;font:500 12px/1.6 Manrope,Arial,sans-serif;color:var(--ink);cursor:pointer}
+.portrait-remix b{font-size:24px;line-height:1;font-weight:400;color:var(--accent)}
+.portrait-remix:hover{color:var(--accent)}
+
+/* Each selection rearranges the same photograph, shapes and signature. */
+.portrait-playground:has(#portrait-mode-play:checked) .words-portrait,.portrait-playground:has(#portrait-mode-signed:checked) .words-portrait{display:none}
+.portrait-playground:has(#portrait-mode-play:checked) .words-play,.portrait-playground:has(#portrait-mode-signed:checked) .words-signed{display:block}
+.portrait-playground:has(#portrait-mode-play:checked) .poster-words{left:43%;top:3%;transform:rotate(7deg);z-index:4;font-size:clamp(45px,6vw,95px)}
+.portrait-playground:has(#portrait-mode-play:checked) .remix-photo{transform:translate(-19%,9%) rotate(-13deg) scale(.85)}
+.portrait-playground:has(#portrait-mode-play:checked) .remix-image img{filter:grayscale(0);transform:scale(1.07)}
+.portrait-playground:has(#portrait-mode-play:checked) .paper-lime{transform:translate(-16%,8%) rotate(14deg)}
+.portrait-playground:has(#portrait-mode-play:checked) .paper-lilac{transform:translate(11%,-2%) rotate(-10deg)}
+.portrait-playground:has(#portrait-mode-play:checked) .poster-autograph{transform:translate(325%,-2%) rotate(14deg);background:var(--poster-lime);color:var(--poster-ink)}
+.portrait-playground:has(#portrait-mode-play:checked) .poster-stamp{transform:translate(-405%,-235%) rotate(-18deg);background:#eb9d7e}
+.portrait-playground:has(#portrait-mode-play:checked) .poster-spark{transform:translate(-90%,310%) rotate(85deg);color:var(--poster-lilac)}
+.portrait-playground:has(#portrait-mode-play:checked) .orbit-back{transform:rotate(50deg) scaleY(.72)}
+.portrait-playground:has(#portrait-mode-play:checked) .orbit-front{transform:rotate(-30deg) scaleX(.72)}
+.portrait-playground:has(#portrait-mode-play:checked) .poster-doodle{transform:translate(70%,0) rotate(18deg)}
+.portrait-playground:has(#portrait-mode-signed:checked) .poster-words{left:53%;top:6%;font-size:clamp(55px,7.5vw,118px);z-index:4}
+.portrait-playground:has(#portrait-mode-signed:checked) .remix-photo{transform:translate(-37%,7%) rotate(-8deg) scale(.74)}
+.portrait-playground:has(#portrait-mode-signed:checked) .paper-lime{transform:translate(-25%,7%) rotate(6deg) scale(.82)}
+.portrait-playground:has(#portrait-mode-signed:checked) .paper-lilac{transform:translate(7%,8%) rotate(12deg) scale(.9)}
+.portrait-playground:has(#portrait-mode-signed:checked) .poster-paper > span{visibility:hidden}
+.portrait-playground:has(#portrait-mode-signed:checked) .poster-autograph{transform:translate(280%,-16%) rotate(8deg) scale(1.15);background:var(--paper);color:var(--accent);box-shadow:none}
+.portrait-playground:has(#portrait-mode-signed:checked) .poster-autograph > span,.portrait-playground:has(#portrait-mode-signed:checked) .poster-autograph > small{color:var(--muted)}
+.portrait-playground:has(#portrait-mode-signed:checked) .poster-stamp{transform:translate(-360%,25%) rotate(-15deg);background:var(--poster-lilac)}
+.portrait-playground:has(#portrait-mode-signed:checked) .poster-spark{transform:translate(-420%,-20%) rotate(-20deg);width:13%;color:var(--accent)}
+.portrait-playground:has(#portrait-mode-signed:checked) .orbit-back{transform:rotate(8deg) scaleY(.75)}
+.portrait-playground:has(#portrait-mode-signed:checked) .orbit-front{transform:rotate(70deg) scaleX(.7)}
+.portrait-playground:has(#portrait-mode-signed:checked) .poster-doodle{transform:translate(80%,-20%) rotate(-25deg);opacity:.35}
+
+.contact-autograph{display:flex;align-items:center;gap:30px;margin-top:35px;border-top:1px solid var(--rule);padding-top:25px;color:var(--accent);max-width:350px}
+.contact-autograph > span:not(.signature-fallback){font:italic 27px/1.15 Instrument,Georgia,serif;color:var(--muted)}
+.contact-autograph .personal-signature{display:block;width:95px;height:140px;flex-shrink:0;color:var(--accent)}
+.contact-autograph .signature-fallback{font:italic 32px/1.4 Instrument,Georgia,serif;overflow-wrap:anywhere}
+.poster-autograph path,.contact-autograph path{stroke-dasharray:1;stroke-dashoffset:0}
+@media(prefers-reduced-motion:no-preference){
+  :root[data-motion="on"] .portrait-drift{transition:transform .35s ease-out}
+  :root[data-motion="on"] :is(.poster-orbit,.poster-words,.poster-paper,.remix-photo,.poster-spark,.poster-stamp,.poster-autograph,.poster-doodle){transition:transform .85s cubic-bezier(.22,.8,.2,1),color .4s,background-color .4s,opacity .4s}
+  :root[data-motion="on"] .remix-image img{transition:filter .8s ease,transform 1s cubic-bezier(.22,.8,.2,1)}
+  :root[data-motion="on"] .composition-options label > span{transition:background-color .25s,color .25s,border-color .25s}
+  :root[data-motion="on"] .portrait-remix b{transition:transform .5s ease}
+  :root[data-motion="on"] .portrait-remix:hover b{transform:rotate(100deg)}
+  :root[data-motion="on"] .portrait-playground.is-signing .personal-signature path{animation:poster-sign var(--stroke-time,.4s) var(--stroke-delay,0s) ease-out both}
+  .poster-autograph .signature-rise{--stroke-delay:.26s;--stroke-time:.3s}
+  .poster-autograph .signature-letters{--stroke-delay:.5s;--stroke-time:.55s}
+  .poster-autograph .signature-dot{--stroke-delay:1s;--stroke-time:.06s}
+  .poster-autograph .signature-sweep{--stroke-delay:1.08s;--stroke-time:.65s}
+  @keyframes poster-sign{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+}
+@media(max-width:1100px) and (min-width:701px){
+  .journey .intro-grid{grid-template-columns:1fr 1.1fr;gap:24px;min-height:520px}
+  .journey #hello-title{font-size:14vw}
+  .playground-heading{font-size:8px;gap:10px}
+  .playground-heading > span:last-child{display:none}
+  .composition-options label > span{font-size:11px;padding-inline:10px}
+  .composition-options small{display:none}
+  .poster-autograph .personal-signature{height:100px}
+  .remix-photo figcaption{font-size:9px;padding-top:9px}
+  .remix-photo figcaption > span:last-child{display:none}
+}
+@media(max-width:700px){
+  .journey .hero-stage{min-height:0;padding-bottom:35px}
+  .journey .intro-grid{grid-template-columns:minmax(0,1fr);gap:38px;min-height:0;padding:38px 0 28px}
+  .journey #hello-title{font-size:23vw;line-height:.84}
+  .portrait-playground{width:min(100%,480px);justify-self:center}
+  .playground-heading{font-size:9px;padding-bottom:12px}
+  .playground-heading > span:last-child{font-size:8px}
+  .poster-words{font-size:17vw}
+  .portrait-playground:has(#portrait-mode-play:checked) .poster-words{font-size:15vw}
+  .portrait-playground:has(#portrait-mode-signed:checked) .poster-words{font-size:19vw}
+  .poster-autograph .personal-signature{height:clamp(70px,23vw,115px);margin-block:4px}
+  .poster-autograph{padding:9px 6px}
+  .poster-autograph > span:not(.signature-fallback),.poster-autograph > small{font-size:6px;letter-spacing:.05em}
+  .poster-stamp{font-size:7px}.poster-stamp em{font-size:23px}
+  .poster-stamp b{font-size:18px}
+  .poster-paper{padding:12px}.paper-lime > span{font-size:7px}
+  .paper-lilac > span{font-size:9px}.paper-lilac b{font-size:21px}
+  .remix-photo{border-width:6px}.remix-photo figcaption{font-size:8px;padding:9px 1px 3px}
+  .remix-photo figcaption > span:last-child{font-size:5px}
+  .playground-controls{padding-top:14px;gap:10px}
+  .composition-options label > span{font-size:12px;padding-inline:12px}
+  .portrait-remix{font-size:12px;gap:8px}
+  .canvas-coordinate{font-size:6px}
+  .journey .hero-bottom{margin-top:4px}
+  .contact-autograph{max-width:320px;margin-top:25px}
+}
+@media(max-width:380px){
+  .composition-options small{display:none}.composition-options label > span{padding-inline:10px}
+  .playground-heading > span:last-child{display:none}
+  .poster-stamp em{font-size:19px}
+}
+@media(prefers-reduced-motion:reduce){.portrait-drift{transform:none!important}.portrait-playground path{stroke-dashoffset:0!important}}
+:root[data-motion="off"] .portrait-drift{transform:none!important}
+:root[data-motion="off"] .portrait-playground path{stroke-dashoffset:0!important}
+@media print{
+  .playground-controls,.playground-announcement{display:none!important}
+  .portrait-playground{max-width:350px;break-inside:avoid}
+  .portrait-drift{transform:none!important}
+  .journey .intro-grid{display:block}.journey #hello-title{font-size:80px}
+}

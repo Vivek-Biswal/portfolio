@@ -23,6 +23,19 @@ selected note on navigation and preserves its position during content updates.
 The reader locks background scrolling, while Escape returns focus to its opener.
 Mobile uses stacked covers and a horizontally scrollable contents strip.
 
+The hero is now a remixable portrait collage with three compositions: Portrait,
+Play, and Signed. The same photograph, paper layers, graphic marks and original
+signature move into a different arrangement for each selection. Play brings the
+photo into color; Signed gives the handwritten mark more prominence. The signature
+also appears beside the contact copy, in the section's existing color palette.
+
+Native radio controls work with touch, keyboard arrows, and without JavaScript.
+The enhancement adds a Remix button, a finite signature-drawing sequence, and
+subtle pointer tilt. The selected composition survives shared CMS updates; stale
+animation frames, timers and listeners are cleaned up. Motion pause, reduced
+motion, visibility changes and window blur stop decorative motion. Mobile stacks
+the artwork below the name and keeps the composition controls at least 44px tall.
+
 `server/render-line.mjs` still reads the shared CMS fields. All four anchor sections,
 project links, note reader routes and complete no-script content remain available.
 New content refreshes the animation instances without retaining stale CMS elements.
@@ -37,6 +50,9 @@ Unicode graphemes and accessible original text.
 ## Files and validation
 
 - `src/one/kinetic-motion.js`: GSAP ScrollTrigger and lifecycle cleanup.
+- `src/one/portrait-playground-markup.js`: shared CMS portrait and signature markup.
+- `src/one/portrait-playground.css`, `portrait-playground.js`: the three compositions,
+  native control styling, pointer response and drawing lifecycle.
 - `src/one/section-motion.js`: chapter motion, pointer response and disclosure effects.
 - `src/one/section-energy.css`: chapter-specific art direction and mobile layouts.
 - `src/one/ideas-gallery.css`: illustrated Ideas gallery and responsive covers.
@@ -46,12 +62,14 @@ Unicode graphemes and accessible original text.
 - `src/one/kinetic-math.js`: deterministic scatter and name fitting.
 - `src/one/journey.css`: responsive design, both color modes and print fallback.
 - `scripts/test-journey.mjs`, `scripts/test-kinetic.mjs`: content and motion checks.
+- `scripts/test-portrait-playground.mjs`: initial native state, rapid input, CMS
+  replacement, reduced motion, pause and teardown regression checks.
 
 Run `npm run test:journey`, `npm run test:cms`, `npm run test:notes`,
 `npm run build`, and `npm run verify:dist`. No dependency or paid API was added.
 The existing separate studio chunk still triggers the Vite size warning.
 
-Local preview: http://127.0.0.1:5173/2d/
+Local static preview: http://127.0.0.1:5174/2d/ (build output with offline defaults).
 
 ## References and verification limits
 
@@ -59,6 +77,8 @@ The [Awwwards animation collection](https://www.awwwards.com/websites/animation/
 and [David Langarica](https://www.davidlangarica.dev/) were consulted as creative
 portfolio references. This design and motion choreography were authored for this
 portfolio; no reference site's code or assets were copied.
+The portrait collage takes broad editorial inspiration from [Cappen](https://cappen.com/),
+using this portfolio's own photograph, signature, typography and colors.
 
 Browser review on 2026-11-13 covered the gallery and reader at desktop and mobile
 viewport sizes (1366 x 900 and 390 x 844). Opening notes, next-article navigation,
@@ -75,3 +95,21 @@ Validation commands cover 9 journey/motion tests, 16 CMS tests, 16 notes tests,
 the production build and distribution verification. The four new notes tests
 check stable artwork after CMS reordering and safe SVG rendering. No public
 deployment was performed in this phase.
+
+## Portrait review, 2026-11-14
+
+The latest targeted suites pass 59 checks: 18 journey/motion/controller, 16 CMS,
+16 notes and 9 essentials. The production build and distribution checks pass.
+The unchanged separately loaded 3D studio still emits the existing bundle-size
+warning. No dependency, paid service or public deployment was added.
+
+Browser review covered the desktop composition at 1280 x 720 and the mobile light
+theme at 390 x 844. Remix selected Play, keyboard ArrowRight selected Signed, and
+the motion toggle stopped decorative animation without resetting the selection.
+The mobile controls measured 44px tall. The review identified horizontal overflow
+from the pre-existing rotated ribbon and overlapping background copy in Signed;
+both were corrected in CSS and rebuilt. Browser access became unavailable before
+the last two CSS fixes, the contact signature, or mobile tapping could receive a
+final visual pass. The attempted viewport reset also failed after that loss of
+access. Real-device performance and OS reduced-motion were not browser-tested;
+the reduced-motion controller behavior is covered by automated tests.

@@ -5,6 +5,8 @@ import defaults from '../content/defaults.json' with {type:'json'};
 import {lineSections} from '../server/render-line.mjs';
 import {renderPublic} from '../server/render-public.mjs';
 import {escapeHtml, noteHref} from '../src/shared/content.js';
+import {portraitPlaygroundHtml} from '../src/one/portrait-playground-markup.js';
+import {signatureHtml} from '../src/shared/signature.js';
 
 const template=()=>readFileSync(new URL('../2d/index.html',import.meta.url),'utf8');
 const count=(html,pattern)=>[...html.matchAll(pattern)].length;
@@ -105,4 +107,54 @@ test('empty collections and long CMS values do not create nested sections or los
  assert.ok(empty.ideas.includes('id="now"'),'current work survives an empty notes collection');
  assert.ok(rendered.includes(escapeHtml(c.contact.heading)),'the final Contact section survives empty preceding collections');
  assert.equal(renderPublic(rendered,'2d',c),rendered);
+});
+
+test('portrait compositions are native labeled controls with one initial selection and a shared signature',()=>{
+ const html=portraitPlaygroundHtml('Vivek Biswal','/0d/portrait-pixel-shades.png');
+ assert.match(html,/<div\b[^>]*class="portrait-playground"[^>]*data-composition="portrait"/);
+ assert.equal(count(html,/\bid="portrait-artwork"/g),1,'controls share one artwork destination');
+ const radios=[...html.matchAll(/<input\b[^>]*\btype="radio"[^>]*>/g)].map(match=>match[0]);
+ assert.equal(radios.length,3);
+ assert.equal(radios.filter(input=>/\schecked(?:\s|\/?>)/.test(input)).length,1,'one composition starts selected');
+ for(const mode of ['portrait','play','signed']){
+  const input=radios.find(input=>input.includes(`value="${mode}"`));assert.ok(input,mode);
+  assert.ok(input.includes('name="portrait-composition"'),'native radio exclusivity works before JS');
+  assert.ok(input.includes(`id="portrait-mode-${mode}"`),'stable control ID supports focus restoration');
+  assert.ok(input.includes('aria-controls="portrait-artwork"'));
+  assert.match(html,new RegExp(`<label>\\s*<input[^>]*id="portrait-mode-${mode}"[^>]*>[\\s\\S]*?<\\/label>`),'each radio has a native label');
+ }
+ assert.match(html,/<fieldset\b[^>]*>[\s\S]*?<legend>[^<]+<\/legend>/,'the modes have an accessible group label');
+ assert.match(html,/<button\b[^>]*id="portrait-remix"[^>]*\bhidden(?:\s|>)/,'JS-only action starts hidden');
+ assert.match(html,/<p\b[^>]*class="playground-announcement sr-only"[^>]*role="status"[^>]*aria-live="polite"/);
+ assert.ok(html.includes(signatureHtml('Vivek Biswal')),'the traced signature is reused without changing its shape');
+ assert.match(html,/<img\b[^>]*src="\/0d\/portrait-pixel-shades\.png"[^>]*alt="Vivek Biswal"/);
+ assert.ok(!/<\/?section\b/i.test(html),'CMS section replacement cannot be confused by nested sections');
+ assert.ok(!/<script\b|\bon(?:click|change|load)\s*=/i.test(html),'native presentation does not require inline code');
+});
+
+test('portrait artwork escapes CMS names and image attributes and omits an unavailable portrait',()=>{
+ const name='Mira <img src=x onerror=alert(1)> & "Chen"';
+ const source='/images/portrait.png" onerror="alert(2)';
+ const html=portraitPlaygroundHtml(name,source);
+ assert.ok(html.includes(`src="${escapeHtml(source)}"`));
+ assert.ok(html.includes(`alt="${escapeHtml(name)}"`));
+ assert.ok(!html.includes('<img src=x onerror='));
+ assert.ok(!/\sonerror="/.test(html),'a quoted CMS path cannot add a handler');
+ assert.ok(html.includes(signatureHtml(name)),'another CMS owner keeps the text signature fallback');
+ assert.ok(!hasClass(html,'personal-signature'),'Vivek handwriting is not mislabeled as another owner');
+ assert.equal(portraitPlaygroundHtml('Mira Chen',''),'','missing portrait does not leave broken controls');
+});
+
+test('CMS hero replacements retain one playground and unique stable interaction IDs',()=>{
+ const before=fixture(),after=fixture();
+ before.profile.name='Previous Owner';before.profile.portrait='/images/previous-owner.png';
+ after.profile.name='Updated Owner';after.profile.portrait='/images/updated-owner.png';
+ const first=renderPublic(template(),'2d',before),updated=renderPublic(first,'2d',after);
+ assert.equal(renderPublic(updated,'2d',after),updated,'repeat rendering does not accumulate art or controls');
+ for(const id of ['portrait-artwork','portrait-remix','portrait-mode-portrait','portrait-mode-play','portrait-mode-signed'])assert.equal(count(updated,new RegExp(`\\bid="${id}"`,'g')),1,`one ${id}`);
+ const ids=[...updated.matchAll(/\bid="([^"]+)"/g)].map(match=>match[1]);
+ assert.equal(new Set(ids).size,ids.length,'decorative SVGs introduce no duplicate document IDs');
+ assert.ok(updated.includes(escapeHtml(after.profile.portrait)));
+ assert.ok(updated.includes(escapeHtml(after.profile.name)));
+ assert.ok(!updated.includes(before.profile.portrait)&&!updated.includes(before.profile.name),'old portrait identity is fully replaced');
 });
