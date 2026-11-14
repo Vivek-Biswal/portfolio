@@ -78,3 +78,22 @@ development response also timed out locally; no backend settings were changed.
 
 Built offline preview with the default shared content:
 http://127.0.0.1:5174/1d/
+
+## Personal signature and Hello envelope — 2026-11-14
+
+The supplied signature was traced into local SVG strokes: the tall V, ascending
+letters, and returning oval flourish. Notebook lines and annotations are not
+included. It signs the portrait reverse and the contact letter, drawing once
+when either is opened. Other CMS profile names retain a text signoff.
+
+The contact envelope keeps its face in view while opening: a hinged flap, a
+small staggered Hello gesture, an ink underline, and a revealed contact sheet.
+Hover, keyboard focus and native open states drive the effects. Touch users can
+tap the whole summary; reduced motion shows the final ink without animation.
+Contact content still grows naturally and links retain their original behavior.
+
+Source: `src/shared/signature.js`, `server/render-essentials.mjs`, and
+`src/zero/discoveries.css`. The 7 essentials and 16 CMS tests, production build,
+and distribution verification passed. The built local preview returned HTTP 200
+with the signature markup. Browser tabs still failed to attach; desktop/mobile
+animation appearance remains unverified. This change has not been deployed.
