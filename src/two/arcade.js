@@ -420,7 +420,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     if (event.target.closest('input,textarea,select,[contenteditable]')) return;
     if (mode === 'desktop') {
       if (!(workspace.contains(event.target) || event.target === document.body)
-        || event.target.closest('.app-window,.start-menu,.desktop-icons')) return;
+        || event.target.closest('.app-window,.start-menu,.desktop-icons,.desktop-welcome,.desktop-surprises')) return;
     } else if (!world.contains(event.target)) return;
     const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
     if (event.repeat) { if (keyActions[key]) event.preventDefault(); return; }

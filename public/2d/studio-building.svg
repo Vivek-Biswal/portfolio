@@ -1,0 +1,204 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 144" width="320" height="288" shape-rendering="crispEdges" role="img" aria-labelledby="title desc">
+<title id="title">The Open Studio</title>
+<desc id="desc">A pixel art creative studio with a lavender tiled roof, warm windows, a rooftop cat, climbing plants and an open door.</desc>
+<defs>
+<g id="studio-window"><rect width="28" height="40" fill="#424958"/><rect x="2" y="2" width="24" height="36" fill="#d9c29c"/><rect x="4" y="4" width="20" height="31" fill="#efd99d"/><rect x="5" y="5" width="9" height="14" fill="#fff0bc"/><rect x="17" y="5" width="6" height="14" fill="#f8e7af"/><rect x="4" y="23" width="20" height="12" fill="#b7b7a0"/><rect x="6" y="25" width="14" height="8" fill="#596e70"/><rect x="8" y="26" width="10" height="5" fill="#a5c9b3"/><rect x="9" y="28" width="6" height="1" fill="#edf3d3"/><rect x="8" y="33" width="10" height="2" fill="#806f66"/><rect x="13" y="4" width="2" height="31" fill="#5f786f"/><rect x="4" y="19" width="20" height="2" fill="#5f786f"/><rect x="-2" y="39" width="32" height="3" fill="#fff4d7"/><rect x="-2" y="42" width="32" height="2" fill="#c4ad96"/></g>
+<g id="studio-pot"><rect x="3" y="21" width="12" height="11" fill="#b89073"/><rect x="1" y="20" width="16" height="4" fill="#d5b18b"/><rect x="4" y="31" width="10" height="2" fill="#846c62"/><rect x="8" y="6" width="2" height="16" fill="#5e7b64"/><path d="M2 10h6V4h5v7h5v6h-7v4H5v-5H0v-4h2Z" fill="#7b9d75"/><path d="M6 6h3V2h4v7h-3v4H5V9h1Z" fill="#b4c292"/><path d="M12 12h6v5h-7v-3h1Z" fill="#526e5d"/></g>
+</defs>
+<!-- A little paved plot with a consistent 1-pixel outline. -->
+<rect x="9" y="136" width="143" height="4" fill="#45454d20"/>
+<path d="M10 128H145V131H151V137H8V133H10Z" fill="#8a8c83"/>
+<rect x="12" y="128" width="131" height="5" fill="#e8e1c5"/>
+<rect x="15" y="129" width="125" height="1" fill="#fff7dc"/>
+<rect x="32" y="66" width="104" height="62" fill="#424958"/>
+<rect x="35" y="67" width="96" height="59" fill="#f4e6c7"/>
+<rect x="131" y="68" width="7" height="59" fill="#b5a58d"/>
+<rect x="36" y="72" width="3" height="54" fill="#e1ceac"/>
+<rect x="128" y="72" width="3" height="54" fill="#cfb99e"/>
+<!-- Limestone masonry. -->
+<path d="M39 91H128M39 103H128M39 115H128M43 82v9M67 91v12M92 103v12M117 115v11" fill="none" stroke="#decbae" stroke-width="1"/>
+<!-- Deep stepped tile roof; tiny attic window and roof garden. -->
+<path d="M21 56H27V49H34V42H43V35H125V42H132V49H140V56H145V65H21Z" fill="#424958"/>
+<path d="M26 57H32V50H39V43H47V38H122V44H129V51H136V57H140V61H26Z" fill="#9189ad"/>
+<path d="M39 44H128V47H39ZM32 51H135V54H32ZM26 58H140V61H26Z" fill="#b7aeca"/>
+<path d="M49 39v5M63 39v5M77 39v5M91 39v5M105 39v5M119 39v5M44 47v4M58 47v4M72 47v4M86 47v4M100 47v4M114 47v4M128 47v4M36 54v4M50 54v4M64 54v4M78 54v4M92 54v4M106 54v4M120 54v4M134 54v4" stroke="#776d91" stroke-width="1" fill="none"/>
+<rect x="105" y="23" width="12" height="15" fill="#87768d"/><rect x="103" y="21" width="16" height="4" fill="#d7c5bd"/><rect x="107" y="26" width="4" height="3" fill="#b9a3ae"/><rect x="112" y="31" width="4" height="3" fill="#b9a3ae"/>
+<path d="M59 40V32H63V27H83V32H87V40Z" fill="#424958"/><path d="M63 38V33H67V30H79V33H83V38Z" fill="#ead7ac"/><rect x="67" y="33" width="12" height="7" fill="#ffe9a1"/><rect x="72" y="32" width="2" height="9" fill="#88775f"/>
+<!-- Sleeping roof cat, readable even at desktop icon scale. -->
+<path d="M42 34v-9h3v4h6v-4h3v5h7v5H42Z" fill="#4b505d"/><rect x="44" y="30" width="2" height="1" fill="#e7deb9"/><rect x="50" y="30" width="2" height="1" fill="#e7deb9"/><path d="M61 33h4v-4h2v6h-7Z" fill="#4b505d"/>
+<!-- Sign, lettered as pixels rather than relying on an installed font. -->
+<rect x="30" y="61" width="108" height="18" fill="#424958"/><rect x="32" y="63" width="104" height="14" fill="#648176"/><rect x="34" y="64" width="100" height="1" fill="#afc0a7"/><rect x="34" y="75" width="100" height="1" fill="#3e6358"/>
+<g fill="#fff1cb"><rect x="47" y="67" width="1" height="1"/>
+<rect x="48" y="67" width="1" height="1"/>
+<rect x="49" y="67" width="1" height="1"/>
+<rect x="46" y="68" width="1" height="1"/>
+<rect x="50" y="68" width="1" height="1"/>
+<rect x="46" y="69" width="1" height="1"/>
+<rect x="50" y="69" width="1" height="1"/>
+<rect x="46" y="70" width="1" height="1"/>
+<rect x="50" y="70" width="1" height="1"/>
+<rect x="46" y="71" width="1" height="1"/>
+<rect x="50" y="71" width="1" height="1"/>
+<rect x="46" y="72" width="1" height="1"/>
+<rect x="50" y="72" width="1" height="1"/>
+<rect x="47" y="73" width="1" height="1"/>
+<rect x="48" y="73" width="1" height="1"/>
+<rect x="49" y="73" width="1" height="1"/>
+<rect x="52" y="67" width="1" height="1"/>
+<rect x="53" y="67" width="1" height="1"/>
+<rect x="54" y="67" width="1" height="1"/>
+<rect x="55" y="67" width="1" height="1"/>
+<rect x="52" y="68" width="1" height="1"/>
+<rect x="56" y="68" width="1" height="1"/>
+<rect x="52" y="69" width="1" height="1"/>
+<rect x="56" y="69" width="1" height="1"/>
+<rect x="52" y="70" width="1" height="1"/>
+<rect x="53" y="70" width="1" height="1"/>
+<rect x="54" y="70" width="1" height="1"/>
+<rect x="55" y="70" width="1" height="1"/>
+<rect x="52" y="71" width="1" height="1"/>
+<rect x="52" y="72" width="1" height="1"/>
+<rect x="52" y="73" width="1" height="1"/>
+<rect x="58" y="67" width="1" height="1"/>
+<rect x="59" y="67" width="1" height="1"/>
+<rect x="60" y="67" width="1" height="1"/>
+<rect x="61" y="67" width="1" height="1"/>
+<rect x="62" y="67" width="1" height="1"/>
+<rect x="58" y="68" width="1" height="1"/>
+<rect x="58" y="69" width="1" height="1"/>
+<rect x="58" y="70" width="1" height="1"/>
+<rect x="59" y="70" width="1" height="1"/>
+<rect x="60" y="70" width="1" height="1"/>
+<rect x="61" y="70" width="1" height="1"/>
+<rect x="58" y="71" width="1" height="1"/>
+<rect x="58" y="72" width="1" height="1"/>
+<rect x="58" y="73" width="1" height="1"/>
+<rect x="59" y="73" width="1" height="1"/>
+<rect x="60" y="73" width="1" height="1"/>
+<rect x="61" y="73" width="1" height="1"/>
+<rect x="62" y="73" width="1" height="1"/>
+<rect x="64" y="67" width="1" height="1"/>
+<rect x="68" y="67" width="1" height="1"/>
+<rect x="64" y="68" width="1" height="1"/>
+<rect x="65" y="68" width="1" height="1"/>
+<rect x="68" y="68" width="1" height="1"/>
+<rect x="64" y="69" width="1" height="1"/>
+<rect x="65" y="69" width="1" height="1"/>
+<rect x="68" y="69" width="1" height="1"/>
+<rect x="64" y="70" width="1" height="1"/>
+<rect x="66" y="70" width="1" height="1"/>
+<rect x="68" y="70" width="1" height="1"/>
+<rect x="64" y="71" width="1" height="1"/>
+<rect x="67" y="71" width="1" height="1"/>
+<rect x="68" y="71" width="1" height="1"/>
+<rect x="64" y="72" width="1" height="1"/>
+<rect x="67" y="72" width="1" height="1"/>
+<rect x="68" y="72" width="1" height="1"/>
+<rect x="64" y="73" width="1" height="1"/>
+<rect x="68" y="73" width="1" height="1"/>
+<rect x="75" y="67" width="1" height="1"/>
+<rect x="76" y="67" width="1" height="1"/>
+<rect x="77" y="67" width="1" height="1"/>
+<rect x="78" y="67" width="1" height="1"/>
+<rect x="74" y="68" width="1" height="1"/>
+<rect x="74" y="69" width="1" height="1"/>
+<rect x="75" y="70" width="1" height="1"/>
+<rect x="76" y="70" width="1" height="1"/>
+<rect x="77" y="70" width="1" height="1"/>
+<rect x="78" y="71" width="1" height="1"/>
+<rect x="78" y="72" width="1" height="1"/>
+<rect x="74" y="73" width="1" height="1"/>
+<rect x="75" y="73" width="1" height="1"/>
+<rect x="76" y="73" width="1" height="1"/>
+<rect x="77" y="73" width="1" height="1"/>
+<rect x="80" y="67" width="1" height="1"/>
+<rect x="81" y="67" width="1" height="1"/>
+<rect x="82" y="67" width="1" height="1"/>
+<rect x="83" y="67" width="1" height="1"/>
+<rect x="84" y="67" width="1" height="1"/>
+<rect x="82" y="68" width="1" height="1"/>
+<rect x="82" y="69" width="1" height="1"/>
+<rect x="82" y="70" width="1" height="1"/>
+<rect x="82" y="71" width="1" height="1"/>
+<rect x="82" y="72" width="1" height="1"/>
+<rect x="82" y="73" width="1" height="1"/>
+<rect x="86" y="67" width="1" height="1"/>
+<rect x="90" y="67" width="1" height="1"/>
+<rect x="86" y="68" width="1" height="1"/>
+<rect x="90" y="68" width="1" height="1"/>
+<rect x="86" y="69" width="1" height="1"/>
+<rect x="90" y="69" width="1" height="1"/>
+<rect x="86" y="70" width="1" height="1"/>
+<rect x="90" y="70" width="1" height="1"/>
+<rect x="86" y="71" width="1" height="1"/>
+<rect x="90" y="71" width="1" height="1"/>
+<rect x="86" y="72" width="1" height="1"/>
+<rect x="90" y="72" width="1" height="1"/>
+<rect x="87" y="73" width="1" height="1"/>
+<rect x="88" y="73" width="1" height="1"/>
+<rect x="89" y="73" width="1" height="1"/>
+<rect x="92" y="67" width="1" height="1"/>
+<rect x="93" y="67" width="1" height="1"/>
+<rect x="94" y="67" width="1" height="1"/>
+<rect x="95" y="67" width="1" height="1"/>
+<rect x="92" y="68" width="1" height="1"/>
+<rect x="96" y="68" width="1" height="1"/>
+<rect x="92" y="69" width="1" height="1"/>
+<rect x="96" y="69" width="1" height="1"/>
+<rect x="92" y="70" width="1" height="1"/>
+<rect x="96" y="70" width="1" height="1"/>
+<rect x="92" y="71" width="1" height="1"/>
+<rect x="96" y="71" width="1" height="1"/>
+<rect x="92" y="72" width="1" height="1"/>
+<rect x="96" y="72" width="1" height="1"/>
+<rect x="92" y="73" width="1" height="1"/>
+<rect x="93" y="73" width="1" height="1"/>
+<rect x="94" y="73" width="1" height="1"/>
+<rect x="95" y="73" width="1" height="1"/>
+<rect x="98" y="67" width="1" height="1"/>
+<rect x="99" y="67" width="1" height="1"/>
+<rect x="100" y="67" width="1" height="1"/>
+<rect x="101" y="67" width="1" height="1"/>
+<rect x="102" y="67" width="1" height="1"/>
+<rect x="100" y="68" width="1" height="1"/>
+<rect x="100" y="69" width="1" height="1"/>
+<rect x="100" y="70" width="1" height="1"/>
+<rect x="100" y="71" width="1" height="1"/>
+<rect x="100" y="72" width="1" height="1"/>
+<rect x="98" y="73" width="1" height="1"/>
+<rect x="99" y="73" width="1" height="1"/>
+<rect x="100" y="73" width="1" height="1"/>
+<rect x="101" y="73" width="1" height="1"/>
+<rect x="102" y="73" width="1" height="1"/>
+<rect x="105" y="67" width="1" height="1"/>
+<rect x="106" y="67" width="1" height="1"/>
+<rect x="107" y="67" width="1" height="1"/>
+<rect x="104" y="68" width="1" height="1"/>
+<rect x="108" y="68" width="1" height="1"/>
+<rect x="104" y="69" width="1" height="1"/>
+<rect x="108" y="69" width="1" height="1"/>
+<rect x="104" y="70" width="1" height="1"/>
+<rect x="108" y="70" width="1" height="1"/>
+<rect x="104" y="71" width="1" height="1"/>
+<rect x="108" y="71" width="1" height="1"/>
+<rect x="104" y="72" width="1" height="1"/>
+<rect x="108" y="72" width="1" height="1"/>
+<rect x="105" y="73" width="1" height="1"/>
+<rect x="106" y="73" width="1" height="1"/>
+<rect x="107" y="73" width="1" height="1"/>
+</g>
+<!-- Striped awning and its little scalloped edge. -->
+<rect x="28" y="80" width="111" height="3" fill="#424958"/><rect x="29" y="83" width="109" height="7" fill="#c1b5ce"/><path d="M29 83h13v7H29ZM55 83h13v7H55ZM81 83h13v7H81ZM107 83h13v7h-13Z" fill="#fff3d4"/><rect x="28" y="89" width="111" height="3" fill="#747086"/>
+<use href="#studio-window" x="40" y="92" transform="translate(0 -4) scale(1 .96)"/>
+<use href="#studio-window" x="102" y="92" transform="translate(0 -4) scale(1 .96)"/>
+<!-- Open doorway: dark gap plus warm door edge. -->
+<rect x="73" y="88" width="25" height="42" fill="#424958"/><rect x="76" y="90" width="19" height="37" fill="#576d64"/><rect x="78" y="92" width="12" height="34" fill="#344b45"/><rect x="79" y="93" width="8" height="22" fill="#a8c4a5"/><rect x="80" y="95" width="3" height="17" fill="#c7d7b6"/>
+<path d="M88 91H95V127H88L84 124V94Z" fill="#c5aa7e"/><path d="M88 94H93V114H88L86 112V96Z" fill="#e7d6a4"/><rect x="91" y="117" width="2" height="4" fill="#f9e7a7"/><rect x="89" y="120" width="4" height="5" fill="#8d775f"/>
+<!-- Small lamps and climbing ivy. -->
+<rect x="33" y="92" width="3" height="10" fill="#4b5158"/><rect x="32" y="94" width="5" height="6" fill="#f6d491"/><rect x="33" y="95" width="3" height="4" fill="#fff1bc"/><rect x="133" y="92" width="3" height="10" fill="#4b5158"/><rect x="132" y="94" width="5" height="6" fill="#f6d491"/><rect x="133" y="95" width="3" height="4" fill="#fff1bc"/>
+<path d="M123 42h3v6h4v5h-4v7h7v6h-6v8h3v6h-4v-7h-4v-7h3v-9h-4v-6h3Z" fill="#6e8b6b"/><path d="M119 43h6v4h-6ZM125 51h7v4h-7ZM121 61h6v4h-6ZM127 68h6v4h-6Z" fill="#a0b88a"/>
+<use href="#studio-pot" x="14" y="99"/><use href="#studio-pot" x="136" y="101" transform="translate(24 20) scale(.82)"/>
+<!-- Entrance steps and a small postcard left by the door. -->
+<rect x="70" y="127" width="30" height="4" fill="#6a7168"/><rect x="72" y="127" width="26" height="2" fill="#f5e8c6"/><rect x="66" y="131" width="38" height="4" fill="#767c72"/><rect x="68" y="131" width="34" height="2" fill="#fff4d8"/>
+<rect x="111" y="124" width="17" height="9" fill="#6d735d"/><rect x="113" y="125" width="13" height="6" fill="#fff3d0"/><path d="M115 127h9v1h-9ZM117 129h5v1h-5Z" fill="#80917b"/>
+</svg>

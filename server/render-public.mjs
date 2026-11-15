@@ -30,7 +30,7 @@ export function renderPublic(template,page,c) {
   }
   if(page==='3d') {
     html=html.replace(/(<a class="os-logo"[^>]*>)[\s\S]*?<\/a>/,(_,start)=>start+e(first)+'<span>OS</span><small>v.03</small></a>');
-    html=html.replace(/<div class="desktop-intro">[\s\S]*?<\/div>/,()=>`<div class="desktop-intro"><p class="intro-kicker">${e(c.profile.name.toUpperCase())} · WORLD 03</p><h1>${e(c.settings.pixelTitle).replaceAll('\n','<br />')}</h1><p>${e(c.settings.pixelSubtitle).replaceAll('\n','<br />')}</p><button type="button" class="pixel-button entrance-primary" data-arcade-enter aria-controls="open-studio">Step inside <span aria-hidden="true">↗</span></button><button type="button" class="entrance-about" data-open="about">Or, meet the maker <span aria-hidden="true">→</span></button></div>`);
+    html=html.replace(/<div class="desktop-intro">[\s\S]*?<\/div>/,()=>`<div class="desktop-intro"><p class="intro-kicker">${e(c.profile.name.toUpperCase())} · WORLD 03</p><h1>${e(c.settings.pixelTitle).replaceAll('\n','<br />')}</h1><p>${e(c.settings.pixelSubtitle).replaceAll('\n','<br />')}</p><button type="button" class="pixel-button entrance-primary" data-arcade-enter aria-controls="open-studio">Open studio <span aria-hidden="true">→</span></button><button type="button" class="entrance-about" data-open="about">Meet the maker <span aria-hidden="true">↗</span></button></div>`);
   }
   if(['project','notes','now'].includes(page)) {
     html=html.replace(/<main[^>]*>[\s\S]*?<\/main>/,()=>`<main class="page reading-page" id="main" tabindex="-1">${essentialsArticle(c,page)}</main>`);

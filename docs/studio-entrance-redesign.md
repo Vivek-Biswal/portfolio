@@ -1,16 +1,25 @@
-# Studio entrance — 15 November 2026
+# Pixel OS desktop — 15 November 2026
 
-The outdoor `/3d/` desktop now uses an evening architectural composition: locally hosted Instrument Serif and Manrope, a softly lit studio illustration, a dark botanical landscape, faint orbital lines and eight subtle CSS light particles. The existing lavender, mint and peach preferences select corresponding dusk palettes. Reduced-motion preferences disable ambience, entrance motion and hover travel.
+The current /3d/ entrance is a pixel mini-game desktop. This replaces the previous evening architectural landing-page treatment, following the user's correction to preserve the OS concept. The 1D and 2D worlds are unchanged.
 
-The new Step inside action uses the same startup-bound studio entry listener as the building. About, Projects, Notes, Contact, Settings, desktop windows, studio fallback and games retain their original controllers and shared CMS content. Both the source template and server renderer contain the new entry action. Canvas rendering publishes the actual walking floor offset to CSS so the building stays aligned after resizing. Outdoor character scale is smaller; the same distance-based walk cycle and manual controls remain in use.
+## Desktop experience
 
-The generated asset and full generation prompt are documented in `studio-entrance-asset.md`. The illustration is an exterior entrance; the interactive Three.js interior is unchanged.
+- Pixel type, pastel wallpaper, tactile window borders, desktop apps, Start menu and taskbar.
+- A draggable readme.txt window with keyboard movement, close/reopen controls and the existing studio action. Its title and introduction still come from the shared CMS.
+- A locally authored SVG studio and canvas pixel landscape: cottages, clouds, gardens and a pond. The existing manual character movement and distance-based gait remain intact.
+- Four collectible pixels with a saved curiosity badge, a pettable cat, a recycle bin that reveals a seed and grows a flower, and a mystery floppy that launches one of the seven existing games without immediately repeating the last choice.
+- Discoveries persist locally when storage is available and remain usable when it is blocked. Reduced-motion preferences suppress decorative motion. Desktop surprises suspend while the studio or arcade is active.
+- Compact phone and landscape layouts put sidequests in a scrollable window. All new controls are buttons with keyboard labels. Closing a panel returns focus to its launcher; dragging the readme focuses its titlebar for keyboard movement.
+
+## Preserved integrations
+
+The existing app window manager, CMS subscription, content readers, Three.js studio, cutaway walls, interior cat, interaction controller, seven games and scores retain their controllers. The source template and server renderer both include the new readme actions. No new dependencies, external services or paid assets were introduced.
+
+The original evening illustration remains an unused historical asset; the current entrance uses public/2d/studio-building.svg.
 
 ## Verification
 
-- Production build and distribution verification passed.
-- CMS, arcade/controller/locomotion and studio test suites passed (112 test cases, including generated cases). The existing CMS rerender check now also checks that the new entry and About actions survive repeated rendering.
-- Browser screenshots reviewed at 1280×720 and 390×844: entrance, typography, art placement, responsive navigation and walking controls were visible and unclipped.
-- Follow-up static review corrected short-landscape intro/control overlap and restored landscape safe-area insets. These final compact-layout adjustments were not visually rechecked: browser access became unavailable.
-- Live studio entry/exit and content-window clicks could not be completed in this browser pass. Existing automated interaction/game tests passed; real-device performance is not measured.
-- No public deployment was performed.
+- Production build, distribution verification and 117 CMS, admin, arcade, locomotion and studio tests passed; 34 focused surprise/controller/CMS tests were rerun after integration fixes.
+- Browser interactions verified: readme close/reopen and keyboard movement, Projects app open/close, cat reaction, seed and flower, collecting all four pixels, mystery disk opening Brick Breaker and returning to desktop, and studio entry/exit.
+- Desktop reviewed at 1280×720. Phone-sized layouts checked at 390×844 and 375×667 with no horizontal page overflow. An 844×390 review exposed a landscape sidequest overflow; the final build uses a compact scrollable panel there. Browser access became unavailable before that last landscape correction and the final focus fixes could be visually rechecked.
+- Real-device performance has not been measured. No public deployment was performed.

@@ -4,10 +4,13 @@ import { renderNotesApp } from './app-content.js';
 import { subscribeContent } from '../shared/public-client.js';
 import { mountCompanion } from './companion.js';
 import { mountArcade } from './arcade.js';
+import { mountDesktopWelcome } from './desktop-welcome.js';
+import { mountDesktopSurprises } from './desktop-surprises.js';
 import './companion.css';
 import './arcade.css';
 import './typography.css';
 import './entrance.css';
+import './desktop-surprises.css';
 
 const layer = document.querySelector('.window-layer');
 const tasks = document.querySelector('.tasks');
@@ -19,7 +22,9 @@ const windows = new Map();
 let topOrder = 10;
 let activeId = null;
 let game;
+let surprises;
 let studio, studioLoading = false, studioGame = false;
+const cleanupWelcome=mountDesktopWelcome(document.querySelector('.workspace'));
 let notesSelection = {kind:'index'};
 let notesRouteActive = false;
 let appliedNotesHash = null;
@@ -303,10 +308,13 @@ game = mountArcade(document.querySelector('.workspace'), {
     if (!active && studioGame) {
       studioGame=false; studio?.show(); syncStudioChrome();
       announce('Back in the studio. Your position and game records are kept.');
-    }
+    } else if (!active) syncStudioChrome();
   },
   onReturnToStudio: () => studioGame,
   announce,
+});
+surprises=mountDesktopSurprises(document.querySelector('.workspace'),{
+  announce,playGame:id=>game.play(id),arcadeEnabled:()=>getContent().settings.arcadeEnabled,
 });
 // Capture the entrance before the legacy arcade click listener. The old games
 // keep their own controllers and scores; the studio owns exploration only.
@@ -355,12 +363,13 @@ document.querySelector('.arcade-building').setAttribute('aria-label','Enter the 
 syncStudioChrome();
 window.addEventListener('pagehide',event=>{
   if(event.persisted)return;
-  studio?.destroy();game.destroy();
+  cleanupWelcome();surprises?.destroy();studio?.destroy();game.destroy();
 });
 applyNotesLocation({focus:false});
 
 subscribeContent(content=>{
   updateApps(content);
+  surprises?.refresh();
   studio?.refresh();
   document.title=content.settings.siteTitle+' — 3D';
   const logo=document.querySelector('.os-logo');

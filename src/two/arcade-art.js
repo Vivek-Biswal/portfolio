@@ -18,68 +18,73 @@ function tree(ctx, x, y, size) {
 }
 export function drawOutside(ctx, { width, height, palette, groundOffset = 32 }) {
   const ground = height - groundOffset;
-  const sky = palette.sky || '#101e1b', glow = palette.glow || '#344637';
+  const sky = palette.wall || '#e5e2ed';
   ctx.save();
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, width, height);
-  // Quiet dusk behind the building. The scene is deterministic and can sleep
-  // while the character is still; atmosphere does not require another RAF loop.
-  const atmosphere = ctx.createRadialGradient(width * .76, ground * .47, 0,
-    width * .76, ground * .47, Math.max(width * .53, height * .8));
-  if (atmosphere?.addColorStop) {
-    atmosphere.addColorStop(0, glow);
-    atmosphere.addColorStop(.64, sky);
-    atmosphere.addColorStop(1, sky);
-    ctx.fillStyle = atmosphere;
-    ctx.fillRect(0, 0, width, height);
-  }
-
-  // Broad, soft contours keep the walking lane legible without a tiled skyline.
-  const relief = Math.min(48, height * .12);
-  for (const [offset, color, wave] of [[.88, '#263c323b', 0], [.54, '#162b25a3', 1], [.19, '#11251fde', 2]]) {
-    ctx.beginPath();
-    ctx.moveTo(-1, ground - relief * offset);
-    for (let i = 0; i < 8; i++) {
-      const x = width * i / 7, next = width * (i + 1) / 7;
-      const y = ground - relief * offset + Math.sin(i * 1.7 + wave) * relief * .23;
-      ctx.quadraticCurveTo(x + width / 14, y - relief * .24, next, y);
-    }
-    ctx.lineTo(width + 1, ground + 2); ctx.lineTo(-1, ground + 2); ctx.closePath();
-    ctx.fillStyle = color; ctx.fill();
-  }
-
-  // Sparse botanical silhouettes frame the edges; the centre remains open.
-  for (const [edge, direction] of [[width * .025, 1], [width * .98, -1]]) {
-    for (let stem = 0; stem < 6; stem++) {
-      const x = edge + direction * stem * 4.4;
-      const tall = relief * (.48 + .1 * (stem % 3));
-      const lean = direction * (7 + stem * 1.4);
-      ctx.strokeStyle = '#58715a46'; ctx.lineWidth = .65;
-      ctx.beginPath(); ctx.moveTo(x, ground - 2);
-      ctx.quadraticCurveTo(x + lean * .1, ground - tall * .58, x + lean, ground - tall);
-      ctx.stroke();
-      ctx.fillStyle = '#3b554543';
-      for (let leaf = 0; leaf < 3; leaf++) {
-        const progress = .35 + leaf * .23;
-        ctx.beginPath();
-        ctx.ellipse(x + lean * progress * progress, ground - tall * progress,
-          2.8, 1.05, direction * (.45 + leaf * .22), 0, Math.PI * 2);
-        ctx.fill();
-      }
+  box(ctx, sky, 0, 0, width, height);
+  // A hand-placed pixel wallpaper, not a second animation loop. Keep the wide
+  // middle quiet for desktop windows and make the lower garden explorable.
+  for (let x = 10; x < width; x += 24) {
+    for (let y = 12; y < ground - 36; y += 24) {
+      box(ctx, '#ffffff24', x, y, 1, 1);
     }
   }
+  const cloud = (x, y, size = 1) => {
+    ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.scale(size, size);
+    box(ctx, '#ffffff4d', 2, 15, 59, 3);
+    box(ctx, '#fffdf4b3', 0, 9, 62, 6); box(ctx, '#fffdf4b3', 8, 4, 44, 6);
+    box(ctx, '#fffdf4b3', 18, 0, 22, 6); box(ctx, '#ffffff8c', 20, 1, 14, 2);
+    ctx.restore();
+  };
+  cloud(width * .20, height * .13, .7);
+  cloud(width * .53, height * .08, .9);
+  cloud(width * .85, height * .25, .6);
 
-  // The physical floor stays exactly aligned with the locomotion baseline.
-  ctx.fillStyle = '#0c1b18'; ctx.fillRect(0, ground, width, groundOffset + 1);
-  ctx.strokeStyle = '#9caa852b'; ctx.lineWidth = .6;
-  ctx.beginPath(); ctx.moveTo(0, ground + .5); ctx.lineTo(width, ground + .5); ctx.stroke();
-  for (let line = 0; line < 3; line++) {
-    ctx.strokeStyle = line === 0 ? '#a6b18b1d' : '#879b7b12';
-    ctx.beginPath(); ctx.moveTo(-width * .12, ground + 8 + line * 13);
-    ctx.bezierCurveTo(width * .28, ground + 6 + line * 5,
-      width * .64, ground + groundOffset * (.22 + line * .16),
-      width * 1.08, ground + 10 + line * 17);
-    ctx.stroke();
+  // Distant stair-step hills and scattered miniature houses sit below app content.
+  const relief = Math.min(58, height * .16);
+  for (let x = -16, i = 0; x < width + 20; x += 24, i++) {
+    const top = ground - relief - [4, 9, 18, 24, 18, 10, 6, 12, 19, 12][i % 10];
+    box(ctx, '#b7b3cd38', x, top, 25, ground - top);
+    box(ctx, '#ffffff20', x, top, 25, 2);
+  }
+  for (const x of [width * .06, width * .57, width * .94]) {
+    const y = ground - relief * .62;
+    box(ctx, '#a7a2bb50', x, y, 18, 24);
+    box(ctx, '#a7a2bb50', x + 4, y - 4, 10, 4);
+    box(ctx, '#f6f1d166', x + 4, y + 6, 3, 4); box(ctx, '#f6f1d166', x + 11, y + 6, 3, 4);
+  }
+  for (let x = -20, i = 0; x < width + 20; x += 28, i++) {
+    const top = ground - 21 - [0, 7, 3, 10, 8, 2][i % 6];
+    box(ctx, '#b3bea0', x, top, 29, ground - top);
+    box(ctx, '#c6ceb4', x + 4, top - 4, 21, 6);
+  }
+  box(ctx, '#c8d0ad', 0, ground - 16, width, 18);
+  for (let x = 11; x < width; x += 29) {
+    box(ctx, '#91a581', x, ground - 10, 2, 5); box(ctx, '#a3b58f', x + 3, ground - 7, 2, 3);
+    if (Math.floor(x / 29) % 3 === 0) {
+      box(ctx, '#77916e', x + 12, ground - 13, 1, 7);
+      box(ctx, '#faf2cb', x + 10, ground - 16, 5, 3); box(ctx, '#d8aa7b', x + 12, ground - 16, 1, 2);
+    }
+  }
+  // A tiny pond and mushrooms reward looking closely, without obstructing walking.
+  if (width > 450) {
+    const pondX = width * .14;
+    box(ctx, '#a3b38b', pondX - 4, ground - 20, 42, 13);
+    box(ctx, '#83aaa8', pondX, ground - 19, 34, 9); box(ctx, '#a6ccbf', pondX + 5, ground - 18, 21, 3);
+    box(ctx, '#e1ecce', pondX + 9, ground - 16, 9, 1); box(ctx, '#6e9074', pondX + 26, ground - 13, 5, 2);
+  }
+  for (const x of [width * .28, width * .56, width * .965]) {
+    box(ctx, '#eee2c3', x + 3, ground - 10, 3, 7);
+    box(ctx, '#ba858b', x, ground - 13, 9, 4); box(ctx, '#ba858b', x + 2, ground - 15, 5, 2);
+    box(ctx, '#f8e9cb', x + 2, ground - 12, 2, 1); box(ctx, '#f8e9cb', x + 6, ground - 13, 1, 1);
+  }
+  // Ground y is the exact locomotion baseline shared with the studio doorway.
+  box(ctx, '#7c9274', 0, ground, width, 2);
+  box(ctx, '#fff6df', 0, ground + 2, width, groundOffset);
+  box(ctx, '#dbd4bc', 0, ground + 5, width, 1);
+  for (let x = -9, i = 0; x < width; x += 24, i++) {
+    box(ctx, '#e6ddc5', x, ground + 6, 1, Math.min(14, groundOffset - 6));
+    box(ctx, '#e6ddc5', x, ground + 19, 24, 1);
+    if (i % 4 === 0) box(ctx, '#eee6d0', x + 8, ground + 10, 5, 1);
   }
   ctx.restore();
 }
