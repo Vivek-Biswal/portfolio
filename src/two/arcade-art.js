@@ -16,30 +16,72 @@ function tree(ctx, x, y, size) {
   box(ctx, '#b4bc98', -10, -72, 14, 7); box(ctx, '#b4bc98', -19, -57, 12, 5); box(ctx, '#65816d', 6, -41, 14, 6);
   ctx.restore();
 }
-export function drawOutside(ctx, { width, height, palette, time, groundOffset = 32 }) {
+export function drawOutside(ctx, { width, height, palette, groundOffset = 32 }) {
   const ground = height - groundOffset;
-  box(ctx, palette.wall, 0, 0, width, height);
-  // A quiet layered garden, with space above it for the portfolio introduction.
-  box(ctx, '#ffffff22', 0, 0, width, height * .55);
-  for (let i = 0; i < 5; i++) {
-    const x = Math.round((width * .17 + i * width * .25 + Math.sin(time * .045 + i) * 3) % (width + 100)) - 40;
-    const y = Math.round(height * .17 + (i % 3) * 22);
-    box(ctx, '#fffdf43d', x, y + 6, 50, 8); box(ctx, '#fffdf43d', x + 12, y, 24, 6);
+  const sky = palette.sky || '#101e1b', glow = palette.glow || '#344637';
+  ctx.save();
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, width, height);
+  // Quiet dusk behind the building. The scene is deterministic and can sleep
+  // while the character is still; atmosphere does not require another RAF loop.
+  const atmosphere = ctx.createRadialGradient(width * .76, ground * .47, 0,
+    width * .76, ground * .47, Math.max(width * .53, height * .8));
+  if (atmosphere?.addColorStop) {
+    atmosphere.addColorStop(0, glow);
+    atmosphere.addColorStop(.64, sky);
+    atmosphere.addColorStop(1, sky);
+    ctx.fillStyle = atmosphere;
+    ctx.fillRect(0, 0, width, height);
   }
-  box(ctx, '#acb5a6', 0, ground - 40, width, 45);
-  for (let x = -10; x < width; x += 52) {
-    box(ctx, '#bdc4ae', x, ground - 52 - (x % 3) * 4, 48, 28); box(ctx, '#bdc4ae', x + 8, ground - 60 - (x % 3) * 4, 31, 10);
+
+  // Broad, soft contours keep the walking lane legible without a tiled skyline.
+  const relief = Math.min(48, height * .12);
+  for (const [offset, color, wave] of [[.88, '#263c323b', 0], [.54, '#162b25a3', 1], [.19, '#11251fde', 2]]) {
+    ctx.beginPath();
+    ctx.moveTo(-1, ground - relief * offset);
+    for (let i = 0; i < 8; i++) {
+      const x = width * i / 7, next = width * (i + 1) / 7;
+      const y = ground - relief * offset + Math.sin(i * 1.7 + wave) * relief * .23;
+      ctx.quadraticCurveTo(x + width / 14, y - relief * .24, next, y);
+    }
+    ctx.lineTo(width + 1, ground + 2); ctx.lineTo(-1, ground + 2); ctx.closePath();
+    ctx.fillStyle = color; ctx.fill();
   }
-  box(ctx, '#ced2b8', 0, ground - 23, width, 25);
-  for (let x = 8; x < width; x += 18) {
-    box(ctx, '#9eaf91', x, ground - 8 - (x % 11), 2, 4);
-    if (x % 3 === 0) { box(ctx, '#f0d7a2', x + 4, ground - 13, 3, 3); box(ctx, '#8c9f7a', x + 5, ground - 10, 1, 4); }
+
+  // Sparse botanical silhouettes frame the edges; the centre remains open.
+  for (const [edge, direction] of [[width * .025, 1], [width * .98, -1]]) {
+    for (let stem = 0; stem < 6; stem++) {
+      const x = edge + direction * stem * 4.4;
+      const tall = relief * (.48 + .1 * (stem % 3));
+      const lean = direction * (7 + stem * 1.4);
+      ctx.strokeStyle = '#58715a46'; ctx.lineWidth = .65;
+      ctx.beginPath(); ctx.moveTo(x, ground - 2);
+      ctx.quadraticCurveTo(x + lean * .1, ground - tall * .58, x + lean, ground - tall);
+      ctx.stroke();
+      ctx.fillStyle = '#3b554543';
+      for (let leaf = 0; leaf < 3; leaf++) {
+        const progress = .35 + leaf * .23;
+        ctx.beginPath();
+        ctx.ellipse(x + lean * progress * progress, ground - tall * progress,
+          2.8, 1.05, direction * (.45 + leaf * .22), 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
   }
-  tree(ctx, 28, ground - 5, 1.1); if (width > 400) tree(ctx, width * .52, ground - 23, .65);
-  tree(ctx, width - 20, ground - 12, .95);
-  box(ctx, '#82937e', 0, ground, width, 2); box(ctx, '#f4eedb', 0, ground + 2, width, height - ground - 2);
-  box(ctx, '#fff9e8', 0, ground + 4, width, 2);
-  for (let x = -24; x < width; x += 30) { box(ctx, '#d8cfb8', x, ground + 18, 29, 1); box(ctx, '#d8cfb8', x + 18, ground + 3, 1, 15); }
+
+  // The physical floor stays exactly aligned with the locomotion baseline.
+  ctx.fillStyle = '#0c1b18'; ctx.fillRect(0, ground, width, groundOffset + 1);
+  ctx.strokeStyle = '#9caa852b'; ctx.lineWidth = .6;
+  ctx.beginPath(); ctx.moveTo(0, ground + .5); ctx.lineTo(width, ground + .5); ctx.stroke();
+  for (let line = 0; line < 3; line++) {
+    ctx.strokeStyle = line === 0 ? '#a6b18b1d' : '#879b7b12';
+    ctx.beginPath(); ctx.moveTo(-width * .12, ground + 8 + line * 13);
+    ctx.bezierCurveTo(width * .28, ground + 6 + line * 5,
+      width * .64, ground + groundOffset * (.22 + line * .16),
+      width * 1.08, ground + 10 + line * 17);
+    ctx.stroke();
+  }
+  ctx.restore();
 }
 export function drawCabinet(ctx, cab, time, selected) {
   const x = cab.x - 23, y = cab.y - 67, accent = cab.color;

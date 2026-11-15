@@ -57,6 +57,8 @@ test('editing the pixel introduction preserves its independent walking controls'
  for(const html of [once,twice]){
   assert.match(html,/<h1>An edited little world<\/h1>/);
   assert.equal((html.match(/class="outdoor-controls"/g)||[]).length,1);
+  assert.equal((html.match(/class="pixel-button entrance-primary" data-arcade-enter/g)||[]).length,1,'CMS rerenders retain the studio entry action');
+  assert.match(html,/class="entrance-about" data-open="about"/,'About stays independently accessible');
   for(const direction of ['left','up','down','right'])assert.ok(html.includes(`data-walk="${direction}"`));
  }
 });

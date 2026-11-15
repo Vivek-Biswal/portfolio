@@ -7,6 +7,7 @@ import { mountArcade } from './arcade.js';
 import './companion.css';
 import './arcade.css';
 import './typography.css';
+import './entrance.css';
 
 const layer = document.querySelector('.window-layer');
 const tasks = document.querySelector('.tasks');

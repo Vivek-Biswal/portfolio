@@ -47,8 +47,8 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   let player = { x: 160, y: 226, direction: 'down', moving: false, phase: 0 };
   let game, currentCabinet, round = 'running', score = 0, best = 0, near;
   const outdoorHeight = () => (workspace.clientWidth <= 760
-    ? workspace.clientHeight <= 300 ? Math.min(108, Math.max(80, workspace.clientHeight * 0.5 - 4)) : Math.min(152, Math.max(108, workspace.clientHeight * 0.27))
-    : Math.min(204, Math.max(144, workspace.clientHeight * 0.28))) / pixelScale;
+    ? Math.min(108, Math.max(76, workspace.clientHeight * 0.17))
+    : Math.min(160, Math.max(100, workspace.clientHeight * 0.23))) / pixelScale;
   const roomCharacterHeight = () => Math.max(52, 64 / pixelScale);
   const outdoorGround = () => workspace.clientWidth <= 760 || workspace.clientHeight <= 520 ? 72 / pixelScale : 32;
   const outdoorMargin = () => Math.ceil(outdoorHeight() * (painter?.aspectRatio || 0.57) / 2) + 8;
@@ -282,7 +282,8 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
   function refresh() {
     const style = getComputedStyle(workspace);
     palette = { wall: style.getPropertyValue('--wall').trim(), tile: style.getPropertyValue('--tile').trim(),
-      ink: '#302736', paper: '#fcf8eb', accent: style.getPropertyValue('--accent').trim() };
+      ink: '#302736', paper: '#fcf8eb', accent: style.getPropertyValue('--accent').trim(),
+      sky: style.getPropertyValue('--outside-sky').trim(), glow: style.getPropertyValue('--outside-glow').trim() };
     draw();
   }
   function resize() {
@@ -305,6 +306,7 @@ export function mountArcade(workspace, { onActiveChange = () => {}, announce = (
     if (!canWalk(player.x, player.y)) { player.x = ROOM.width / 2; player.y = ROOM.height - 26; }
     const margin = outdoorMargin();
     outer.x = Math.min(ROOM.width - margin, Math.max(margin, outdoorFraction * ROOM.width)); outer.y = ROOM.height - outdoorGround();
+    workspace.style.setProperty('--entrance-ground', `${outdoorGround() * pixelScale}px`);
     ctx.imageSmoothingEnabled = false; fitRoom(); fitGame(); refresh();
     if (mode === 'room') updateHint();
   }

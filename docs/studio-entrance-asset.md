@@ -1,0 +1,11 @@
+# Evening studio entrance asset
+
+- Asset: `public/studio/entrance-evening.png`
+- Created: 2026-11-15 using the built-in `image_gen.imagegen` tool, with `transparent_background: true`.
+- Size: 1536 × 1024 pixels, RGBA PNG, 2,893,165 bytes.
+- Transparent outer edges verified; the amber architectural lighting is embedded in the asset. The original `entrance.png` remains unchanged.
+- This is an exterior illustration used as the studio entrance button; it does not replace the interactive Three.js interior.
+
+## Generation prompt
+
+Create a premium website hero asset: an isolated richly rendered architectural miniature of a small creative studio, seen from a gently elevated three-quarter front-right perspective. Genuine transparent alpha background, absolutely no backdrop, no horizon, no sky. The studio is wider than tall, a thoughtful compact one-storey building with warm finely textured limestone walls, deep forest-green architectural window and door frames, oak details, brushed brass sconces, a graceful pitched glass skylight roof, large warm illuminated windows showing softly detailed bookshelves, a writing desk, a glowing desk lamp and creative work inside. A single inviting oak-framed front door is clearly visible. A little tasteful ivy climbs one corner, two sculptural potted plants flank the building, and a small carefully crafted stone platform supports it. Style: exquisite realistic stylized 3D miniature, architectural model photography quality, physically based materials, rich soft global illumination, fine bevels, subtle material texture, not a toy, not blocky low-poly, no plastic. Cinematic after-hours lighting: honey amber interior light, warm sconces, cool soft forest reflected light on the outer walls, gentle rim lighting. Restrained forest green, cream limestone, oak and amber palette. Building centered and entirely visible with small transparent margins, platform close to bottom. No text, no logo, no signs, no people, no characters, no labels, no detached objects, no broad ground plane. This cutout will be placed over a dark forest-green website background, so preserve delicate clean anti-aliased transparent edges and warm internal illumination without painting a dark background.
